@@ -1,0 +1,64 @@
+%Author: xtobol06
+
+%class
+\documentclass[a4paper, 12pt]{article}
+
+%encoding
+\usepackage[T1]{fontenc}           %font encoding
+\usepackage[utf8]{inputenc}         %script encoding
+
+\usepackage[bibencoding=UTF-8,style=iso-numeric]{biblatex}
+\addbibresource{sources.bib}
+
+%packages
+\usepackage[czech]{babel}           %language
+\usepackage[a4paper, text={17cm,24cm}, left=2cm, top=3 cm]{geometry}		%layout
+\usepackage{times}					%font
+\usepackage[ruled, czech, linesnumbered, longend, noline]{algorithm2e}		%algorithms
+\usepackage[unicode,hidelinks]{hyperref}	%links
+\usepackage{amsmath}
+\usepackage{tabularx}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{csquotes}
+
+\begin{document}
+
+    \begin{titlepage}
+		\centering
+
+        \textsc{\Huge Vysoké učení technické v~Brně \\[0.3em]
+            \huge Fakulta informačních technologií}
+        
+        \vspace{\stretch{0.382}}
+        
+        {\Huge Dokumentace k projektu z IFJ a IAL\\[0.4em]
+            \LARGE Tým xbielg00, varianta TRP}
+        
+        \vspace{\stretch{0.618}}
+
+        \begin{table}[H]
+            \hfill
+            \begin{tabularx}{0.5\textwidth}{Xr}
+                \textbf{Gabriel Biel} & \textbf{xbielg00} \\
+                Adam Gabrys & xgabry01 \\
+                Jakub Mikyšek & xmikys03 \\
+                David Tobolík & xtobol06 \\
+            \end{tabularx}
+        \end{table}
+	\end{titlepage}
+   
+    \tableofcontents
+    \newpage
+
+    \section{Rozdělení práce}
+    xxxx xxxx        
+
+    \newpage
+	%bibliography
+	\renewcommand{\refname}{Zdroje}
+	\printbibliography
+\end{document}
+
