@@ -1,0 +1,30 @@
+PROJECT=ifj-compiler
+SOURCE_DIR=./src/
+
+SOURCES += lex-anal.c
+SOURCES += syn-anal.c
+SOURCES += code-gen.c
+SOURCES += main.c
+
+TARGETS = $(addprefix $(SOURCE_DIR), $(SOURCES))
+
+CC=gcc
+CFLAGS=-std=c99 -Wall -Wextra -pedantic -lm -fcommon
+
+.PHONY: all run tests clean compile
+
+all: clean compile
+
+compile:
+	$(CC) $(CFLAGS) $(TARGETS) -o $(PROJECT) 
+
+run: compile
+	./$(PROJECT)
+
+tests: 
+	cmake -S . -B build
+	cmake --build build
+	./build/tests-all
+
+clean:
+	@rm -fr build $(PROJECT)
