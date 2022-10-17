@@ -1,44 +1,28 @@
 #include <stdio.h>
 #include <ctype.h>
 
-typedef enum
-{
-    Start,
-    Slash,
-    Comment,
-    LineComment,
-    CommentStar,
-    CommentEnd,
-    QuestionMark,
-    AlmostEndOfProgram,
-    EndOfProgram,
-    ID,
-    DollarSign,
-    VarID,
-    Int,
-    Dot,
-    DoubleDot,
-    EulNum,
-    Double,
-    String,
-    StringEnd,
-    Semicolon,
-    Assign,
-    RPar,
-    LPar,
-    PlusSign,
-    MinusSign,
-    StarSign,
-    Error
-} States;
+#include "lex-anal.h"
 
-void foo() {
-    int d;  // temporary var for get rid of errors
-    switch (d)
+char lexAnal(char test){
+    return test;
+}
+
+int scanner() {
+    State current = Start;  // current state
+    State previous;
+    char in;
+
+    switch (current)
     {
     case Start:
-        if (d == "/") return Slash;
+        if (in == '/') { previous = current; current = Slash; }
+        break;
     case Slash:
-        return;
+        break;
+
+    default:
+        return 1; // unknown state
     }
+
+    return 0; // everything allright
 }
