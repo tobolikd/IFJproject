@@ -39,18 +39,15 @@ typedef enum
     PlusSign,
     MinusSign,
     StarSign,
-
-
     LastState //gives me total number of states
 } AutoState;
 
 typedef struct 
 {
-    AutoState State;
-    char* type;
-}Lexeme;
-
-
+    AutoState type; 
+    char* data; 
+    int lineNum;
+}Token;
 
 
 /* TODO */
@@ -58,26 +55,36 @@ int checkProlog()
 {
     return 0;
 }
+
+
 /* TODO */
-/* move cursor 1 back */
-/* set curState na start */
-int gotToken(int *curState, AutoState State)
+/* needs to return a token!!! */
+int gotToken(int lineNum, int *curState, char* State, char* data)
 {
     *curState = Start;
-    printf("%d\n",State);
+    printf("%s %d\n",State,lineNum);
     return 1;
 }
 
 int getNextToken()
 {
-    int curState = Start;
-    char curEdge = fgetc(fp);
-
-    while (1)
+    int curState = Start;   
+    char curEdge = fgetc(fp); 
+    int lineNum =1; //drop 1 level
+    /* TODO redo for Token structure */
+    Token *token; 
+    /* TODO break the loop & send token to main */
+    while (1) //until you get a token 
     {
         switch (curState)
         {
         case Start:
+            if (curEdge == ' ')
+                break;
+
+            if (curEdge == '\n')//count number of lines for function gotToken & debug
+                lineNum++;
+            
             if (curEdge == '/')
             {
                 curState = Slash; break;
@@ -88,11 +95,16 @@ int getNextToken()
             }
             if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
             {
-                curState = ID; break;
+                curState = ID;
+                fseek(fp,-1,SEEK_CUR); //catch the first letter
+                break;
+
             }
             if (curEdge >= '0' && curEdge <= '9')
             {
-                curState = Int; break;
+                curState = Int; 
+                fseek(fp,-1,SEEK_CUR); //catch the first number
+                break;
             }
             if (curEdge == '$')
             {
@@ -104,26 +116,26 @@ int getNextToken()
             }
             if (curEdge == ';')
             {
-                gotToken(&curState, Semicolon); break;
+                gotToken(lineNum, &curState, "Semicolon", NULL); break;
             }
             if (curEdge == '=')
             {
-                gotToken(&curState, Assign); break;            }
+                gotToken(lineNum, &curState, "Assign", NULL); break;            }
             if (curEdge == ')')
             {
-                gotToken(&curState, RPar); break;
+                gotToken(lineNum, &curState, "RPar", NULL); break;
             }
             if (curEdge == '(')
             {
-                gotToken(&curState, LPar); break;
+                gotToken(lineNum, &curState, "LPar", NULL); break;
             }
             if (curEdge == '}')
             {
-                gotToken(&curState, RCurl); break;
+                gotToken(lineNum, &curState, "RCurl", NULL); break;
             }
             if (curEdge == '{')
             {
-                gotToken(&curState, LCurl); break;
+                gotToken(lineNum, &curState, "LCurl", NULL); break;
             }
             break;
         case Slash:
@@ -136,11 +148,10 @@ int getNextToken()
                 curState = StarComment; break;
             }
             break;
-        /* comments */
         case LineComment:
             if (curEdge == '\n')
             {
-                gotToken(&curState, CommentEnd);
+                curState = Start;
                 break;
             }
             break;
@@ -153,7 +164,7 @@ int getNextToken()
         case CommentStar:
             if (curEdge == '/')
             {
-                gotToken(&curState, CommentEnd);
+                curState = Start;
                 break;
             }
             curState = StarComment;
@@ -166,7 +177,7 @@ int getNextToken()
             }
             else
             {
-                gotToken(&curState, QuestionMark);          
+                gotToken(lineNum, &curState, "QuestionMark", NULL);          
             }
             break;
         case ID:
@@ -176,18 +187,18 @@ int getNextToken()
             }
             else
             {
-                gotToken(&curState, ID);
+                gotToken(lineNum, &curState, "ID", NULL);
             }
             break;
         case DollarSign:
             if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
             {
                 curState = VarID;
-                attachData();
+                fseek(fp,-1,SEEK_CUR);//catch the caller
             }
             else
             {
-                gotToken(&curState, DollarSign);
+                gotToken(lineNum, &curState, "DollarSign", NULL);
             }
             break;
             
@@ -198,7 +209,7 @@ int getNextToken()
             }
             else
             {
-                gotToken(&curState, VarID);
+                gotToken(lineNum, &curState, "VarID", NULL);
             }
             break;
         case String:
@@ -208,7 +219,7 @@ int getNextToken()
             }
             if (curEdge == '"')
             {
-                gotToken(&curState, StringEnd);
+                gotToken(lineNum, &curState, "StringEnd", NULL);
             }
             else
             {
@@ -219,36 +230,38 @@ int getNextToken()
 
         /* TODO numbers */
         case Int:
-            gotToken(&curState, Int); break;
-            break;
+            gotToken(lineNum, &curState, "Int", NULL); break;
 
         default:
             break;
         }
 
-
-        curEdge = fgetc(fp);
-        if (curEdge == -1)
+        if (curEdge == -1) //if EOF brake the loop
         {
             break;
         }
+
+        
+        curEdge = fgetc(fp); //get another edge
         
     }
     return 0;
 }
 
-void attachData()
+//reallocate memory for data
+//return new pointer
+void* attachData(/* pointer to data string */)
 {
-    return ;
+    return NULL;
 }
 
 int main(int argc, char const *argv[])
 {
     /* TODO - chceck arguments  */
-    fp = fopen("test.txt" ,"r");  
+    fp = fopen("../myTestFiles/test.txt" ,"r");  
     
 
-    /* TODO */
+    /* TODO check prolog*/
     if (checkProlog())
         exit(1); //no prolog - lexical error 1 
 
@@ -257,10 +270,6 @@ int main(int argc, char const *argv[])
     while (1)
     {
         getNextToken();
-
-        attachData();
-
-        printf("TOKEN\n");
 
         if (0) //EOF
             break;
