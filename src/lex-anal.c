@@ -129,13 +129,13 @@ Token* getToken(int *lineNum)
             {
                 curState = ID;
                 // data = attachData(data, curEdge);//attach the caller
-                fseek(fp,-1,SEEK_CUR); break;
+                fseek(fp,-1,SEEK_CUR); break;//catch the "force-out" edge
             }
             if (curEdge >= '0' && curEdge <= '9')
             {
                 curState = Int; 
                 // data = attachData(data, curEdge); //attach the caller
-                fseek(fp,-1,SEEK_CUR); break;
+                fseek(fp,-1,SEEK_CUR); break;//catch the "force-out" edge
             }
             if (curEdge == '$')
             {
@@ -146,10 +146,13 @@ Token* getToken(int *lineNum)
                 data = attachData(data, curEdge);
                 curState = String; break;
             }
+            if (curEdge == '=')
+            {
+                curState = Assign;
+                break;
+            }
             if (curEdge == ';')
                 return tokenCtor(*lineNum, "Semicolon", data);
-            if (curEdge == '=')
-                return tokenCtor(*lineNum, "Assign", data);
             if (curEdge == ')')
                 return tokenCtor(*lineNum, "RPar", data);
             if (curEdge == '(')
@@ -158,7 +161,29 @@ Token* getToken(int *lineNum)
                 return tokenCtor(*lineNum, "RCurl", data);
             if (curEdge == '{')
                 return tokenCtor(*lineNum, "LCurl", data);
-            
+            if (curEdge =='.')
+                return tokenCtor(*lineNum, "DotSign", data);
+            if (curEdge =='*')
+                return tokenCtor(*lineNum, "MulSign", data);
+            if (curEdge =='-')
+                return tokenCtor(*lineNum, "MinusSign", data);
+            if (curEdge =='+')
+                return tokenCtor(*lineNum, "PlusSign", data);
+            if (curEdge =='.')
+                return tokenCtor(*lineNum, "DotSign", data);
+            if (curEdge =='>')
+            {
+                curState = GreaterThanSign; break;
+            }
+            if (curEdge =='<')
+            {
+                curState = LesserThanSign; break;
+            }
+            if (curEdge =='!')
+            {
+                curState = ExclamMark; break;
+            }
+
             //unknow ATM
             printf("At line: %d START -> %c : Not recognised",*lineNum,curEdge);
             return NULL;
@@ -173,7 +198,9 @@ Token* getToken(int *lineNum)
             {
                 curState = StarComment; break;
             }
-            break;
+            fseek(fp,-1,SEEK_CUR); break;//catch the "force-out" edge
+            return tokenCtor(*lineNum, "Slash",data);            
+
         case LineComment:
             if (curEdge == '\n')
             {
@@ -221,7 +248,7 @@ Token* getToken(int *lineNum)
             {
                 curState = VarID;
                 // data = attachData(data, curEdge); //attach the caller
-                fseek(fp,-1,SEEK_CUR);
+                fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
             }
             else
             {
@@ -250,11 +277,118 @@ Token* getToken(int *lineNum)
             else
                 data = attachData(data, curEdge);
             break;
+        case Assign:
+            if (curEdge == '=')
+            {
+                curState = DoubleEqual; break;
+            }
+            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            return tokenCtor(*lineNum, "Assign", data);
+            
+        case DoubleEqual:
+            if (curEdge == '=')
+                return tokenCtor(*lineNum, "StrictEquality", data);
+            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            printf("Line %d - Lexical Error",*lineNum);
+            return NULL;
 
-        /* TODO numbers */
+        //numbers
         case Int:
+            if (isdigit(curEdge))
+            {
+                data = attachData(data,curEdge);
+                break;
+            }
+            if (curEdge == '.')
+            {
+                data = attachData(data,curEdge);
+                curState = Double;
+                break;
+            }
+            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
             return tokenCtor(*lineNum, "Int", data);
-
+        case Double:
+            if (isdigit(curEdge))
+            {
+                data = attachData(data,curEdge);
+                break;
+            }
+            if (curEdge == 'e' || curEdge == 'E')
+            {
+                data = attachData(data,curEdge);
+                curState = EulNum;
+                break;
+            }
+            //if there is nothing after dot 
+            if (data[-2] == '.')
+            {
+                printf("Line %d - Number cannot end with . sign.",*lineNum);
+                curState = Error;
+                break;
+            }
+            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            return tokenCtor(*lineNum, "Double", data);
+        case EulNum:
+            if (isdigit(curEdge))
+            {
+                data = attachData(data,curEdge);
+                curState = EulDouble;
+                break;
+            }
+            if (curEdge == '+' || curEdge == '-')
+            {
+                data = attachData(data,curEdge);
+                curState = EulNumExtra;
+                break;
+            }
+            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            printf("Line %d - Number cannot end with E sign.",*lineNum);
+            return NULL; //return error
+        case EulNumExtra:
+            if (isdigit(curEdge))
+            {
+                data = attachData(data,curEdge);
+                curState = EulDouble;
+                break;
+            }
+            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            printf("Line %d - Number cannot end with operator sign.",*lineNum);
+            return NULL; //return error
+        case EulDouble:
+            if (isdigit(curEdge))
+            {
+                data = attachData(data,curEdge);
+                break;
+            }
+            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            return tokenCtor(*lineNum, "EuldDouble", data);
+        //end of numbers
+        case ExclamMark:
+            if (curEdge == '=')
+            {
+                curState = ExclamEqual;break;
+            }
+            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            printf("Line %d - Lexical error.",*lineNum);
+            return NULL; //return error
+        case ExclamEqual:
+            if (curEdge == '=')
+                return tokenCtor(*lineNum, "NotEqual", data);
+            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            printf("Line %d - Lexical error.",*lineNum);
+            return NULL; //return error
+        case GreaterThanSign:
+            if (curEdge == '=')
+                return tokenCtor(*lineNum, "GreaterEqualThanSign", data);
+            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            return tokenCtor(*lineNum, "GreaterThanSign", data);
+            
+        case LesserThanSign:
+            if (curEdge == '=')
+                return tokenCtor(*lineNum, "LesserEqualThanSign", data);
+            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            return tokenCtor(*lineNum, "LesserThanSign", data);
+            
         case Error:
             return NULL;
 
@@ -267,6 +401,22 @@ Token* getToken(int *lineNum)
     }
     printf("unthinkable happend"); // should never happen
     return NULL;
+}
+
+void tokenDtor(Token *token)
+{
+    if (token!=NULL)
+        free(token->data);
+    free(token);
+}
+void listDtor(TokenList*list)
+{
+    for (int i = list->length-1; i >= 0; i--)
+    {
+        tokenDtor(list->TokenArray[i]);
+    }
+    free(list->TokenArray);
+    free(list);
 }
 
 int main(int argc, char const *argv[])
@@ -300,15 +450,8 @@ int main(int argc, char const *argv[])
         else
             // printf("%s %d %s\n",curToken->lexeme,curToken->lineNum,curToken->data);
             printf("%s %d %s\n",list->TokenArray[list->length-1]->lexeme,list->TokenArray[list->length-1]->lineNum, list->TokenArray[list->length-1]->data);
-        
-
-        /* TODO tokenDtor */
-        free(curToken->data);
-        free(curToken);
-
     }
-    /* todo listDtor */
-    free(list->TokenArray);
-    free(list);
-    
+
+    listDtor(list);
+    return 0;
 }

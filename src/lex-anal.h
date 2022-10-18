@@ -24,10 +24,10 @@ typedef enum
     VarID,
     Int,
     Dot,
-    DoubleDot,
+    Double,
     EulNum,
     EulNumExtra,
-    Double,
+    EulDouble,
     String,
     StringEnd,
     Semicolon,
@@ -38,7 +38,17 @@ typedef enum
     LCurl,
     PlusSign,
     MinusSign,
-    StarSign,
+    MulSign,
+    DotSign,
+    GreaterThanSign,
+    LesserThanSign,
+    ExclamMark,
+    ExclamEqual,
+    GreaterEqualThanSign,
+    DoubleEqual,
+    StrictEquality,
+
+
     LastState //gives me total number of states
 } AutoState;
 
