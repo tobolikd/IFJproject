@@ -1,0 +1,11 @@
+# ignore all
+/*
+
+# except
+!src
+!tests
+!doc
+!Makefile
+!README.md
+!.gitignore
+!CMakeLists.txt

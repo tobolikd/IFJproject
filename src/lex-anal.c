@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 #include <stdlib.h>
 
-#define ASCII 128
+#include "lex-anal.h"
 
 /* Global variable */
 FILE *fp;
@@ -45,6 +46,7 @@ typedef enum
 typedef struct 
 {
     AutoState type; 
+    char* lexeme;
     char* data; 
     int lineNum;
 }Token;
@@ -59,22 +61,27 @@ int checkProlog()
 
 /* TODO */
 /* needs to return a token!!! */
-int gotToken(int lineNum, int *curState, char* State, char* data)
+/* DELETE *curstate argument */
+Token* foundToken(int lineNum, char* State, char* data)
 {
-    *curState = Start;
-    printf("%s %d\n",State,lineNum);
-    return 1;
+    Token *new = malloc(sizeof(Token)); //allocates memory for new token
+    new->data = data; //string already allocated
+    new->lexeme = State;
+    new->lineNum = lineNum;
+       
+    return new;
 }
 
-int getNextToken()
+/* TODO RETURNS A TOKEN */
+Token* getToken()
 {
     int curState = Start;   
     char curEdge = fgetc(fp); 
+    char *data=NULL;
     int lineNum =1; //drop 1 level
-    /* TODO redo for Token structure */
-    Token *token; 
+
     /* TODO break the loop & send token to main */
-    while (1) //until you get a token 
+    while (1) //until you get a token -> whole finite state 
     {
         switch (curState)
         {
@@ -82,7 +89,7 @@ int getNextToken()
             if (curEdge == ' ')
                 break;
 
-            if (curEdge == '\n')//count number of lines for function gotToken & debug
+            if (curEdge == '\n')//count number of lines for function foundToken & debug
                 lineNum++;
             
             if (curEdge == '/')
@@ -96,14 +103,16 @@ int getNextToken()
             if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
             {
                 curState = ID;
-                fseek(fp,-1,SEEK_CUR); //catch the first letter
+                // data = attachData(data, curEdge);//attach the caller
+                fseek(fp,-1,SEEK_CUR);
                 break;
 
             }
             if (curEdge >= '0' && curEdge <= '9')
             {
                 curState = Int; 
-                fseek(fp,-1,SEEK_CUR); //catch the first number
+                // data = attachData(data, curEdge); //attach the caller
+                fseek(fp,-1,SEEK_CUR);
                 break;
             }
             if (curEdge == '$')
@@ -116,26 +125,26 @@ int getNextToken()
             }
             if (curEdge == ';')
             {
-                gotToken(lineNum, &curState, "Semicolon", NULL); break;
+                return foundToken(lineNum, "Semicolon", NULL); break;
             }
             if (curEdge == '=')
             {
-                gotToken(lineNum, &curState, "Assign", NULL); break;            }
+                return foundToken(lineNum, "Assign", NULL); break;            }
             if (curEdge == ')')
             {
-                gotToken(lineNum, &curState, "RPar", NULL); break;
+                return foundToken(lineNum, "RPar", NULL); break;
             }
             if (curEdge == '(')
             {
-                gotToken(lineNum, &curState, "LPar", NULL); break;
+                return foundToken(lineNum, "LPar", NULL); break;
             }
             if (curEdge == '}')
             {
-                gotToken(lineNum, &curState, "RCurl", NULL); break;
+                return foundToken(lineNum, "RCurl", NULL); break;
             }
             if (curEdge == '{')
             {
-                gotToken(lineNum, &curState, "LCurl", NULL); break;
+                return foundToken(lineNum, "LCurl", NULL); break;
             }
             break;
         case Slash:
@@ -177,39 +186,40 @@ int getNextToken()
             }
             else
             {
-                gotToken(lineNum, &curState, "QuestionMark", NULL);          
+                return foundToken(lineNum, "QuestionMark", NULL);          
             }
             break;
         case ID:
             if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
             {
-                attachData();
+                data = attachData(data, curEdge);
             }
             else
             {
-                gotToken(lineNum, &curState, "ID", NULL);
+                return foundToken(lineNum, "ID", NULL);
             }
             break;
         case DollarSign:
             if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
             {
                 curState = VarID;
-                fseek(fp,-1,SEEK_CUR);//catch the caller
+                // data = attachData(data, curEdge); //attach the caller
+                fseek(fp,-1,SEEK_CUR);
             }
             else
             {
-                gotToken(lineNum, &curState, "DollarSign", NULL);
+                return foundToken(lineNum, "DollarSign", NULL);
             }
             break;
             
         case VarID:
             if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
             {
-                attachData();
+                data = attachData(data, curEdge);
             }
             else
             {
-                gotToken(lineNum, &curState, "VarID", NULL);
+                return foundToken(lineNum, "VarID", NULL);
             }
             break;
         case String:
@@ -219,18 +229,18 @@ int getNextToken()
             }
             if (curEdge == '"')
             {
-                gotToken(lineNum, &curState, "StringEnd", NULL);
+                return foundToken(lineNum, "StringEnd", NULL);
             }
             else
             {
-                attachData();
+                data = attachData(data, curEdge);
             }
             break;
 
 
         /* TODO numbers */
         case Int:
-            gotToken(lineNum, &curState, "Int", NULL); break;
+            return foundToken(lineNum, "Int", NULL); break;
 
         default:
             break;
@@ -250,9 +260,18 @@ int getNextToken()
 
 //reallocate memory for data
 //return new pointer
-void* attachData(/* pointer to data string */)
+void* attachData(char *data, char dataToBeInserted)
 {
-    return NULL;
+    int len = strlen(data)+1; // length of string + terminating null byte ('\0')
+    if (data == NULL)
+        len = 1;
+    
+    data = realloc(data,(len+1)*sizeof(char));
+    if (data == NULL)
+        exit(111);
+    
+    data[-2] = dataToBeInserted;
+    return data;
 }
 
 int main(int argc, char const *argv[])
@@ -263,18 +282,31 @@ int main(int argc, char const *argv[])
 
     /* TODO check prolog*/
     if (checkProlog())
-        exit(1); //no prolog - lexical error 1 
+        return(1); //no prolog - lexical error 1 
 
     
     //loop through the program - get & send tokens
     while (1)
     {
-        getNextToken();
+        Token* curToken;
+        curToken = getToken();
 
-        if (0) //EOF
-            break;
+        //if token.type == error => lexical error 1
+        if (curToken->type == Error)
+            return (1);
+
+        //insert token to an array 
+        // insertToken();
+
+        printf("%s %d\n",curToken->lexeme,curToken->lineNum);
+
+        free(curToken->data);
+        free(curToken);
 
         break;    
     }
     
+    /* send an array of tokens */
+
+
 }

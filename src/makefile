@@ -1,5 +1,5 @@
 PROJECT=ifj
-SCAN=$(PROJECT)-scanner
+SCAN=lex-anal
 CC=gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -lm -fcommon
 
