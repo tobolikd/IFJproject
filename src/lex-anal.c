@@ -8,7 +8,6 @@
 /* Global variable */
 FILE *fp;
 
-
 typedef struct 
 {
     AutoState type; 
@@ -19,55 +18,58 @@ typedef struct
 
 typedef struct 
 {
-    Token *TokenArray;
+    Token **TokenArray;
     int length;
 }TokenList;
 
-
-/* TODO */
-int checkProlog()
+//check if prolog is present
+void checkProlog()
 {
-    return 0;
+    char *prolog = "<?php";
+    if(prolog[0]==fgetc(fp) )
+        if(prolog[1]==fgetc(fp))
+            if(prolog[2]==fgetc(fp))
+                if(prolog[3]==fgetc(fp))  
+                    if(prolog[4]==fgetc(fp))
+                        return;
+    printf("%s : prolog is missing",prolog);
+    exit(1);                   
 }
 
-//reallocate memory for data
+//allocate memory for data
 //return new pointer
 void* attachData(char *data, char dataToBeInserted)
 {
     int len;
     if (data == NULL)
-        len = 2;
+        len = 1;
     else
-        len = strlen(data)+2; // length of string + 1 + terminating null byte ('\0')
+        len = strlen(data)+1; // length of string + 1 + terminating null byte ('\0')
     
-    data = realloc(data,(len)*sizeof(char));
+    data = realloc(data,(len+1)*sizeof(char));
     if (data == NULL)
         exit(111);
     
-    data[len-2] = dataToBeInserted;
-    data[len-1] = '\0';
+    data[len-1] = dataToBeInserted;
+    data[len] = '\0';
     return data;
 }
 
-
-/* TODO */
-/* needs to return a token!!! */
-/* DELETE *curstate argument */
-Token* foundToken(int lineNum, char* State, char* data)
+//setup token
+//return new token
+Token* tokenCtor(int lineNum, char* State, char* data)
 {
     Token *new = malloc(sizeof(Token)); //allocates memory for new token
     new->data = data; //string already allocated
     new->lexeme = State;
     new->lineNum = lineNum;
-
     return new;
 }
 
-/* TODO RETURNS A TOKEN */
-/* IT currently works with global variable of FILE *fp */
-
-TokenList* insertToken(TokenList *list,Token* newToken)
+//appends token to list of tokens
+void *appendToken(TokenList *list, Token* newToken)
 {
+    //new tokenList - initiate
     if(list == NULL)
     {
         list = malloc(sizeof(TokenList));
@@ -76,33 +78,45 @@ TokenList* insertToken(TokenList *list,Token* newToken)
     }
     else
     {
+        //allocate memory for new token 
         list->length++;
         list->TokenArray = realloc(list->TokenArray,(list->length+1)*sizeof(Token));
     }
-    // &list->TokenArray[list->length-1] = newToken;
-    // &list->TokenArray[list->length] = NULL;
+    list->TokenArray[list->length-1] = newToken;
+    list->TokenArray[list->length] = NULL;
     return list;
 }
 
-
-//sends back pointer to a token with allocated memory and required data
+/* TODO error stavy */
+/* TODO dokoncit stavy z KA mat. operatory, cisla atd.. */
+/* TODO EOF edge v jednolivych stavoch*/
+//returns pointer to setup token
+//returns NULL if error accured
 Token* getToken(int *lineNum)
 {
-    int curState = Start;   
+    int curState = Start;
     char curEdge = fgetc(fp); //reads from file GLOBAL POINTER
     char *data=NULL;
-    Token *token;
+
     while (1) //until you get a token -> whole finite state 
     {
+
+        //to break the loop 
+        if (curEdge == EOF)
+            curState = Error;
+        
+
         switch (curState)
         {
         case Start:
+            //white signs
             if (curEdge == ' ') 
                 break;
-
             if (curEdge == '\n')//count number of lines for function foundToken & debug
-                *lineNum = *lineNum +1 ;
-            
+            {
+                *lineNum = *lineNum +1;
+                break;
+            }
             if (curEdge == '/')
             {
                 curState = Slash; break;
@@ -115,16 +129,13 @@ Token* getToken(int *lineNum)
             {
                 curState = ID;
                 // data = attachData(data, curEdge);//attach the caller
-                fseek(fp,-1,SEEK_CUR);
-                break;
-
+                fseek(fp,-1,SEEK_CUR); break;
             }
             if (curEdge >= '0' && curEdge <= '9')
             {
                 curState = Int; 
                 // data = attachData(data, curEdge); //attach the caller
-                fseek(fp,-1,SEEK_CUR);
-                break;
+                fseek(fp,-1,SEEK_CUR); break;
             }
             if (curEdge == '$')
             {
@@ -136,40 +147,23 @@ Token* getToken(int *lineNum)
                 curState = String; break;
             }
             if (curEdge == ';')
-            {
-                token = foundToken(*lineNum, "Semicolon", data);
-                return token; break;
-            }
+                return tokenCtor(*lineNum, "Semicolon", data);
             if (curEdge == '=')
-            {
-                token = foundToken(*lineNum, "Assign", data);
-                return token; break;           
-            }
+                return tokenCtor(*lineNum, "Assign", data);
             if (curEdge == ')')
-            {
-                token = foundToken(*lineNum, "RPar", data);
-                return token; break;
-            }
+                return tokenCtor(*lineNum, "RPar", data);
             if (curEdge == '(')
-            {
-                token = foundToken(*lineNum, "LPar", data);
-                return token; break;
-            }
+                return tokenCtor(*lineNum, "LPar", data);
             if (curEdge == '}')
-            {
-                token = foundToken(*lineNum, "RCurl", data);
-                return token; break;
-            }
+                return tokenCtor(*lineNum, "RCurl", data);
             if (curEdge == '{')
-            {
-                token = foundToken(*lineNum, "LCurl", data);
-                return token; break;
-            }
-            if (curEdge == EOF)
-            {
-                curState = Error;break;
-            }
+                return tokenCtor(*lineNum, "LCurl", data);
+            
+            //unknow ATM
+            printf("At line: %d START -> %c : Not recognised",*lineNum,curEdge);
+            return NULL;
             break;
+
         case Slash:
             if (curEdge == '/')
             {
@@ -208,8 +202,7 @@ Token* getToken(int *lineNum)
             }
             else
             {
-                token = foundToken(*lineNum, "QuestionMark", data);
-                return token;          
+                return tokenCtor(*lineNum, "QuestionMark", data);
             }
             break;
         case ID:
@@ -219,9 +212,8 @@ Token* getToken(int *lineNum)
             }
             else
             {
-                token = foundToken(*lineNum, "ID", data);
                 fseek(fp,-1,SEEK_CUR);
-                return token;
+                return tokenCtor(*lineNum, "ID", data);
             }
             break;
         case DollarSign:
@@ -233,8 +225,7 @@ Token* getToken(int *lineNum)
             }
             else
             {
-                token = foundToken(*lineNum, "DollarSign", data);
-                return token;
+                return tokenCtor(*lineNum, "DollarSign", data);
             }
             break;
             
@@ -243,8 +234,7 @@ Token* getToken(int *lineNum)
                 data = attachData(data, curEdge);
             else
             {
-                token = foundToken(*lineNum, "VarID", data);
-                return token;
+                return tokenCtor(*lineNum, "VarID", data);
             }
             break;
         case String:
@@ -255,18 +245,15 @@ Token* getToken(int *lineNum)
             if (curEdge == '"')
             {
                 data = attachData(data, curEdge);
-                token = foundToken(*lineNum, "StringEnd", data);
-                return token;
+                return tokenCtor(*lineNum, "StringEnd", data);
             }
             else
                 data = attachData(data, curEdge);
             break;
 
-
         /* TODO numbers */
         case Int:
-            token = foundToken(*lineNum, "Int", data);
-            return token;
+            return tokenCtor(*lineNum, "Int", data);
 
         case Error:
             return NULL;
@@ -276,58 +263,52 @@ Token* getToken(int *lineNum)
 
         }
 
-        if (curEdge == -1) //if EOF brake the loop
-        {
-            break;
-        }
-        
         curEdge = fgetc(fp); //get another edge
-        
     }
-    return 0;
+    printf("unthinkable happend"); // should never happen
+    return NULL;
 }
 
 int main(int argc, char const *argv[])
 {
-    /* TODO - chceck arguments  */
+    /* TODO - chceck arguments for file */
     fp = fopen("../myTestFiles/test.txt" ,"r");  
     
-
-    /* TODO check prolog*/
-    if (checkProlog())
-        return(1); //no prolog - lexical error 1 
+    checkProlog();
 
     
-    //loop through the program - get & send tokens
-    int lineNum = 1;
-    // Token* tokenArray = NULL;
-    TokenList *list;
+    TokenList *list; //structure to string tokens together
+    Token* curToken; //token cursor
 
+    int lineNum = 1; //on what line token is found
+
+    //loop through the program - get & send tokens
     while (1)
     {
-        Token* curToken;
+
         curToken = getToken(&lineNum);
 
-        // list = insertToken(list,curToken);
+        list = appendToken(list,curToken);
 
         //if getToken returned NULL - error ! 
         if (curToken == NULL)
             break;
 
-        //insert token to an array 
-        // insertToken();
         if (curToken->data == NULL)
-            // printf("%s %d\n",list->TokenArray[list->length-1].lexeme,list->TokenArray[list->length-1].lineNum);
-            printf("%s %d\n",curToken->lexeme,curToken->lineNum);
+            printf("%s %d\n",list->TokenArray[list->length-1]->lexeme,list->TokenArray[list->length-1]->lineNum);
+            // printf("%s %d\n",curToken->lexeme,curToken->lineNum);
         else
-            printf("%s %d %s\n",curToken->lexeme,curToken->lineNum,curToken->data);
-            // printf("%s %d %s\n",list->TokenArray[list->length-1].lexeme,list->TokenArray[list->length-1].lineNum, list->TokenArray[list->length-1].data);
+            // printf("%s %d %s\n",curToken->lexeme,curToken->lineNum,curToken->data);
+            printf("%s %d %s\n",list->TokenArray[list->length-1]->lexeme,list->TokenArray[list->length-1]->lineNum, list->TokenArray[list->length-1]->data);
+        
+
+        /* TODO tokenDtor */
         free(curToken->data);
         free(curToken);
 
     }
+    /* todo listDtor */
+    free(list->TokenArray);
+    free(list);
     
-    /* send an array of tokens */
-
-
 }
