@@ -9,9 +9,10 @@ extern "C" {
 
 typedef enum
 {
+    Error,
     Start,
     Slash,
-    Comment,
+    StarComment,
     LineComment,
     CommentStar,
     CommentEnd,
@@ -25,6 +26,7 @@ typedef enum
     Dot,
     DoubleDot,
     EulNum,
+    EulNumExtra,
     Double,
     String,
     StringEnd,
@@ -32,11 +34,13 @@ typedef enum
     Assign,
     RPar,
     LPar,
+    RCurl,
+    LCurl,
     PlusSign,
     MinusSign,
     StarSign,
-    Error
-} State;
+    LastState //gives me total number of states
+} AutoState;
 
 int scanner();
 
