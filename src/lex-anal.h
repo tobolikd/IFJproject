@@ -6,6 +6,7 @@
 extern "C" {
 #endif
 
+#include <stdio.h>
 
 typedef enum
 {
@@ -39,6 +40,13 @@ typedef enum
 } State;
 
 int scanner();
+
+/* reads from fp and checks if it starts with "<?php"
+ *
+ * note: no whitespace characters aren't allowed before prolog
+ * @param fp file descriptor to read from
+ */
+int checkProlog(FILE *fp);
 
 // mock function only to verify test functionality
 char lexAnal(char test);

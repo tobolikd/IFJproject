@@ -7,6 +7,10 @@ char lexAnal(char test){
     return test;
 }
 
+int checkProlog(FILE *fp){
+    return 0;
+}
+
 int scanner() {
     State current = Start;  // current state
     State previous;
