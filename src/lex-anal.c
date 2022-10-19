@@ -5,9 +5,6 @@
 
 #include "lex-anal.h"
 
-/* Global variable */
-FILE *fp;
-
 typedef struct 
 {
     AutoState type; 
@@ -23,7 +20,7 @@ typedef struct
 }TokenList;
 
 //check if prolog is present
-void checkProlog()
+void checkProlog(FILE* fp)
 {
     char *prolog = "<?php";
     if(prolog[0]==fgetc(fp) )
@@ -88,11 +85,10 @@ void *appendToken(TokenList *list, Token* newToken)
 }
 
 /* TODO error stavy */
-/* TODO dokoncit stavy z KA mat. operatory, cisla atd.. */
 /* TODO EOF edge v jednolivych stavoch*/
 //returns pointer to setup token
 //returns NULL if error accured
-Token* getToken(int *lineNum)
+Token* getToken(FILE* fp,int *lineNum)
 {
     int curState = Start;
     char curEdge = fgetc(fp); //reads from file GLOBAL POINTER
@@ -422,10 +418,10 @@ void listDtor(TokenList*list)
 int main(int argc, char const *argv[])
 {
     /* TODO - chceck arguments for file */
-    fp = fopen("../myTestFiles/test.txt" ,"r");  
+    FILE* fp;
+    fp = fopen( argv[argc-1] ,"r");
     
-    checkProlog();
-
+    checkProlog(fp);
     
     TokenList *list; //structure to string tokens together
     Token* curToken; //token cursor
@@ -436,22 +432,21 @@ int main(int argc, char const *argv[])
     while (1)
     {
 
-        curToken = getToken(&lineNum);
+        curToken = getToken(fp,&lineNum); //get token
 
-        list = appendToken(list,curToken);
+        list = appendToken(list,curToken); //append to list
 
-        //if getToken returned NULL - error ! 
-        if (curToken == NULL)
+        if (curToken == NULL) //if getToken returned NULL - error ! 
             break;
 
         if (curToken->data == NULL)
             printf("%s %d\n",list->TokenArray[list->length-1]->lexeme,list->TokenArray[list->length-1]->lineNum);
             // printf("%s %d\n",curToken->lexeme,curToken->lineNum);
         else
-            // printf("%s %d %s\n",curToken->lexeme,curToken->lineNum,curToken->data);
             printf("%s %d %s\n",list->TokenArray[list->length-1]->lexeme,list->TokenArray[list->length-1]->lineNum, list->TokenArray[list->length-1]->data);
+            // printf("%s %d %s\n",curToken->lexeme,curToken->lineNum,curToken->data);
     }
 
-    listDtor(list);
+    listDtor(list); //free every token in token list
     return 0;
 }
