@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
 
-#include "../src/lex-anal.h"
+extern "C" {
+    #include "../src/lex-anal.h"
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+    #include <string.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+}
 
 TEST(linkTest, lexAnal) {
     EXPECT_EQ(lexAnal('a'), 'a') << "Test function not found!";

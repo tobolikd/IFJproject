@@ -1,11 +1,6 @@
 #ifndef LEX_ANAL_H
 #define LEX_ANAL_H
 
-// needed for tests to run properly
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdio.h>
 
 typedef enum
@@ -50,11 +45,5 @@ int checkProlog(FILE *fp);
 
 // mock function only to verify test functionality
 char lexAnal(char test);
-
-
-// needed for tests to run properly
-#ifdef __cplusplus
-}
-#endif
 
 #endif // LEX_ANAL_H
