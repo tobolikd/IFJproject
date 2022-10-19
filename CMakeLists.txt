@@ -12,11 +12,12 @@ set(UNIT_TESTS
     tests/test-lex-anal.cpp
     tests/test-syn-anal.cpp
     tests/test-code-gen.cpp
-    tests/tests-main.cpp
 )
 
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -35,7 +36,7 @@ add_library(projectFiles ${PROJECT_FILES})
 add_library(proj1 src/lex-anal.c)
 
 add_executable(tests-all ${UNIT_TESTS})
-target_link_libraries(tests-all GTest::gtest GTest::gtest_main)
+target_link_libraries(tests-all GTest::gtest_main)
 target_link_libraries(tests-all projectFiles)
 
 include (GoogleTest)
