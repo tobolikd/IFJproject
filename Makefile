@@ -24,7 +24,7 @@ run: compile
 tests: 
 	cmake -S . -B build
 	cmake --build build
-	./build/tests-all
+	./build/tests-all || true
 
 clean:
 	@rm -fr build $(PROJECT)
