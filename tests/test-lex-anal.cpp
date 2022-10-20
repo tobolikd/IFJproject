@@ -39,6 +39,7 @@ TEST_P(testCheckProlog, returnValue) {
     const char * in = std::get<1>(GetParam()).data();
 
     FILE *tmpFile = prepTmpFile(in);
+    ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - failed to allocate file" << std::endl;
     EXPECT_EQ(returnValue, checkProlog(tmpFile)) << "Processed input: \"" << in << "\"" << std::endl;
     fclose(tmpFile);
 }

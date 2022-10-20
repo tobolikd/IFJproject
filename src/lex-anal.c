@@ -3,15 +3,18 @@
 
 #include "lex-anal.h"
 
-char lexAnal(char test){
+char lexAnal(char test)
+{
     return test;
 }
 
-int checkProlog(FILE *fp){
+int checkProlog(FILE *fp)
+{
     return 0;
 }
 
-int scanner() {
+int scanner()
+{
     State current = Start;  // current state
     State previous;
     char in;
