@@ -13,7 +13,7 @@ CFLAGS=-std=c99 -Wall -Wextra -pedantic -lm -fcommon
 
 .PHONY: all run tests clean compile
 
-all: clean compile
+all: compile
 
 compile:
 	$(CC) $(CFLAGS) $(TARGETS) -o $(PROJECT) 
