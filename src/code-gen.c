@@ -1,5 +1,6 @@
 #include "code-gen.h"
 
-char codeGen(char test) {
+char codeGen(char test) 
+{
     return test;
 }

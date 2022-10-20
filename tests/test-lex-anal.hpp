@@ -6,10 +6,12 @@
 
 
 // returns file pointer to tmp file with given string in it
-FILE *prepTmpFile(const char *in) {
+FILE *prepTmpFile(const char *in)
+{
     FILE *file = tmpfile();
     
-    if (file == NULL) {
+    if (file == NULL)
+    {
         std::cerr << "\n\nTEST ERROR - could not open tmpfile\n\n";
         return NULL;
     }
