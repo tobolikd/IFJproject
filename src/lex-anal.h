@@ -47,15 +47,42 @@ typedef enum
     GreaterEqualThanSign,
     DoubleEqual,
     StrictEquality,
-
-
-    LastState //gives me total number of states
+    LesserEqualThanSign,
+    NotEqual,
+    EuldDouble,
 } AutoState;
 
-int scanner();
+typedef struct 
+{
+    AutoState type; 
+    char* lexeme;
+    char* data; 
+    int lineNum;
+}Token;
 
-// mock function only to verify test functionality
-char lexAnal(char test);
+typedef struct 
+{
+    Token **TokenArray;
+    int length;
+}TokenList;
+
+int checkProlog(FILE* fp);
+
+char* attachData(char *data, char dataToBeInserted);
+
+Token* tokenCtor(AutoState type,int lineNum, char* State, char* data);
+
+TokenList *appendToken(TokenList *list, Token* newToken);
+
+Token* getToken(FILE* fp,int *lineNum);
+
+void tokenDtor(Token *token);
+
+void listDtor(TokenList*list);
+
+TokenList *lexAnalyser(FILE *fp);
+
+
 
 
 // needed for tests to run properly
