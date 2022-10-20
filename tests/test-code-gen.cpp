@@ -1,9 +1,11 @@
 #include <gtest/gtest.h>
 
-extern "C" {
+extern "C"
+{
     #include "../src/code-gen.h"
 }
 
-TEST(linkTest, codeGen) {
+TEST(linkTest, codeGen)
+{
     EXPECT_EQ(codeGen('c'), 'c');
 }

@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
-extern "C" {
+extern "C"
+{
     #include "../src/lex-anal.h"
 
     #include <stdio.h>
@@ -11,7 +12,8 @@ extern "C" {
 
 #include "test-lex-anal.hpp"
 
-TEST(linkTest, lexAnal) {
+TEST(linkTest, lexAnal)
+{
     EXPECT_EQ(lexAnal('a'), 'a') << "Test function not found!";
 }
 
@@ -34,7 +36,8 @@ INSTANTIATE_TEST_CASE_P(prologValues, testCheckProlog,
                             )
                         );
 
-TEST_P(testCheckProlog, returnValue) {
+TEST_P(testCheckProlog, returnValue)
+{
     int returnValue= std::get<0>(GetParam());
     const char * in = std::get<1>(GetParam()).data();
 
