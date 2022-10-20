@@ -13,7 +13,7 @@ CFLAGS=-std=c99 -Wall -Wextra -pedantic -lm -fcommon
 
 .PHONY: all run tests clean compile
 
-all: clean compile
+all: compile
 
 compile:
 	$(CC) $(CFLAGS) $(TARGETS) -o $(PROJECT) 
@@ -24,7 +24,7 @@ run: compile
 tests: 
 	cmake -S . -B build
 	cmake --build build
-	./build/tests-all
+	./build/tests-all || true
 
 clean:
 	@rm -fr build $(PROJECT)

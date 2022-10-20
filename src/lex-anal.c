@@ -5,7 +5,6 @@
 
 #include "lex-anal.h"
 
-
 //check if prolog is present
 int checkProlog(FILE* fp)
 {
@@ -39,6 +38,7 @@ char* attachData(char *data, char dataToBeInserted)
     data[len] = '\0';
     return data;
 }
+
 
 //setup token
 //return new token
@@ -452,8 +452,8 @@ int main(int argc, char const *argv[])
     if (argc == 2)
         fp = fopen(argv[argc-1],"r");
     else
-        fp = fopen("../myTestFiles/test.txt","r");
-        //printf("ENTER FILE AS AN ARGUMENT");
+        printf("ENTER FILE AS AN ARGUMENT");
+        // fp = fopen("../myTestFiles/test.txt","r");
     
     TokenList *list = lexAnalyser(fp);
 

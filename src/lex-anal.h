@@ -1,11 +1,7 @@
 #ifndef LEX_ANAL_H
 #define LEX_ANAL_H
 
-// needed for tests to run properly
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#include <stdio.h>
 
 typedef enum
 {
@@ -82,12 +78,5 @@ void listDtor(TokenList*list);
 
 TokenList *lexAnalyser(FILE *fp);
 
-
-
-
-// needed for tests to run properly
-#ifdef __cplusplus
-}
-#endif
 
 #endif // LEX_ANAL_H
