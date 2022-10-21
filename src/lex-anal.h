@@ -46,6 +46,9 @@ typedef enum
     LesserEqualThanSign,
     NotEqual,
     EuldDouble,
+    Comma,
+    Colons,
+    Backslash,
 } AutoState;
 
 typedef struct 

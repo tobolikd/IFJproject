@@ -90,7 +90,10 @@ Token* getToken(FILE* fp,int *lineNum)
     while (1) //until you get a token -> whole finite state 
     {
         if (curEdge == EOF)
+        {
+            free(data);
             return tokenCtor(Error,*lineNum, "EOF", NULL);
+        }
         
         switch (curState)
         {
@@ -111,7 +114,7 @@ Token* getToken(FILE* fp,int *lineNum)
             {
                 curState = QuestionMark; break;
             }
-            if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
+            if (isalpha(curEdge))
             {
                 curState = ID;
                 // data = appendChar(data, curEdge);//attach the caller
@@ -167,8 +170,15 @@ Token* getToken(FILE* fp,int *lineNum)
                 return tokenCtor(MinusSign,*lineNum, "MinusSign", data);
             if (curEdge =='+')
                 return tokenCtor(PlusSign,*lineNum, "PlusSign", data);
-            if (curEdge =='.')
+            if (curEdge =='.') 
                 return tokenCtor(DotSign,*lineNum, "DotSign", data);
+            if (curEdge ==',')
+                return tokenCtor(Comma,*lineNum, "Comma", data);
+            if (curEdge ==':')
+                return tokenCtor(Colons,*lineNum, "Colons", data);
+            if (curEdge =='\\')
+                return tokenCtor(Backslash,*lineNum, "Backslash", data);
+            
 
             if (curEdge == EOF)
                 return tokenCtor(Error,*lineNum, "EOF", NULL);
@@ -192,17 +202,26 @@ Token* getToken(FILE* fp,int *lineNum)
 
         case LineComment:
             if (curEdge == '\n')
+            {
+                *lineNum = *lineNum + 1;
                 curState = Start;
+            }
             break;
 
         case StarComment:
+            if (curEdge == '\n')
+                *lineNum = *lineNum +1;
             if (curEdge == '*')
                 curState = CommentStar;
             break;
 
         case CommentStar:
+            if (curEdge == '\n')
+                *lineNum = *lineNum +1;
             if (curEdge == '/')
+            {
                 curState = Start;
+            }
             else
                 curState = StarComment;
             break;
@@ -220,7 +239,7 @@ Token* getToken(FILE* fp,int *lineNum)
             break;
 
         case ID:
-            if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
+            if (isalnum(curEdge) || curEdge == '_')  //alphanumeric or punctuation mark
                 data = appendChar(data, curEdge);
             else
             {
@@ -230,7 +249,7 @@ Token* getToken(FILE* fp,int *lineNum)
             break;
 
         case DollarSign:
-            if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
+            if (isalpha(curEdge))
             {
                 curState = VarID;
                 // data = appendChar(data, curEdge); //attach the caller
@@ -243,7 +262,7 @@ Token* getToken(FILE* fp,int *lineNum)
             break;
             
         case VarID:
-            if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
+            if (isalnum(curEdge) || curEdge == '_')
                 data = appendChar(data, curEdge);
             else
             {
@@ -253,15 +272,19 @@ Token* getToken(FILE* fp,int *lineNum)
 
         case String:
             /* TODO - possibly more signs from ASCII may cause error when inside string*/
-            if (curEdge == EOF)
-                return NULL;
             if (curEdge == '"')
             {
                 data = appendChar(data, curEdge);
                 return tokenCtor(StringEnd,*lineNum, "StringEnd", data);
             }
-            else
+            else if (isprint(curEdge))
+            {
                 data = appendChar(data, curEdge);
+                break;
+            }
+            //DEBUG
+            printf("At line: %d STRING -> %c : Not recognised",*lineNum,curEdge);
+            return NULL;
             break;
 
         case Assign:
@@ -404,7 +427,7 @@ void tokenDtor(Token *token)
 
 void listDtor(TokenList*list)
 {
-    for (int i = list->length-1; i >= 0; i--)
+    for (int i = list->length; i >= 0; i--)
     {
         tokenDtor(list->TokenArray[i]);
     }
@@ -412,6 +435,31 @@ void listDtor(TokenList*list)
     free(list);
 }
 
+/* TODO */
+Token *checkForKeyWord(Token *token)
+{
+    return token;
+}
+
+void printToken(Token*token)
+{
+    if (token->data == NULL)
+        printf("%d %s\n",token->lineNum,token->lexeme);
+    else
+        printf("%d %s %s\n",token->lineNum,token->lexeme, token->data);
+}
+
+
+void prinTokenList(TokenList *list)
+{
+    for (int i = 0; i < list->length; i++)
+    {
+        if (list->TokenArray[i] != NULL)
+            printToken(list->TokenArray[i]);
+    }
+}
+
+//NULL to propagate error
 TokenList *lexAnalyser(FILE *fp)
 {
     if (checkProlog(fp))
@@ -434,6 +482,13 @@ TokenList *lexAnalyser(FILE *fp)
             listDtor(list);
             return NULL;
         }
+        
+        //check for keywords if lexeme == id
+        if (curToken->type == ID)
+        {
+            curToken = checkForKeyWord(curToken);
+        }
+        
 
         //EOF - dont append this token
         if (curToken->type == Error)
@@ -453,27 +508,24 @@ int main(int argc, char const *argv[])
     if (argc == 2)
         fp = fopen(argv[argc-1],"r");
     else
+    {
         printf("ENTER FILE AS AN ARGUMENT");
+        return 1;
+    }
         // fp = fopen("../myTestFiles/test.txt","r");
     
     TokenList *list = lexAnalyser(fp);
 
     if(list == NULL) // there was an error in lexAnalyser
-        return 1;
-
-
-    for (int i = 0; i < list->length; i++)
     {
-        if (list->TokenArray[i] != NULL)
-        {
-            if (list->TokenArray[i]->data == NULL)
-                printf("%s %d\n",list->TokenArray[i]->lexeme,list->TokenArray[i]->lineNum);
-            else
-                printf("%s %d %s\n",list->TokenArray[i]->lexeme,list->TokenArray[i]->lineNum, list->TokenArray[i]->data);
-        }
+        fclose(fp);
+        return 1;
     }
 
+    prinTokenList(list);
+
     listDtor(list);
+    fclose(fp);
 
     return 0;
 }
