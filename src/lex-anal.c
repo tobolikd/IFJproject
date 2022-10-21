@@ -22,7 +22,7 @@ int checkProlog(FILE* fp)
 
 //allocate memory for data
 //return new pointer
-char* attachData(char *data, char dataToBeInserted)
+char* appendChar(char *data, char dataToBeInserted)
 {
     int len;
     if (data == NULL)
@@ -42,13 +42,13 @@ char* attachData(char *data, char dataToBeInserted)
 
 //setup token
 //return new token
-Token* tokenCtor(AutoState type, int lineNum, char* State, char* data)
+Token* tokenCtor(AutoState type, int lineNum, char* lexeme, char* data)
 {
     Token *new = malloc(sizeof(Token)); //allocates memory for new token
     if (new == NULL) // error alocating memory
         return NULL;
     new->data = data; //string already allocated
-    new->lexeme = State;
+    new->lexeme = lexeme;
     new->lineNum = lineNum;
     new->type = type;
     return new;
@@ -114,13 +114,13 @@ Token* getToken(FILE* fp,int *lineNum)
             if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
             {
                 curState = ID;
-                // data = attachData(data, curEdge);//attach the caller
+                // data = appendChar(data, curEdge);//attach the caller
                 fseek(fp,-1,SEEK_CUR); break;//catch the "force-out" edge
             }
             if (curEdge >= '0' && curEdge <= '9')
             {
                 curState = Int; 
-                // data = attachData(data, curEdge); //attach the caller
+                // data = appendChar(data, curEdge); //attach the caller
                 fseek(fp,-1,SEEK_CUR); break;//catch the "force-out" edge
             }
             if (curEdge == '$')
@@ -129,7 +129,7 @@ Token* getToken(FILE* fp,int *lineNum)
             }
             if (curEdge == '"')
             {
-                data = attachData(data, curEdge);
+                data = appendChar(data, curEdge);
                 curState = String; break;
             }
             if (curEdge == '=')
@@ -221,7 +221,7 @@ Token* getToken(FILE* fp,int *lineNum)
 
         case ID:
             if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
-                data = attachData(data, curEdge);
+                data = appendChar(data, curEdge);
             else
             {
                 fseek(fp,-1,SEEK_CUR);
@@ -233,7 +233,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
             {
                 curState = VarID;
-                // data = attachData(data, curEdge); //attach the caller
+                // data = appendChar(data, curEdge); //attach the caller
                 fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
             }
             else
@@ -244,7 +244,7 @@ Token* getToken(FILE* fp,int *lineNum)
             
         case VarID:
             if ((curEdge >= 'A' && curEdge <= 'Z') || (curEdge >= 'a' && curEdge <= 'z'))
-                data = attachData(data, curEdge);
+                data = appendChar(data, curEdge);
             else
             {
                 return tokenCtor(VarID,*lineNum, "VarID", data);
@@ -257,11 +257,11 @@ Token* getToken(FILE* fp,int *lineNum)
                 return NULL;
             if (curEdge == '"')
             {
-                data = attachData(data, curEdge);
+                data = appendChar(data, curEdge);
                 return tokenCtor(StringEnd,*lineNum, "StringEnd", data);
             }
             else
-                data = attachData(data, curEdge);
+                data = appendChar(data, curEdge);
             break;
 
         case Assign:
@@ -281,12 +281,12 @@ Token* getToken(FILE* fp,int *lineNum)
         case Int:
             if (isdigit(curEdge))
             {
-                data = attachData(data,curEdge);
+                data = appendChar(data,curEdge);
                 break;
             }
             if (curEdge == '.')
             {
-                data = attachData(data,curEdge);
+                data = appendChar(data,curEdge);
                 curState = Double;
                 break;
             }
@@ -296,12 +296,12 @@ Token* getToken(FILE* fp,int *lineNum)
         case Double:
             if (isdigit(curEdge))
             {
-                data = attachData(data,curEdge);
+                data = appendChar(data,curEdge);
                 break;
             }
             if (curEdge == 'e' || curEdge == 'E')
             {
-                data = attachData(data,curEdge);
+                data = appendChar(data,curEdge);
                 curState = EulNum;
                 break;
             }
@@ -318,13 +318,13 @@ Token* getToken(FILE* fp,int *lineNum)
         case EulNum:
             if (isdigit(curEdge))
             {
-                data = attachData(data,curEdge);
+                data = appendChar(data,curEdge);
                 curState = EulDouble;
                 break;
             }
             if (curEdge == '+' || curEdge == '-')
             {
-                data = attachData(data,curEdge);
+                data = appendChar(data,curEdge);
                 curState = EulNumExtra;
                 break;
             }
@@ -340,7 +340,7 @@ Token* getToken(FILE* fp,int *lineNum)
         case EulNumExtra:
             if (isdigit(curEdge))
             {
-                data = attachData(data,curEdge);
+                data = appendChar(data,curEdge);
                 curState = EulDouble;
                 break;
             }
@@ -350,7 +350,7 @@ Token* getToken(FILE* fp,int *lineNum)
         case EulDouble:
             if (isdigit(curEdge))
             {
-                data = attachData(data,curEdge);
+                data = appendChar(data,curEdge);
                 break;
             }
             fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
@@ -401,6 +401,7 @@ void tokenDtor(Token *token)
         free(token->data);
     free(token);
 }
+
 void listDtor(TokenList*list)
 {
     for (int i = list->length-1; i >= 0; i--)
