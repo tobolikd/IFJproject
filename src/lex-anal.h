@@ -111,5 +111,13 @@ void listDtor(TokenList*list);
 /// @return Pointer to TokenList with every found tokens in an array of tokens with its additional data. NULL if data were not recognized or fail. 
 TokenList *lexAnalyser(FILE *fp);
 
+/// @brief Print out given token. [LineNum Lexeme Data]
+/// @param token Token to be prited out.
+void printToken(Token*token);
+
+/// @brief Print out given token array. [LineNum Lexeme Data]
+/// @param list List to be printed out.
+void prinTokenList(TokenList *list);
+
 
 #endif // LEX_ANAL_H

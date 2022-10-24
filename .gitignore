@@ -1,5 +1,7 @@
-# ignore all
+# ignore all 
+# dont save binary files
 /*
+src/lex-anal 
 
 # except
 !src
