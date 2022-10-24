@@ -1,6 +1,7 @@
 #include "lex-anal.h"
 #include "syn-anal.h"
 #include "code-gen.h"
+#include "error-codes.h"
 
 int main (int argc,char**argv) {
     /* SCANNER */

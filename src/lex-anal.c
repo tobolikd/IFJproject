@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "lex-anal.h"
+#include "error-codes.h"
 
 //check if prolog is present
 int checkProlog(FILE* fp)
@@ -15,8 +16,9 @@ int checkProlog(FILE* fp)
                 if(prolog[3]==fgetc(fp))  
                     if(prolog[4]==fgetc(fp))
                         return 0;
-    //DEBUG
+#if (DEBUG == 1)
     printf("%s : prolog is missing",prolog);
+#endif
     return 1;                   
 }
 
@@ -183,8 +185,10 @@ Token* getToken(FILE* fp,int *lineNum)
             if (curEdge == EOF)
                 return tokenCtor(Error,*lineNum, "EOF", NULL);
             
-            //DEBUG
+            
+#if (DEBUG == 1)
             printf("At line: %d START -> %c : Not recognised",*lineNum,curEdge);
+#endif
             return NULL;
             break;
 
@@ -282,8 +286,9 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge);
                 break;
             }
-            //DEBUG
+#if (DEBUG == 1)
             printf("At line: %d STRING -> %c : Not recognised",*lineNum,curEdge);
+#endif
             return NULL;
             break;
 
@@ -413,8 +418,9 @@ Token* getToken(FILE* fp,int *lineNum)
 
         curEdge = fgetc(fp); //get another edge
     }
-    //DEBUG
+#if (DEBUG == 1)
     printf("unthinkable happend"); // should never happen
+#endif
     return NULL;
 }
 
