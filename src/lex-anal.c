@@ -89,7 +89,7 @@ Token* getToken(FILE* fp,int *lineNum)
 
     while (1) //until you get a token -> whole finite state 
     {
-        if (curEdge == EOF)
+        if (curEdge == EOF && curState != AlmostEndOfProgram)
         {
             free(data);
             return tokenCtor(Error,*lineNum, "EOF", NULL);
@@ -175,7 +175,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if (curEdge ==',')
                 return tokenCtor(Comma,*lineNum, "Comma", data);
             if (curEdge ==':')
-                return tokenCtor(Colons,*lineNum, "Colons", data);
+                return tokenCtor(Colon,*lineNum, "Colon", data);
             if (curEdge =='\\')
                 return tokenCtor(Backslash,*lineNum, "Backslash", data);
             
@@ -406,6 +406,12 @@ Token* getToken(FILE* fp,int *lineNum)
             fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
             return tokenCtor(LesserThanSign,*lineNum, "LesserThanSign", data);
 
+        case AlmostEndOfProgram:
+            if (curEdge =! EOF)
+                return NULL; //nothing else should follow this token - lexError            
+            fseek(fp,-1,SEEK_CUR);//stay within the file
+            return tokenCtor(EndOfProgram,*lineNum,"EndOfProgram",data);
+
         default:
             break;
 
@@ -505,14 +511,14 @@ TokenList *lexAnalyser(FILE *fp)
 int main(int argc, char const *argv[])
 {
     FILE *fp;
-    if (argc == 2)
-        fp = fopen(argv[argc-1],"r");
-    else
-    {
-        printf("ENTER FILE AS AN ARGUMENT");
-        return 1;
-    }
-        // fp = fopen("../myTestFiles/test.txt","r");
+    // if (argc == 2)
+    //     fp = fopen(argv[argc-1],"r");
+    // else
+    // {
+    //     printf("ENTER FILE AS AN ARGUMENT");
+    //     return 1;
+    // }
+        fp = fopen("../myTestFiles/test.txt","r");
     
     TokenList *list = lexAnalyser(fp);
 
