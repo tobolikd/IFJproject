@@ -3,19 +3,11 @@
 extern "C"
 {
     #include "../src/lex-anal.h"
-
-    #include <stdio.h>
-    #include <stdlib.h>
 }
 
 #include <string>
 
 #include "test-lex-anal.hpp"
-
-TEST(linkTest, lexAnal)
-{
-    EXPECT_EQ(lexAnal('a'), 'a') << "Test function not found!";
-}
 
 class testCheckProlog : public ::testing::TestWithParam<std::tuple<int, std::string>> {};
 
@@ -46,5 +38,4 @@ TEST_P(testCheckProlog, returnValue)
     EXPECT_EQ(returnValue, checkProlog(tmpFile)) << "Processed input: \"" << in << "\"" << std::endl;
     fclose(tmpFile);
 }
-
 
