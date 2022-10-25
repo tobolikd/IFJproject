@@ -1,5 +1,5 @@
-#ifndef LEX_ANAL_H
-#define LEX_ANAL_H
+#ifndef LEX_ANALYZER_H
+#define LEX_ANALYZER_H
 
 #include <stdio.h>
 
@@ -120,4 +120,4 @@ void printToken(Token*token);
 void prinTokenList(TokenList *list);
 
 
-#endif // LEX_ANAL_H
+#endif // LEX_ANALYZER_H

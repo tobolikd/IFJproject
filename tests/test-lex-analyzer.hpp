@@ -1,5 +1,5 @@
-#ifndef IFJ_TEST_LEX_ANAL_H
-#define TEST_LEX_ANAL_H
+#ifndef IFJ_TEST_LEX_ANALYZER_H
+#define IFJ_TEST_LEX_ANALYZER_H
 
 #include <string>
 #include <iostream>
@@ -24,4 +24,4 @@ FILE *prepTmpFile(const char *in)
 }
 
 
-#endif // IFJ_TEST_LEX_ANAL_H
+#endif // IFJ_TEST_LEX_ANALYZER_H

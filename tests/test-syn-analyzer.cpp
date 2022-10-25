@@ -2,6 +2,6 @@
 
 extern "C"
 {
-    #include "../src/syn-anal.h"
+    #include "../src/syn-analyzer.h"
 }
 

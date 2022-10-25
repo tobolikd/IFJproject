@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "lex-anal.h"
+#include "lex-analyzer.h"
 #include "error-codes.h"
 
 //check if prolog is present
