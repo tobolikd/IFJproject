@@ -3,17 +3,11 @@
 #include "code-gen.h"
 #include "error-codes.h"
 
-int main (int argc,char**argv) {
+int main () {
     /* SCANNER */
     FILE *fp;
 
-    if (argc == 2)
-        fp = fopen(argv[argc-1],"r");
-    else
-    {
-        printf("ENTER A FILE AS ARGUMENT.\n");
-        return 1;
-    }
+    fp = stdin;
 
     TokenList *list = lexAnalyser(fp); // get list of tokens
 
