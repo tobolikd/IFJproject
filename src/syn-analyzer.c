@@ -1,3 +1,3 @@
-#include "syn-anal.h"
+#include "syn-analyzer.h"
 #include "error-codes.h"
 

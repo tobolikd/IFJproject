@@ -2,12 +2,12 @@
 
 extern "C"
 {
-    #include "../src/lex-anal.h"
+    #include "../src/lex-analyzer.h"
 }
 
 #include <string>
 
-#include "test-lex-anal.hpp"
+#include "test-lex-analyzer.hpp"
 
 class testCheckProlog : public ::testing::TestWithParam<std::tuple<int, std::string>> {};
 

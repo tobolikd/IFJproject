@@ -1,0 +1,5 @@
+#ifndef IFJ_SYN_ANALYZER_H
+#define IFJ_SYN_ANALYZER_H
+
+
+#endif // IFJ_SYN_ANALYZER_H

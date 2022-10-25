@@ -1,5 +1,5 @@
-#include "lex-anal.h"
-#include "syn-anal.h"
+#include "lex-analyzer.h"
+#include "syn-analyzer.h"
 #include "code-gen.h"
 #include "error-codes.h"
 
