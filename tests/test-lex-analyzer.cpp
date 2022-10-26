@@ -8,16 +8,17 @@ extern "C"
 #include <string>
 #include <cstdlib>
 #include <time.h>
+#include <iostream>
 
 #include "test-lex-analyzer.hpp"
 
 
-/* checkProlog - tests
- *
- * @brief - 
- *
- */
-class testCheckProlog : public ::testing::TestWithParam<std::tuple<int, std::string>> {};
+class testCheckProlog : public testBaseForFiles {};
+
+TEST_P(testCheckProlog, returnValue)
+{
+    EXPECT_EQ(returnValue, checkProlog(tmpFile)) << "Processed input: |" << dataIn << "|" << std::endl;
+}
 
 INSTANTIATE_TEST_CASE_P(BASIC, testCheckProlog,
                         testing::Values(
@@ -36,52 +37,23 @@ INSTANTIATE_TEST_CASE_P(BASIC, testCheckProlog,
                             )
                         );
 
-TEST_P(testCheckProlog, returnValue)
-{
-    int returnValue= std::get<0>(GetParam());
-    const char *in = std::get<1>(GetParam()).data();
 
-    FILE *tmpFile = prepTmpFile(in);
-    ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - failed to allocate file" << std::endl;
-    EXPECT_EQ(returnValue, checkProlog(tmpFile)) << "Processed input: \"" << in << "\"" << std::endl;
-    fclose(tmpFile);
+class testGetTokenCorrect : public testBaseForTokens {};
+
+TEST_P(testGetTokenCorrect, typeAndReturnValue)
+{
+    ASSERT_FALSE(returnedToken == NULL) << "RETURNED TOKEN IS NULL" << std::endl;
+    EXPECT_EQ(expectedType, returnedToken->type) << "Incorrect token type\n" << std::endl;
+    EXPECT_EQ(lineNum, returnedToken->lineNum) << "Incorrect line number" << std::endl;
+    if (expectedData != "")
+    {
+        ASSERT_FALSE(returnedToken->data == NULL) << "RETURNED DATA IS NULL" << std::endl;
+        EXPECT_EQ(expectedData, returnedToken->data) << "Incorrect lexeme data\n" << std::endl;
+    }
+    FAIL() << tokenInfo() << std::endl;
 }
 
-class testBaseForTokens : public ::testing::TestWithParam<std::tuple<AutoState, std::string, std::string>>
-{
-    protected:
-        AutoState expectedType;
-        std::string expectedData;
-        int lineNum;
-        Token *returnedToken = NULL;
-
-        std::string dataIn;
-
-        void SetUp() override
-        {
-            srand(time(0)); // init rand()
-            
-            expectedType = std::get<0>(GetParam());
-            expectedData = std::get<1>(GetParam());
-            dataIn = std::get<2>(GetParam()).data();
-            
-            lineNum = rand(); // get random line num
-
-            FILE *tmpFile = prepTmpFile(dataIn.data());
-            ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - failed to allocate file" << std::endl;
-            returnedToken = getToken(tmpFile, &lineNum);
-            fclose(tmpFile);
-        }
-
-        void TearDown() override
-        {
-            tokenDtor(returnedToken);
-        }
-};
-
-class testGetToken : public testBaseForTokens {};
-
-INSTANTIATE_TEST_SUITE_P(BASIC, testGetToken,
+INSTANTIATE_TEST_SUITE_P(BASIC, testGetTokenCorrect,
                         testing::Values(
                             std::make_tuple(Semicolon,"",";"),
                             std::make_tuple(RPar,"",")"),
@@ -96,8 +68,9 @@ INSTANTIATE_TEST_SUITE_P(BASIC, testGetToken,
                             std::make_tuple(Colons,"",":"),
                             std::make_tuple(Backslash,"","\\"), // check
                             std::make_tuple(Slash,"","/"),
-                            std::make_tuple(QuestionMark,"","?"),
+                            std::make_tuple(QuestionMark,"","?"), // check
                             std::make_tuple(ID,"ahoj","ahoj"),
+                            std::make_tuple(ID,"_ahoj","_ahoj"),
                             std::make_tuple(DollarSign,"","$"), // check
                             std::make_tuple(VarID,"variable","$variable"),
                             std::make_tuple(StringEnd,"nejaky string","\"nejaky string\""),
@@ -115,14 +88,38 @@ INSTANTIATE_TEST_SUITE_P(BASIC, testGetToken,
                             )   
                         );
 
-TEST_P(testGetToken, tokenTypeAndValue)
+
+                        
+class testGetTokenIncorrect : public testBaseForFiles {};
+
+TEST_P(testGetTokenIncorrect, returnValue)
 {
-    ASSERT_FALSE(returnedToken == NULL) << "RETURNED TOKEN IS NULL" << std::endl;
-    EXPECT_EQ(expectedType, returnedToken->type) << "Incorrect token type\t\tInput data |" << dataIn << "|" << std::endl;
-    EXPECT_EQ(lineNum, returnedToken->lineNum) << "Incorrect line number" << std::endl;
-    if (expectedData != "")
-    {
-        ASSERT_FALSE(returnedToken->data == NULL) << "RETURNED DATA IS NULL" << std::endl;
-        EXPECT_EQ(expectedData, returnedToken->data) << "Incorrect lexeme data\t\tInput data |" << dataIn << "|" << std::endl;
-    }
+    int lineNum;
+    Token *returnedToken = getToken(tmpFile, &lineNum);
+    EXPECT_TRUE(returnedToken == NULL) << "RETURNED TOKEN SHOULD BE NULL\nInput: |" << dataIn << "|\nReturned token type: " << returnedToken->type << std::endl;
+    tokenDtor(returnedToken);
 }
+
+INSTANTIATE_TEST_SUITE_P(INTERMEDIATE, testGetTokenIncorrect,
+                        testing::Values(
+                                std::make_tuple(0, "$7a"),
+                                std::make_tuple(0, "$+"),
+                                std::make_tuple(0, "\"not ended string\\\""),
+                                std::make_tuple(0, "89.e"),
+                                std::make_tuple(0, "78.5e"),
+                                std::make_tuple(0, "87e"),
+                                std::make_tuple(0, "\"not ended string"),
+                                std::make_tuple(0, "?4"),
+                                std::make_tuple(0, "?invalid"),
+                                std::make_tuple(0, "/*unterminated comment"),
+                                std::make_tuple(0, "/*terminated comment*/"),
+                                std::make_tuple(0, "?function"),
+                                std::make_tuple(0, "?true"),
+                                std::make_tuple(0, "?_"),
+                                std::make_tuple(0, "\\"),
+                                std::make_tuple(0, "1e-"),
+                                std::make_tuple(0, "1e+"),
+                                std::make_tuple(0, "1.e+"),
+                                std::make_tuple(0, "1.2e-")
+                            )
+                        );
