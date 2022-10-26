@@ -1,4 +1,4 @@
-#include <stdio.h>
+
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
@@ -63,6 +63,7 @@ TokenList *appendToken(TokenList *list, Token* newToken)
     if(list == NULL)
     {
         list = malloc(sizeof(TokenList));
+        debug_print("allocated list %p\n", (void *) list);
         list->TokenArray = malloc(2*sizeof(Token));
         list->length = 1;
     }
@@ -93,7 +94,8 @@ Token* getToken(FILE* fp,int *lineNum)
     {
         if (curEdge == EOF)
         {
-            free(data);
+            if (data != NULL)
+                free(data);
             return tokenCtor(Error,*lineNum, "EOF", NULL);
         }
         
@@ -426,19 +428,38 @@ Token* getToken(FILE* fp,int *lineNum)
 
 void tokenDtor(Token *token)
 {
-    if (token!=NULL)
-        free(token->data);
-    free(token);
+    debug_print("deconstructing token\n");
+    if (token != NULL)
+    {
+        if (token->data != NULL)
+        {
+            debug_print("freeing token->data...");
+            free(token->data);
+            debug_print("done\n");
+        }
+        debug_print("freeing token...");
+        free(token);
+        debug_print("done\n");
+    }
+    debug_print("token deconstructed\n");
 }
 
-void listDtor(TokenList*list)
+void listDtor(TokenList *list)
 {
+    debug_print("freeing list %p", (void *) list);
     for (int i = list->length; i >= 0; i--)
     {
-        tokenDtor(list->TokenArray[i]);
+        if (list->TokenArray[i] != NULL)
+            tokenDtor(list->TokenArray[i]);
     }
-    free(list->TokenArray);
-    free(list);
+    
+    if (list != NULL)
+    {
+        if (list->TokenArray != NULL)
+            free(list->TokenArray);
+        free(list);
+    }
+    debug_print("list %p freed", (void *) list);
 }
 
 /* TODO */
@@ -471,8 +492,8 @@ TokenList *lexAnalyser(FILE *fp)
     if (checkProlog(fp))
         return NULL;
     
-    TokenList *list; //structure to string tokens together
-    Token* curToken; //token cursor
+    TokenList *list = NULL; //structure to string tokens together
+    Token* curToken = NULL; //token cursor
 
     int lineNum = 1; //on what line token is found
                      //starts on line number (prolog is on line 1)
@@ -483,6 +504,7 @@ TokenList *lexAnalyser(FILE *fp)
         curToken = getToken(fp,&lineNum); //get token
 
         //getToken returned NULL this means error ! 
+
         if (curToken == NULL) 
         {
             listDtor(list);
@@ -494,14 +516,14 @@ TokenList *lexAnalyser(FILE *fp)
         {
             curToken = checkForKeyWord(curToken);
         }
-        
 
         //EOF - dont append this token
         if (curToken->type == Error)
         {
-            free(curToken);
+            tokenDtor(curToken);
             break;
         }
+
         list = appendToken(list,curToken); //append to list
     }
 

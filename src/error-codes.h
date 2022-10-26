@@ -22,4 +22,7 @@ enum ifjErrCode {
 // define 1 for debug logs, 0 for none
 #define DEBUG 0
 
+#define debug_print(...) \
+            do { if (DEBUG == 1) fprintf(stderr, __VA_ARGS__); } while (0)
+
 #endif // IFJ_ERROR_CODES_H
