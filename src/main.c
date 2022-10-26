@@ -16,8 +16,9 @@ int main () {
         fclose(fp);
         return 1;
     }
-    //DEBUG
+#if (DEBUG == 1)
     prinTokenList(list);
+#endif
 
     // free memory 
     listDtor(list);
