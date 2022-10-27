@@ -10,6 +10,16 @@ extern "C"
 #include <iostream>
 #include <gtest/gtest.h>
 
+using std::tuple;
+using std::to_string;
+using std::get;
+using std::cerr;
+using std::vector;
+using std::pair;
+using std::endl;
+using std::string;
+using std::array;
+
 // returns file pointer to tmp file with given string in it
 FILE *prepTmpFile(const char *in)
 {
@@ -17,7 +27,7 @@ FILE *prepTmpFile(const char *in)
     
     if (file == NULL)
     {
-        std::cerr << "\n\nTEST ERROR - could not open tmpfile\n\n";
+        cerr << "\n\nTEST ERROR - could not open tmpfile\n\n";
         return NULL;
     }
     
@@ -34,54 +44,55 @@ FILE *prepTmpFile(const char *in)
  *
  * to be inherited
  */
-class testBaseForTokens : public ::testing::TestWithParam<std::tuple<AutoState, std::string, std::string>>
+class testBaseForTokens : public ::testing::TestWithParam<tuple<AutoState, string, string>>
 {
     protected:
-        std::string dataIn;
+        string dataIn;
         int lineNum;
 
         AutoState expectedType;
-        std::string expectedData;
-        
+        string expectedData;
+
+        FILE *tmpFile;
         Token *returnedToken = NULL;
 
         void SetUp() override
         {
             srand(time(0)); // init rand()
             
-            expectedType = std::get<0>(GetParam());
-            expectedData = std::get<1>(GetParam());
-            dataIn = std::get<2>(GetParam()).data();
+            expectedType = get<0>(GetParam());
+            expectedData = get<1>(GetParam());
+            dataIn = get<2>(GetParam());
             
             lineNum = rand(); // get random line num
 
-            FILE *tmpFile = prepTmpFile(dataIn.data());
-            ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - failed to allocate file" << std::endl;
-            returnedToken = getToken(tmpFile, &lineNum);
-            if (tmpFile != NULL)
-                fclose(tmpFile);
+            tmpFile = prepTmpFile(dataIn.data());
+            ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - failed to allocate file" << endl;
         }
 
         void TearDown() override
         {
+            if (tmpFile != NULL)
+                fclose(tmpFile);
+
             tokenDtor(returnedToken);
         }
 
-        std::string tokenInfo()
+        string tokenInfo()
         {
-            std::string out = "";
+            string out = "";
             out += "\nInput file: |" + dataIn + "|";
-            out += "\nExpected Type: " + std::to_string(expectedType);
-            out += "\nEpected Data: |" + expectedData + "|";
+            out += "\nExpected Type: " + to_string(expectedType);
+            out += "\nExpected Data: |" + expectedData + "|";
 
             if (returnedToken == NULL)
             {
                 out += "\nReturned token <NULL>";
                 return out;
             }
-            out += "\nReturned token (" + std::to_string(reinterpret_cast<intptr_t>(returnedToken)) + ")";
-            out += "\n\tType: " + std::to_string(returnedToken->type);
-            std::string data = (returnedToken->data == NULL) ? "<NULL>" : "|" + std::string(returnedToken->data) + "|";
+            out += "\nReturned token (" + to_string(reinterpret_cast<intptr_t>(returnedToken)) + ")";
+            out += "\n\tType: " + to_string(returnedToken->type);
+            string data = (returnedToken->data == NULL) ? "<NULL>" : "|" + string(returnedToken->data) + "|";
             out += "\n\tData: " + data;
             return out; 
         }
@@ -93,7 +104,7 @@ class testBaseForTokens : public ::testing::TestWithParam<std::tuple<AutoState, 
  *
  * to be inherited
  */
-class testBaseForFiles : public ::testing::TestWithParam<std::tuple<int, std::string>>
+class testBaseForFiles : public ::testing::TestWithParam<tuple<int, string>>
 {
     protected:
         int returnValue;
@@ -104,13 +115,13 @@ class testBaseForFiles : public ::testing::TestWithParam<std::tuple<int, std::st
         void SetUp() override
         {
             printf("setting up");
-            returnValue = std::get<0>(GetParam());
-            dataIn = std::get<1>(GetParam()).data();
+            returnValue = get<0>(GetParam());
+            dataIn = get<1>(GetParam()).data();
 
             printf("got values");
             tmpFile = prepTmpFile(dataIn);
             printf("got file");
-            ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - failed to allocate file" << std::endl;
+            ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - failed to allocate file" << endl;
             printf("asserted");
         }
 
