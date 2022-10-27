@@ -103,6 +103,13 @@ TEST_P(testGetTokenIncorrect, returnValue)
     int lineNum;
     Token *returnedToken = getToken(tmpFile, &lineNum);
     EXPECT_TRUE(returnedToken == NULL) << "RETURNED TOKEN SHOULD BE NULL\nInput: |" << dataIn << "|\nReturned token type: " << returnedToken->type << endl;
+    if (returnedToken != NULL)
+    {
+        if (returnedToken->data != NULL)
+            FAIL() << "\nReturned data: |" << returnedToken->data << "|" << endl;
+        else
+            FAIL() << "\nReturned data: <NULL>" << endl;
+    }
     tokenDtor(returnedToken);
 }
 
