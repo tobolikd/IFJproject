@@ -17,10 +17,10 @@ enum ifjErrCode {
 };
 
 // global variable for errCode storage
-// enum ifjErrCode errorCode = SUCCESS;
+//enum ifjErrCode errorCode = SUCCESS;
 
 // define 1 for debug logs, 0 for none
-#define DEBUG 1
+#define DEBUG 0
 
 #define debug_print(...) \
             do { if (DEBUG == 1) fprintf(stderr, __VA_ARGS__); } while (0)

@@ -17,3 +17,9 @@
  - **every commit in main has to be compilable** (warnings are allowed)
    - including tests - run "make" and "make tests"
  - DRY - don't repeat yourself
+ - debug logs should be active only if DEBUG (src/error-codes.h) is set to 1
+ ```
+ #if (DEBUG == 1)
+ // your printf or whatever
+ #endif
+ ```

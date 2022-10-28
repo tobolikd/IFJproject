@@ -3,14 +3,14 @@ cmake_minimum_required(VERSION 3.14)
 project(IFJ-tests)
 
 set(PROJECT_FILES
-    src/lex-anal.c
-    src/syn-anal.c
+    src/lex-analyzer.c
+    src/syn-analyzer.c
     src/code-gen.c
 )
 
 set(UNIT_TESTS
-    tests/test-lex-anal.cpp
-    tests/test-syn-anal.cpp
+    tests/test-lex-analyzer.cpp
+    tests/test-syn-analyzer.cpp
     tests/test-code-gen.cpp
 )
 
@@ -32,8 +32,6 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_library(projectFiles ${PROJECT_FILES})
-
-add_library(proj1 src/lex-anal.c)
 
 add_executable(tests-all ${UNIT_TESTS})
 target_link_libraries(tests-all GTest::gtest_main)

@@ -334,6 +334,7 @@ Token* getToken(FILE* fp,int *lineNum)
             #endif
             return NULL;
 
+        //numbers
         case Int:
             if (isdigit(curEdge))
             {
@@ -548,8 +549,8 @@ TokenList *lexAnalyser(FILE *fp)
     if (checkProlog(fp))
         return NULL;
     
-    TokenList *list = NULL; //structure to string tokens together
-    Token* curToken = NULL; //token cursor
+    TokenList *list; //structure to string tokens together
+    Token* curToken; //token cursor
 
     int lineNum = 1; //on what line token is found
                      //starts on line number (prolog is on line 1)
@@ -559,8 +560,7 @@ TokenList *lexAnalyser(FILE *fp)
     {
         curToken = getToken(fp,&lineNum); //get token
 
-        //getToken returned NULL means error 
-
+        //getToken returned NULL this means error ! 
         if (curToken == NULL) 
         {
             listDtor(list);
@@ -572,16 +572,44 @@ TokenList *lexAnalyser(FILE *fp)
         {
             curToken = checkForKeyWord(curToken);
         }
+        
 
         //EOF - dont append this token
-        if (curToken->type == EndOfProgram)
+        if (curToken->type == Error)
         {
-            tokenDtor(curToken);
+            free(curToken);
             break;
         }
-
         list = appendToken(list,curToken); //append to list
     }
 
     return list;
+}
+
+int main(int argc, char const *argv[])
+{
+    FILE *fp;
+    if (argc == 2)
+        fp = fopen(argv[argc-1],"r");
+    else
+    {
+        printf("ENTER FILE AS AN ARGUMENT");
+        return 1;
+    }
+        // fp = fopen("../myTestFiles/test.txt","r");
+    
+    TokenList *list = lexAnalyser(fp);
+
+    if(list == NULL) // there was an error in lexAnalyser
+    {
+        fclose(fp);
+        return 1;
+    }
+
+    prinTokenList(list);
+
+    listDtor(list);
+    fclose(fp);
+
+    return 0;
 }
