@@ -17,7 +17,7 @@ int checkProlog(FILE* fp)
                     if(prolog[4]==fgetc(fp))
                     {
                         char c = fgetc(fp);
-                        fseek(fp,-1,SEEK_CUR); //if end of line i want to catch it in KA
+                        ungetc(c,fp); //if end of line i want to catch it in KA
                         if (c=='\n' || c ==EOF || c == ' ')
                             return 0;
                     }
@@ -85,8 +85,21 @@ TokenList *appendToken(TokenList *list, Token* newToken)
     return list;
 }
 
-/* TODO error stavy NULL*/
-/* TODO EOF edge v jednolivych stavoch TOKEN EOF*/
+/// @brief Checks if datas value is one of valide data types in php.
+/// @param data String to be checked.
+/// @return Returns 1 if data represents data type. Returns 0 if id doesnt.
+int checkDataType(char *data)
+{
+    if (data == NULL)
+        return 0;
+    if (!strcmp(data,"string"))
+        return 1;
+    else if (!strcmp(data,"int"))
+        return 1;
+    else if (!strcmp(data,"float"))
+        return 1;
+    return 0;    
+}
 
 
 //returns pointer to setup token
@@ -109,6 +122,9 @@ Token* getToken(FILE* fp,int *lineNum)
             case String:
                 free(data);
                 return NULL;
+
+            case ID:
+                return tokenCtor(ID,*lineNum, "ID", data);
             
             case StarComment:
                 return NULL;
@@ -119,7 +135,11 @@ Token* getToken(FILE* fp,int *lineNum)
             case AlmostEndOfProgram:
                 return tokenCtor(EndOfProgram,*lineNum, "EndOfProgram", data);
 
-            
+            case QuestionMark:
+                if (checkDataType(data))
+                    return tokenCtor(nullType, *lineNum, "nullType", data);
+                free(data);
+                return NULL;                
 
             default:
                 break;
@@ -224,7 +244,7 @@ Token* getToken(FILE* fp,int *lineNum)
             {
                 curState = StarComment; break;
             }
-            fseek(fp,-1,SEEK_CUR); //catch the "force-out" edge
+            ungetc(curEdge,fp); //catch the "force-out" edge
             return tokenCtor(Slash,*lineNum, "Slash",data);            
 
         case LineComment:
@@ -260,6 +280,16 @@ Token* getToken(FILE* fp,int *lineNum)
                 curState = AlmostEndOfProgram; 
                 break;
             }
+            else if (isprint(curEdge))//look for data type
+            {
+                data = appendChar(data, curEdge);
+                break;
+            }
+            if (checkDataType(data))//returns 1 it is a valid data type
+            {
+                ungetc(curEdge,fp); //catch the "force-out" edge
+                return tokenCtor(nullType, *lineNum, "nullType", data);
+            }
             return NULL;
         
         case AlmostEndOfProgram:
@@ -270,7 +300,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge);
             else
             {
-                fseek(fp,-1,SEEK_CUR);
+                ungetc(curEdge,fp);
                 return tokenCtor(ID,*lineNum, "ID", data);
             }
             break;
@@ -290,7 +320,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge);
                 break;
             }
-            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            ungetc(curEdge,fp);//catch the "force-out" edge
             return tokenCtor(VarID,*lineNum, "VarID", data);
 
         case String:
@@ -365,7 +395,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 curState = EulNum;
                 break;
             }
-            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            ungetc(curEdge,fp);//catch the "force-out" edge
             return tokenCtor(Int,*lineNum, "Int", data);
 
         case Double:
@@ -389,7 +419,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 #endif
                 return NULL;
             }
-            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            ungetc(curEdge,fp);//catch the "force-out" edge
             return tokenCtor(Double,*lineNum, "Double", data);
 
         case EulNum:
@@ -416,7 +446,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 break;
             }
 		#if (DEBUG == 1)
-            		printf("Line %d - Number cannot end with . sign.",*lineNum);
+            printf("Line %d - Number cannot end with . sign.",*lineNum);
 		#endif
             return NULL; //return error
 
@@ -442,7 +472,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 #endif
                 return NULL;
             }
-            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            ungetc(curEdge,fp);//catch the "force-out" edge
             return tokenCtor(EuldDouble,*lineNum, "EuldDouble", data);
         //end of numbers
 
@@ -467,13 +497,13 @@ Token* getToken(FILE* fp,int *lineNum)
         case GreaterThanSign:
             if (curEdge == '=')
                 return tokenCtor(GreaterEqualThanSign,*lineNum, "GreaterEqualThanSign", data);
-            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            ungetc(curEdge,fp);//catch the "force-out" edge
             return tokenCtor(GreaterThanSign,*lineNum, "GreaterThanSign", data);
 
         case LesserThanSign:
             if (curEdge == '=')
                 return tokenCtor(LesserEqualThanSign,*lineNum, "LesserEqualThanSign", data);
-            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            ungetc(curEdge,fp);//catch the "force-out" edge
             return tokenCtor(LesserThanSign,*lineNum, "LesserThanSign", data);
 
         default:
