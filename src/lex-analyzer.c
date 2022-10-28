@@ -324,8 +324,6 @@ Token* getToken(FILE* fp,int *lineNum)
             return tokenCtor(VarID,*lineNum, "VarID", data);
 
         case String:
-/* TODO - possibly more signs from ASCII may cause error when inside string*/
-/* FIX \ problems */// check if previous character was backslash
             if (curEdge == '"')
             {
                 if (data != NULL)
@@ -591,8 +589,8 @@ TokenList *lexAnalyser(FILE *fp)
     if (checkProlog(fp))
         return NULL;
     
-    TokenList *list; //structure to string tokens together
-    Token* curToken; //token cursor
+    TokenList *list = NULL; //structure to string tokens together
+    Token* curToken = NULL; //token cursor
 
     int lineNum = 1; //on what line token is found
                      //starts on line number (prolog is on line 1)
@@ -613,8 +611,7 @@ TokenList *lexAnalyser(FILE *fp)
         if (curToken->type == ID)
         {
             curToken = checkForKeyWord(curToken);
-        }
-        
+        }        
 
         //EOF - dont append this token
         if (curToken->type == EndOfProgram)
@@ -622,6 +619,7 @@ TokenList *lexAnalyser(FILE *fp)
             free(curToken);
             break;
         }
+
         list = appendToken(list,curToken); //append to list
     }
 
