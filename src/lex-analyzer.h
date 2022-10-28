@@ -49,6 +49,7 @@ typedef enum
     Comma,
     Colons,
     Backslash,
+    nullType
 } AutoState;
 
 typedef struct 
