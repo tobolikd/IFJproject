@@ -3,54 +3,101 @@
 
 #include <stdio.h>
 
+#define GENERATE_ENUM(ENUM) ENUM,
+#define GENERATE_STRING(STRING) #STRING,
+
+#define FOREACH_STATE(STATE)\
+    STATE(Error)\
+    STATE(Start)\
+    STATE(Slash)\
+    STATE(StarComment)\
+    STATE(LineComment)\
+    STATE(CommentStar)\
+    STATE(CommentEnd)\
+    STATE(QuestionMark)\
+    STATE(AlmostEndOfProgram)\
+    STATE(EndOfProgram)\
+    STATE(ID)\
+    STATE(DollarSign)\
+    STATE(VarID)\
+    STATE(Int)\
+    STATE(Dot)\
+    STATE(Double)\
+    STATE(EulNum)\
+    STATE(EulNumExtra)\
+    STATE(EulDouble)\
+    STATE(String)\
+    STATE(StringEnd)\
+    STATE(Semicolon)\
+    STATE(Assign)\
+    STATE(RPar)\
+    STATE(LPar)\
+    STATE(RCurl)\
+    STATE(LCurl)\
+    STATE(PlusSign)\
+    STATE(MinusSign)\
+    STATE(MulSign)\
+    STATE(DotSign)\
+    STATE(GreaterThanSign)\
+    STATE(LesserThanSign)\
+    STATE(ExclamMark)\
+    STATE(ExclamEqual)\
+    STATE(GreaterEqualThanSign)\
+    STATE(DoubleEqual)\
+    STATE(StrictEquality)\
+    STATE(LesserEqualThanSign)\
+    STATE(NotEqual)\
+    STATE(EuldDouble)\
+    STATE(Comma)\
+    STATE(Colons)\
+    STATE(Backslash)\
+
 typedef enum
 {
-    EndOfProgram,
-    Start,
-    Slash,
-    StarComment,
-    LineComment,
-    CommentStar,
-    CommentEnd,
-    QuestionMark,
-    AlmostEndOfProgram,
-    ID,
-    DollarSign,
-    VarID,
-    Int,
-    Dot,
-    DotDouble,
-    Double,
-    EulNum,
-    EulNumExtra,
-    EulDouble,
-    String,
-    StringEnd,
-    Semicolon,
-    Assign,
-    RPar,
-    LPar,
-    RCurl,
-    LCurl,
-    PlusSign,
-    MinusSign,
-    MulSign,
-    DotSign,
-    GreaterThanSign,
-    LesserThanSign,
-    ExclamMark,
-    ExclamEqual,
-    GreaterEqualThanSign,
-    DoubleEqual,
-    StrictEquality,
-    LesserEqualThanSign,
-    NotEqual,
-    EuldDouble,
-    Comma,
-    Colons,
-    Backslash,
-    nullType
+    FOREACH_STATE(GENERATE_ENUM) 
 } AutoState;
+
+// get state string by using STATE_STRING[AutoState]
+static const char* STATE_STRING[] = 
+{
+    FOREACH_STATE(GENERATE_STRING)
+};
+
+#define FOREACH_TOKEN_TYPE(TYPE)\
+        TYPE(t_EOF)/*data - <NULL>*/\
+        TYPE(t_condition)/*data - if | while*/\
+        TYPE(t_else)/*data - <NULL>*/\
+        TYPE(t_null)/*data - <NULL>*/\
+        TYPE(t_return)/*data - <NULL>*/\
+        TYPE(t_function)/*data - <NULL>*/\
+        TYPE(t_type)/*data - int | string | float | void*/\
+        TYPE(t_nullType)/*data - int | string | float*/\
+        TYPE(t_varId)/*data - <var name>*/\
+        TYPE(t_functionId)/* - <fnc name>*/\
+        TYPE(t_operator)/*data - . | + | - | * | / */\
+        TYPE(t_comparator)/*data - === | !== | < | > | <= | >= */\
+        TYPE(t_int)/*data - <int value>*/\
+        TYPE(t_float)/*data - <float value>*/\
+        TYPE(t_string)/*data - <string value>*/\
+        TYPE(t_semicolon)/*data - <NULL>*/\
+        TYPE(t_assign)/*data - <NULL>*/\
+        TYPE(t_lPar)/*data - <NULL>*/\
+        TYPE(t_rPar)/*data - <NULL>*/\
+        TYPE(t_lCurl)/*data - <NULL>*/\
+        TYPE(t_rCurl)/*data - <NULL>*/\
+        TYPE(t_comma)/*data - */\
+        TYPE(t_colon)/*data - */\
+
+typedef enum
+{
+   FOREACH_TOKEN_TYPE(GENERATE_ENUM) 
+} TokenType;
+
+// get token type string by using TOKEN_TYPE_STRING[TokenType]
+static const char* TOKEN_TYPE_STRING[] = 
+{
+    FOREACH_TOKEN_TYPE(GENERATE_STRING)
+};
 
 typedef struct 
 {
