@@ -21,9 +21,7 @@ int checkProlog(FILE* fp)
                         if (c=='\n' || c ==EOF || c == ' ')
                             return 0;
                     }
-#if (DEBUG == 1)
-    printf("%s : prolog is missing",prolog);
-#endif
+    debug_print("%s : prolog is missing\n",prolog);
     return 1;                   
 }
 
@@ -68,7 +66,6 @@ TokenList *appendToken(TokenList *list, Token* newToken)
     if(list == NULL)
     {
         list = malloc(sizeof(TokenList));
-        debug_print("allocated list %p\n", (void *) list);
         list->TokenArray = malloc(2*sizeof(Token));
         list->length = 1;
     }
@@ -224,14 +221,8 @@ Token* getToken(FILE* fp,int *lineNum)
                 return tokenCtor(Comma,*lineNum, "Comma", data);
             if (curEdge ==':')
                 return tokenCtor(Colons,*lineNum, "Colons", data);
-            // if (curEdge =='\\')
-            //     return tokenCtor(Backslash,*lineNum, "Backslash", data);
             
-
-            #if (DEBUG == 1)
-                printf("At line: %d START -> %c : Not recognised",*lineNum,curEdge);
-            #endif
-            
+            debug_print("At line: %d START -> %c : Not recognised\n",*lineNum,curEdge);
             return NULL;
             break;
 
@@ -353,9 +344,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 break;
             }
             //weird data on the input
-            #if (DEBUG == 1)
-                printf("At line: %d STRING -> %c : Not recognised",*lineNum,curEdge);
-            #endif
+            debug_print("At line: %d STRING -> %c : Not recognised\n",*lineNum,curEdge);
 
             return NULL;
 
@@ -369,9 +358,7 @@ Token* getToken(FILE* fp,int *lineNum)
         case DoubleEqual:
             if (curEdge == '=')
                 return tokenCtor(StrictEquality,*lineNum, "StrictEquality", data);
-            #if (DEBUG == 1)
-                printf("Line %d c %c- Lexical Error", *lineNum,curEdge);
-            #endif
+            debug_print("Line %d - Lexical Error\n", *lineNum);
             return NULL;
 
         //numbers
@@ -412,9 +399,7 @@ Token* getToken(FILE* fp,int *lineNum)
             //but if there is nothing after dot means error
             if (data[strlen(data)-1] == '.')
             {
-                #if (DEBUG == 1)
-                    printf("Line %d - Number cannot end with . sign.",*lineNum);
-                #endif
+                debug_print("Line %d - Number cannot end with . sign. \n",*lineNum);
                 return NULL;
             }
             ungetc(curEdge,fp);//catch the "force-out" edge
@@ -443,9 +428,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 curState = EulDouble;
                 break;
             }
-		#if (DEBUG == 1)
-            printf("Line %d - Number cannot end with . sign.",*lineNum);
-		#endif
+            debug_print("Line %d - Number cannot end with operator sign.\n",*lineNum);
             return NULL; //return error
 
         case EulDouble:
@@ -457,17 +440,13 @@ Token* getToken(FILE* fp,int *lineNum)
             //previous state == EulNum
             if (data[strlen(data)-1] == 'e' || data[strlen(data)-1] == 'E' )
             {
-                #if (DEBUG == 1)
-                    printf("Line %d - %c Unpropper double number ending.",*lineNum,curEdge);
-                #endif
+                debug_print("Line %d - %c Unpropper double number ending.\n",*lineNum,curEdge);
                 return NULL;
             }
             //previous state == EulNUmExtra
             if (data[strlen(data)-1] == '+' || data[strlen(data)-1] == '-' )
             {
-                #if (DEBUG == 1)
-                    printf("Line %d - %c Unpropper double number ending.",*lineNum,curEdge);
-                #endif
+                debug_print("Line %d - %c Unpropper double number ending.\n",*lineNum,curEdge);
                 return NULL;
             }
             ungetc(curEdge,fp);//catch the "force-out" edge
@@ -479,17 +458,13 @@ Token* getToken(FILE* fp,int *lineNum)
             {
                 curState = ExclamEqual;break;
             }
-            #if (DEBUG == 1)
-                printf("Line %d - %c Lexical error.",*lineNum,curEdge);
-            #endif
+            debug_print("Line %d - Lexical error.\n",*lineNum);
             return NULL; //return error
 
         case ExclamEqual:
             if (curEdge == '=')
                 return tokenCtor(NotEqual,*lineNum, "NotEqual", data);
-            #if (DEBUG == 1)
-                printf("Line %d - %c Lexical error.",*lineNum,curEdge);
-            #endif
+            debug_print("Line %d - Lexical error.\n",*lineNum);
             return NULL; //return error
             
         case GreaterThanSign:
@@ -517,33 +492,23 @@ Token* getToken(FILE* fp,int *lineNum)
         }
         curEdge = fgetc(fp); //get another edge
     }
-#if (DEBUG == 1)
-    printf("unthinkable happend"); // should never happen
-#endif
+    debug_log("unthinkable happend\n"); // should never happen
     return NULL;
 }
 
 void tokenDtor(Token *token)
 {
-    debug_print("deconstructing token\n");
     if (token != NULL)
     {
         if (token->data != NULL)
-        {
-            debug_print("freeing token->data...");
             free(token->data);
-            debug_print("done\n");
-        }
-        debug_print("freeing token...");
+
         free(token);
-        debug_print("done\n");
     }
-    debug_print("token deconstructed\n");
 }
 
 void listDtor(TokenList *list)
 {
-    debug_print("freeing list %p\n", (void *) list);
     if (list != NULL)
     {
         for (int i = list->length; i >= 0; i--)
@@ -556,7 +521,6 @@ void listDtor(TokenList *list)
             free(list->TokenArray);
         free(list);
     }
-    debug_print("list %p freed\n", (void *) list);
 }
 
 /* TODO */
@@ -616,7 +580,7 @@ TokenList *lexAnalyser(FILE *fp)
         //EOF - dont append this token
         if (curToken->type == EndOfProgram)
         {
-            free(curToken);
+            tokenDtor(curToken);
             break;
         }
 
