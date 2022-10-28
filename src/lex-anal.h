@@ -5,7 +5,7 @@
 
 typedef enum
 {
-    Error,
+    EndOfProgram,
     Start,
     Slash,
     StarComment,
@@ -14,12 +14,12 @@ typedef enum
     CommentEnd,
     QuestionMark,
     AlmostEndOfProgram,
-    EndOfProgram,
     ID,
     DollarSign,
     VarID,
     Int,
     Dot,
+    DotDouble,
     Double,
     EulNum,
     EulNumExtra,
@@ -96,6 +96,7 @@ TokenList *appendToken(TokenList *list, Token* newToken);
 /// @param fp Pointer to file to scan through.
 /// @param lineNum Pointer to line number where the file is currently reading from.
 /// @return Pointer to first found token. Moves file cursor just after the read token.
+/// @return Null if lexical error occured & token EndOfProgram if ended correctly
 Token* getToken(FILE* fp,int *lineNum);
 
 /// @brief Frees memory of tokens data and token itslef.

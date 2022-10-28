@@ -1,9 +1,10 @@
-#include <stdio.h>
+
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include "lex-anal.h"
+#include "lex-analyzer.h"
+#include "error-codes.h"
 
 //check if prolog is present
 int checkProlog(FILE* fp)
@@ -14,9 +15,15 @@ int checkProlog(FILE* fp)
             if(prolog[2]==fgetc(fp))
                 if(prolog[3]==fgetc(fp))  
                     if(prolog[4]==fgetc(fp))
-                        return 0;
-    //DEBUG
+                    {
+                        char c = fgetc(fp);
+                        fseek(fp,-1,SEEK_CUR); //if end of line i want to catch it in KA
+                        if (c=='\n' || c ==EOF || c == ' ')
+                            return 0;
+                    }
+#if (DEBUG == 1)
     printf("%s : prolog is missing",prolog);
+#endif
     return 1;                   
 }
 
@@ -61,6 +68,7 @@ TokenList *appendToken(TokenList *list, Token* newToken)
     if(list == NULL)
     {
         list = malloc(sizeof(TokenList));
+        debug_print("allocated list %p\n", (void *) list);
         list->TokenArray = malloc(2*sizeof(Token));
         list->length = 1;
     }
@@ -77,22 +85,45 @@ TokenList *appendToken(TokenList *list, Token* newToken)
     return list;
 }
 
-/* TODO error stavy */
-/* TODO EOF edge v jednolivych stavoch*/
+/* TODO error stavy NULL*/
+/* TODO EOF edge v jednolivych stavoch TOKEN EOF*/
+
+
 //returns pointer to setup token
 //returns NULL if error accured
 Token* getToken(FILE* fp,int *lineNum)
 {
     int curState = Start;
-    char curEdge = fgetc(fp); //reads from file GLOBAL POINTER
-    char *data=NULL;
+    char curEdge = fgetc(fp);
+    char *data = NULL;
 
     while (1) //until you get a token -> whole finite state 
     {
-        if (curEdge == EOF && curState != AlmostEndOfProgram)
+        if (curEdge == EOF)
         {
-            free(data);
-            return tokenCtor(Error,*lineNum, "EOF", NULL);
+            switch (curState)
+            {
+            case Start:
+                return tokenCtor(EndOfProgram,*lineNum, "EndOfProgram", data);
+
+            case String:
+                free(data);
+                return NULL;
+            
+            case StarComment:
+                return NULL;
+
+            case CommentStar:
+                return NULL;
+
+            case AlmostEndOfProgram:
+                return tokenCtor(EndOfProgram,*lineNum, "EndOfProgram", data);
+
+            
+
+            default:
+                break;
+            }
         }
         
         switch (curState)
@@ -117,14 +148,14 @@ Token* getToken(FILE* fp,int *lineNum)
             if (isalpha(curEdge))
             {
                 curState = ID;
-                // data = appendChar(data, curEdge);//attach the caller
-                fseek(fp,-1,SEEK_CUR); break;//catch the "force-out" edge
+                data = appendChar(data, curEdge);//attach the caller
+                break;
             }
-            if (curEdge >= '0' && curEdge <= '9')
+            if (isdigit(curEdge))
             {
                 curState = Int; 
-                // data = appendChar(data, curEdge); //attach the caller
-                fseek(fp,-1,SEEK_CUR); break;//catch the "force-out" edge
+                data = appendChar(data, curEdge); //attach the caller
+                break;
             }
             if (curEdge == '$')
             {
@@ -161,9 +192,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if (curEdge == '}')
                 return tokenCtor(RCurl, *lineNum, "RCurl", data);
             if (curEdge == '{')
-                return tokenCtor(LCurl,*lineNum, "LCurl", data);
-            if (curEdge =='.')
-                return tokenCtor(DotSign,*lineNum, "DotSign", data);
+                return tokenCtor(LCurl,*lineNum, "LCurl", data); 
             if (curEdge =='*')
                 return tokenCtor(MulSign,*lineNum, "MulSign", data);
             if (curEdge =='-')
@@ -175,16 +204,15 @@ Token* getToken(FILE* fp,int *lineNum)
             if (curEdge ==',')
                 return tokenCtor(Comma,*lineNum, "Comma", data);
             if (curEdge ==':')
-                return tokenCtor(Colon,*lineNum, "Colon", data);
+                return tokenCtor(Colons,*lineNum, "Colons", data);
             if (curEdge =='\\')
                 return tokenCtor(Backslash,*lineNum, "Backslash", data);
             
 
-            if (curEdge == EOF)
-                return tokenCtor(Error,*lineNum, "EOF", NULL);
+            #if (DEBUG == 1)
+                printf("At line: %d START -> %c : Not recognised",*lineNum,curEdge);
+            #endif
             
-            //DEBUG
-            printf("At line: %d START -> %c : Not recognised",*lineNum,curEdge);
             return NULL;
             break;
 
@@ -197,7 +225,7 @@ Token* getToken(FILE* fp,int *lineNum)
             {
                 curState = StarComment; break;
             }
-            fseek(fp,-1,SEEK_CUR); break;//catch the "force-out" edge
+            fseek(fp,-1,SEEK_CUR); //catch the "force-out" edge
             return tokenCtor(Slash,*lineNum, "Slash",data);            
 
         case LineComment:
@@ -216,27 +244,28 @@ Token* getToken(FILE* fp,int *lineNum)
             break;
 
         case CommentStar:
-            if (curEdge == '\n')
-                *lineNum = *lineNum +1;
             if (curEdge == '/')
             {
                 curState = Start;
+                break;
             }
+            if (curEdge == '\n')
+                *lineNum = *lineNum +1;
             else
                 curState = StarComment;
             break;
 
         case QuestionMark:
-            if (curEdge == '>')
-            {
-                curState = AlmostEndOfProgram; break;
-            }
-            else
+            if (curEdge != '>')
             {
                 fseek(fp,-1,SEEK_CUR);
                 return tokenCtor(QuestionMark,*lineNum, "QuestionMark", data);
             }
+            curState = AlmostEndOfProgram; 
             break;
+        
+        case AlmostEndOfProgram:
+            return NULL; //nothing should come after ?>    
 
         case ID:
             if (isalnum(curEdge) || curEdge == '_')  //alphanumeric or punctuation mark
@@ -249,32 +278,33 @@ Token* getToken(FILE* fp,int *lineNum)
             break;
 
         case DollarSign:
-            if (isalpha(curEdge))
+            if (isalpha(curEdge) || curEdge == '_')
             {
                 curState = VarID;
-                // data = appendChar(data, curEdge); //attach the caller
-                fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+                data = appendChar(data, curEdge); //attach the caller
+                break;
             }
-            else
-            {
-                return tokenCtor(DollarSign,*lineNum, "DollarSign", data);
-            }
-            break;
+            return NULL; //dollar sign isnt final state 
             
         case VarID:
-            if (isalnum(curEdge) || curEdge == '_')
-                data = appendChar(data, curEdge);
-            else
+            if (isalpha(curEdge) || curEdge == '_')
             {
-                return tokenCtor(VarID,*lineNum, "VarID", data);
+                data = appendChar(data, curEdge);
+                break;
             }
-            break;
+            fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
+            return tokenCtor(VarID,*lineNum, "VarID", data);
 
         case String:
-            /* TODO - possibly more signs from ASCII may cause error when inside string*/
+/* TODO - possibly more signs from ASCII may cause error when inside string*/
+/* FIX \ problems */// check if previous character was backslash
             if (curEdge == '"')
             {
-                data = appendChar(data, curEdge);
+                if(data[strlen(data)-1] == '\\') // in case there was \\bs before
+                {
+                    data[strlen(data)-1] = '"';
+                    break;
+                }
                 return tokenCtor(StringEnd,*lineNum, "StringEnd", data);
             }
             else if (isprint(curEdge))
@@ -282,8 +312,10 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge);
                 break;
             }
-            //DEBUG
-            printf("At line: %d STRING -> %c : Not recognised",*lineNum,curEdge);
+            //weird data on the input
+            #if (DEBUG == 1)
+                printf("At line: %d STRING -> %c : Not recognised",*lineNum,curEdge);
+            #endif
             return NULL;
             break;
 
@@ -297,10 +329,11 @@ Token* getToken(FILE* fp,int *lineNum)
         case DoubleEqual:
             if (curEdge == '=')
                 return tokenCtor(StrictEquality,*lineNum, "StrictEquality", data);
-            printf("Line %d - Lexical Error", *lineNum);
+            #if (DEBUG == 1)
+                printf("Line %d c %c- Lexical Error", *lineNum,curEdge);
+            #endif
             return NULL;
 
-        //numbers
         case Int:
             if (isdigit(curEdge))
             {
@@ -310,7 +343,13 @@ Token* getToken(FILE* fp,int *lineNum)
             if (curEdge == '.')
             {
                 data = appendChar(data,curEdge);
-                curState = Double;
+                curState = DotDouble;
+                break;
+            }
+            if (curEdge == 'e' || curEdge == 'E')
+            {
+                data = appendChar(data,curEdge);
+                curState = EulNum;
                 break;
             }
             fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
@@ -332,7 +371,9 @@ Token* getToken(FILE* fp,int *lineNum)
             //but if there is nothing after dot means error
             if (data[strlen(data)-1] == '.')
             {
-                printf("Line %d - Number cannot end with . sign.",*lineNum);
+                #if (DEBUG == 1)
+                    printf("Line %d - Number cannot end with . sign.",*lineNum);
+                #endif
                 return NULL;
             }
             fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
@@ -352,13 +393,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 break;
             }
             //cannot end with e as its last character
-            if (data[strlen(data)-1] == 'e')
-            {
-                printf("Line %d - Number cannot end with . sign.",*lineNum);
-                return NULL;
-            }
-            printf("Line %d - Number cannot end with E sign.",*lineNum);
-            return NULL; //return error
+            return NULL;
 
         case EulNumExtra:
             if (isdigit(curEdge))
@@ -367,7 +402,9 @@ Token* getToken(FILE* fp,int *lineNum)
                 curState = EulDouble;
                 break;
             }
-            printf("Line %d - Number cannot end with operator sign.",*lineNum);
+		#if (DEBUG == 1)
+            		printf("Line %d - Number cannot end with . sign.",*lineNum);
+		#endif
             return NULL; //return error
 
         case EulDouble:
@@ -375,6 +412,22 @@ Token* getToken(FILE* fp,int *lineNum)
             {
                 data = appendChar(data,curEdge);
                 break;
+            }
+            //previous state == EulNum
+            if (data[strlen(data)-1] == 'e' || data[strlen(data)-1] == 'E' )
+            {
+                #if (DEBUG == 1)
+                    printf("Line %d - %c Unpropper double number ending.",*lineNum,curEdge);
+                #endif
+                return NULL;
+            }
+            //previous state == EulNUmExtra
+            if (data[strlen(data)-1] == '+' || data[strlen(data)-1] == '-' )
+            {
+                #if (DEBUG == 1)
+                    printf("Line %d - %c Unpropper double number ending.",*lineNum,curEdge);
+                #endif
+                return NULL;
             }
             fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
             return tokenCtor(EuldDouble,*lineNum, "EuldDouble", data);
@@ -385,13 +438,17 @@ Token* getToken(FILE* fp,int *lineNum)
             {
                 curState = ExclamEqual;break;
             }
-            printf("Line %d - Lexical error.",*lineNum);
+            #if (DEBUG == 1)
+                printf("Line %d - %c Lexical error.",*lineNum,curEdge);
+            #endif
             return NULL; //return error
 
         case ExclamEqual:
             if (curEdge == '=')
                 return tokenCtor(NotEqual,*lineNum, "NotEqual", data);
-            printf("Line %d - Lexical error.",*lineNum);
+            #if (DEBUG == 1)
+                printf("Line %d - %c Lexical error.",*lineNum,curEdge);
+            #endif
             return NULL; //return error
             
         case GreaterThanSign:
@@ -406,39 +463,59 @@ Token* getToken(FILE* fp,int *lineNum)
             fseek(fp,-1,SEEK_CUR);//catch the "force-out" edge
             return tokenCtor(LesserThanSign,*lineNum, "LesserThanSign", data);
 
-        case AlmostEndOfProgram:
-            if (curEdge =! EOF)
-                return NULL; //nothing else should follow this token - lexError            
-            fseek(fp,-1,SEEK_CUR);//stay within the file
-            return tokenCtor(EndOfProgram,*lineNum,"EndOfProgram",data);
-
         default:
             break;
 
         } // end of switch 
 
+        if(curEdge == EOF && curState != Start)
+        {
+            if (data != NULL)
+                free(data);
+            return NULL;
+        }
         curEdge = fgetc(fp); //get another edge
     }
-    //DEBUG
+#if (DEBUG == 1)
     printf("unthinkable happend"); // should never happen
+#endif
     return NULL;
 }
 
 void tokenDtor(Token *token)
 {
-    if (token!=NULL)
-        free(token->data);
-    free(token);
+    debug_print("deconstructing token\n");
+    if (token != NULL)
+    {
+        if (token->data != NULL)
+        {
+            debug_print("freeing token->data...");
+            free(token->data);
+            debug_print("done\n");
+        }
+        debug_print("freeing token...");
+        free(token);
+        debug_print("done\n");
+    }
+    debug_print("token deconstructed\n");
 }
 
-void listDtor(TokenList*list)
+void listDtor(TokenList *list)
 {
+    debug_print("freeing list %p\n", (void *) list);
     for (int i = list->length; i >= 0; i--)
     {
-        tokenDtor(list->TokenArray[i]);
+        if (list->TokenArray[i] != NULL)
+            tokenDtor(list->TokenArray[i]);
     }
-    free(list->TokenArray);
-    free(list);
+    
+    if (list != NULL)
+    {
+        if (list->TokenArray != NULL)
+            free(list->TokenArray);
+        free(list);
+    }
+    debug_print("list %p freed", (void *) list);
 }
 
 /* TODO */
@@ -471,8 +548,8 @@ TokenList *lexAnalyser(FILE *fp)
     if (checkProlog(fp))
         return NULL;
     
-    TokenList *list; //structure to string tokens together
-    Token* curToken; //token cursor
+    TokenList *list = NULL; //structure to string tokens together
+    Token* curToken = NULL; //token cursor
 
     int lineNum = 1; //on what line token is found
                      //starts on line number (prolog is on line 1)
@@ -482,7 +559,8 @@ TokenList *lexAnalyser(FILE *fp)
     {
         curToken = getToken(fp,&lineNum); //get token
 
-        //getToken returned NULL this means error ! 
+        //getToken returned NULL means error 
+
         if (curToken == NULL) 
         {
             listDtor(list);
@@ -494,44 +572,16 @@ TokenList *lexAnalyser(FILE *fp)
         {
             curToken = checkForKeyWord(curToken);
         }
-        
 
         //EOF - dont append this token
-        if (curToken->type == Error)
+        if (curToken->type == EndOfProgram)
         {
-            free(curToken);
+            tokenDtor(curToken);
             break;
         }
+
         list = appendToken(list,curToken); //append to list
     }
 
     return list;
-}
-
-int main(int argc, char const *argv[])
-{
-    FILE *fp;
-    // if (argc == 2)
-    //     fp = fopen(argv[argc-1],"r");
-    // else
-    // {
-    //     printf("ENTER FILE AS AN ARGUMENT");
-    //     return 1;
-    // }
-        fp = fopen("../myTestFiles/test.txt","r");
-    
-    TokenList *list = lexAnalyser(fp);
-
-    if(list == NULL) // there was an error in lexAnalyser
-    {
-        fclose(fp);
-        return 1;
-    }
-
-    prinTokenList(list);
-
-    listDtor(list);
-    fclose(fp);
-
-    return 0;
 }
