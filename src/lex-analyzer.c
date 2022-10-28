@@ -256,13 +256,12 @@ Token* getToken(FILE* fp,int *lineNum)
             break;
 
         case QuestionMark:
-            if (curEdge != '>')
+            if (curEdge == '>')
             {
-                fseek(fp,-1,SEEK_CUR);
-                return tokenCtor(QuestionMark,*lineNum, "QuestionMark", data);
+                curState = AlmostEndOfProgram; 
+                break;
             }
-            curState = AlmostEndOfProgram; 
-            break;
+            return NULL;
         
         case AlmostEndOfProgram:
             return NULL; //nothing should come after ?>    
