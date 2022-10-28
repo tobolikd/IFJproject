@@ -1,6 +1,8 @@
 #ifndef IFJ_ERROR_CODES_H
 #define IFJ_ERROR_CODES_H
 
+#include <stdio.h>
+
 enum ifjErrCode {
     SUCCESS = 0, // no error
     LEXICAL_ERR = 1, // incorrect lexeme structure
@@ -19,10 +21,26 @@ enum ifjErrCode {
 // global variable for errCode storage
 //enum ifjErrCode errorCode = SUCCESS;
 
-// define 1 for debug logs, 0 for none
-#define DEBUG 0
+/* print debug info using debug_print() macro
+ * 0 - OFF
+ * 1 - ON
+ */
+#define DEBUG 1
 
-#define debug_print(...) \
-            do { if (DEBUG == 1) fprintf(stderr, __VA_ARGS__); } while (0)
+// used for compiler messages (description of error)
+// WILL BE IN FINAL SOLUTION
+#define debug_print(...) do { if (DEBUG == 1) fprintf(stderr, __VA_ARGS__); } while (0)
+
+/* print logs using debug_log() macro
+ * 0 - OFF
+ * 1 - ON
+ */
+#define DEBUG_LOGS 1
+
+// used for developmnent purposes
+// will NOT be printer in final solution
+#define debug_log(...) do { if (DEBUG_LOGS == 1) fprintf(stderr, __VA_ARGS__); } while (0)
+
+
 
 #endif // IFJ_ERROR_CODES_H
