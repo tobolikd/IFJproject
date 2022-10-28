@@ -145,7 +145,7 @@ Token* getToken(FILE* fp,int *lineNum)
             {
                 curState = QuestionMark; break;
             }
-            if (isalpha(curEdge))
+            if (isalpha(curEdge)|| curEdge == '_')
             {
                 curState = ID;
                 data = appendChar(data, curEdge);//attach the caller
@@ -163,7 +163,6 @@ Token* getToken(FILE* fp,int *lineNum)
             }
             if (curEdge == '"')
             {
-                data = appendChar(data, curEdge);
                 curState = String; break;
             }
             if (curEdge == '=')
@@ -205,8 +204,8 @@ Token* getToken(FILE* fp,int *lineNum)
                 return tokenCtor(Comma,*lineNum, "Comma", data);
             if (curEdge ==':')
                 return tokenCtor(Colons,*lineNum, "Colons", data);
-            if (curEdge =='\\')
-                return tokenCtor(Backslash,*lineNum, "Backslash", data);
+            // if (curEdge =='\\')
+            //     return tokenCtor(Backslash,*lineNum, "Backslash", data);
             
 
             #if (DEBUG == 1)
@@ -299,10 +298,24 @@ Token* getToken(FILE* fp,int *lineNum)
 /* FIX \ problems */// check if previous character was backslash
             if (curEdge == '"')
             {
-                if(data[strlen(data)-1] == '\\') // in case there was \\bs before
+                if (data != NULL)
                 {
-                    data[strlen(data)-1] = '"';
-                    break;
+                    int cursor = strlen(data)-1; //loop through the array
+                    int count = 0; //number of \\bs
+
+                    while (cursor > 1) // solve repeating \\bs
+                    {
+                        if(data[cursor] != '\\') // in case there was \\bs before
+                            break;
+                        count++;
+                        cursor--;
+                    }
+
+                    if (count%2) //if there is odd number of \\bs -> put " to string
+                    {
+                        data[strlen(data)-1] = '"';
+                        break;
+                    }
                 }
                 return tokenCtor(StringEnd,*lineNum, "StringEnd", data);
             }
@@ -315,8 +328,8 @@ Token* getToken(FILE* fp,int *lineNum)
             #if (DEBUG == 1)
                 printf("At line: %d STRING -> %c : Not recognised",*lineNum,curEdge);
             #endif
+
             return NULL;
-            break;
 
         case Assign:
             if (curEdge == '=')
@@ -343,7 +356,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if (curEdge == '.')
             {
                 data = appendChar(data,curEdge);
-                curState = DotDouble;
+                curState = Double;
                 break;
             }
             if (curEdge == 'e' || curEdge == 'E')
@@ -503,19 +516,19 @@ void tokenDtor(Token *token)
 void listDtor(TokenList *list)
 {
     debug_print("freeing list %p\n", (void *) list);
-    for (int i = list->length; i >= 0; i--)
-    {
-        if (list->TokenArray[i] != NULL)
-            tokenDtor(list->TokenArray[i]);
-    }
-    
     if (list != NULL)
     {
+        for (int i = list->length; i >= 0; i--)
+        {
+            if (list->TokenArray[i] != NULL)
+                tokenDtor(list->TokenArray[i]);
+        }
+    
         if (list->TokenArray != NULL)
             free(list->TokenArray);
         free(list);
     }
-    debug_print("list %p freed", (void *) list);
+    debug_print("list %p freed\n", (void *) list);
 }
 
 /* TODO */
