@@ -280,7 +280,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 curState = AlmostEndOfProgram; 
                 break;
             }
-            else if (isprint(curEdge))//look for data type
+            else if (isalpha(curEdge))//look for data type
             {
                 data = appendChar(data, curEdge);
                 break;
