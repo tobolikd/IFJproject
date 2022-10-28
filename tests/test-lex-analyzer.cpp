@@ -49,14 +49,13 @@ TEST_P(testGetTokenCorrect, typeAndReturnValue)
     returnedToken = getToken(tmpFile, &lineNum);
 
     ASSERT_FALSE(returnedToken == NULL) << "RETURNED TOKEN IS NULL" << endl;
-    EXPECT_EQ(expectedType, returnedToken->type) << "Incorrect token type" << endl;
+    EXPECT_EQ(expectedType, returnedToken->type) << "Incorrect token type" << tokenInfo() << endl;
     EXPECT_EQ(lineNum, returnedToken->lineNum) << "Incorrect line number" << endl;
     if (expectedData != "")
     {
         ASSERT_FALSE(returnedToken->data == NULL) << "RETURNED DATA IS NULL" << endl;
-        EXPECT_EQ(expectedData, returnedToken->data) << "Incorrect lexeme data" << endl;
+        EXPECT_EQ(expectedData, returnedToken->data) << "Incorrect lexeme data\n" << tokenInfo() << endl;
     }
-    FAIL() << tokenInfo() << endl;
 }
 
 INSTANTIATE_TEST_SUITE_P(BASIC, testGetTokenCorrect,
