@@ -71,12 +71,12 @@ INSTANTIATE_TEST_SUITE_P(BASIC, testGetTokenCorrect,
                             make_tuple(PlusSign,"","+"),
                             make_tuple(Comma,"",","),
                             make_tuple(Colons,"",":"),
-                            // make_tuple(Backslash,"","\\"), // check
+                            make_tuple(Backslash,"","\\"), // check
                             make_tuple(Slash,"","/"),
-                            // make_tuple(QuestionMark,"","?"), // check
+                            make_tuple(QuestionMark,"","?"), // check
                             make_tuple(ID,"ahoj","ahoj"),
                             make_tuple(ID,"_ahoj","_ahoj"),
-                            // make_tuple(DollarSign,"","$"), // check
+                            make_tuple(DollarSign,"","$"), // check
                             make_tuple(VarID,"variable","$variable"),
                             make_tuple(StringEnd,"nejaky string","\"nejaky string\""),
                             make_tuple(Assign,"","="),
