@@ -575,7 +575,7 @@ TokenList *lexAnalyser(FILE *fp)
         
 
         //EOF - dont append this token
-        if (curToken->type == Error)
+        if (curToken->type == EndOfProgram)
         {
             free(curToken);
             break;
@@ -584,32 +584,4 @@ TokenList *lexAnalyser(FILE *fp)
     }
 
     return list;
-}
-
-int main(int argc, char const *argv[])
-{
-    FILE *fp;
-    if (argc == 2)
-        fp = fopen(argv[argc-1],"r");
-    else
-    {
-        printf("ENTER FILE AS AN ARGUMENT");
-        return 1;
-    }
-        // fp = fopen("../myTestFiles/test.txt","r");
-    
-    TokenList *list = lexAnalyser(fp);
-
-    if(list == NULL) // there was an error in lexAnalyser
-    {
-        fclose(fp);
-        return 1;
-    }
-
-    prinTokenList(list);
-
-    listDtor(list);
-    fclose(fp);
-
-    return 0;
 }

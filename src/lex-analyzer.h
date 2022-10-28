@@ -47,7 +47,7 @@ typedef enum
     NotEqual,
     EuldDouble,
     Comma,
-    Colon,
+    Colons,
     Backslash,
 } AutoState;
 
