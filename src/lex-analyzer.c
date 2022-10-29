@@ -25,6 +25,47 @@ int checkProlog(FILE* fp)
     return 1;                   
 }
 
+Token *getKeyword(Token *token)
+{
+    if (token->data!=NULL)
+    {
+        if (!strcmp(token->data,"if") || !strcmp(token->data,"while"))
+        {
+            token->type = t_condition;
+        }
+        else if (!strcmp(token->data,"int")||!strcmp(token->data,"string")||!strcmp(token->data,"float")||!strcmp(token->data,"void"))
+        {
+            token->type = t_type;
+        }
+        else if (!strcmp(token->data,"else"))
+        {
+            token->type = t_else;
+            free(token->data);
+            token->data=NULL;
+        }
+        else if (!strcmp(token->data,"return"))
+        {
+            token->type = t_return;
+            free(token->data);
+            token->data=NULL;
+
+        }
+        else if (!strcmp(token->data,"null"))
+        {
+            token->type = t_null;
+            free(token->data);
+            token->data=NULL;
+        }
+        else if (!strcmp(token->data,"function"))
+        {
+            token->type = t_function;
+            free(token->data);
+            token->data=NULL;
+        }    
+    }
+    return token;
+}
+
 //allocate memory for data
 //return new pointer
 char* appendChar(char *data, char dataToBeInserted)
@@ -55,6 +96,11 @@ Token* tokenCtor(TokenType type, int lineNum, char* data)
     new->data = data; //string already allocated
     new->lineNum = lineNum;
     new->type = type;
+    if (type == t_functionId)
+    {
+        new = getKeyword(new);
+    }
+    
     return new;
 }
 
@@ -562,10 +608,7 @@ void listDtor(TokenList *list)
 }
 
 /* TODO */
-Token *checkForKeyWord(Token *token)
-{
-    return token;
-}
+
 
 void printToken(Token*token)
 {
@@ -609,12 +652,6 @@ TokenList *lexAnalyser(FILE *fp)
             return NULL;
         }
         
-        //check for keywords if lexeme == id
-        if (curToken->type == t_functionId)
-        {
-            curToken = checkForKeyWord(curToken);
-        }        
-
         //EOF - dont append this token
         if (curToken->type == t_EOF)
         {

@@ -120,11 +120,16 @@ typedef struct
 /// @return 0 if <?php is present, if not return 1.
 int checkProlog(FILE* fp);
 
+/// @brief Compares tokens data to known keywords.
+/// @param token Token with type t_functionId.
+/// @return Token with updated tokenType and data if keyword is found.
+Token *getKeyword(Token *token);
+
 /// @brief Appends 1 character to character array.
 /// @param data Array of characters.
 /// @param dataToBeInserted Character to be inserted.
 /// @return Pointer to string with character added.
-char* appendChar(char *data, char dataToBeInserted);
+char *appendChar(char *data, char dataToBeInserted);
 
 /// @brief Creates token.
 /// @param type Autostate of token.
@@ -132,7 +137,7 @@ char* appendChar(char *data, char dataToBeInserted);
 /// @param lexeme Token name.
 /// @param data Additional data of token.
 /// @return Pointer to newly created token.
-Token* tokenCtor(TokenType type, int lineNum, char* data);
+Token *tokenCtor(TokenType type, int lineNum, char* data);
 
 /// @brief Appends token to an array of tokens.
 /// @param list Array of tokens.
@@ -145,7 +150,7 @@ TokenList *appendToken(TokenList *list, Token* newToken);
 /// @param lineNum Pointer to line number where the file is currently reading from.
 /// @return Pointer to first found token. Moves file cursor just after the read token.
 /// @return Null if lexical error occured & token EndOfProgram if ended correctly
-Token* getToken(FILE* fp,int *lineNum);
+Token *getToken(FILE* fp,int *lineNum);
 
 /// @brief Frees memory of tokens data and token itslef.
 /// @param token 
