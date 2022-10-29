@@ -85,6 +85,74 @@ char* appendChar(char *data, char dataToBeInserted)
     return data;
 }
 
+char *parseString(char *data)
+{
+    int i = 0;
+    char *new = NULL;
+
+    while (data[i] != '\0')
+    {
+        if (data[i] == '\\') //if bs appears go through valid sequenses
+        {
+            i++;//look i ahead.
+            switch (data[i])
+            {
+            case '\\':
+                new = appendChar(new, data[i]);
+                break;
+            case 'n':
+                data[i] = '\n';
+                new = appendChar(new, data[i]);
+                break;
+            case 't':
+                data[i] = '\t';
+                new = appendChar(new, data[i]);
+                break;
+            case '$':
+                new = appendChar(new, data[i]);
+                break;
+            case 'x':
+                i++;//move pointer
+                if ( 256 > strtol(data+i,NULL,16)&& isxdigit(data[i+1]))
+                {
+                    new = appendChar(new,(char)strtol(data+i,NULL,16) );//strtol converts
+                    i +=1;//move pointer
+                    break;
+                }
+                free(data);
+                free(new);
+                return NULL; // error
+            case '0' ... '7':
+                if( 256 > (int)strtol(data+i,NULL,8)&& isdigit(data[i+1]) && isdigit(data[i+2]))
+                {
+                    new = appendChar(new, (char)strtol(data+i,NULL,8));//strtol converts
+                    i +=2;//move poiter
+                    break;
+                }
+                free(data);
+                free(new);
+                return NULL; // error 
+                
+            default:
+                new = appendChar(new, (char)strtol(data+i,NULL,8));
+
+            }//end of switch
+        }
+        else //if there cur is not backslash 
+        {
+            if (data[i] == '$') //dollar may only be inserted after backslash
+            {
+                free(data);
+                free(new);
+                return NULL; // error 
+            }
+            new = appendChar(new, data[i]);
+        }
+        i++;//move onto next character
+    }
+    free(data);
+    return new;
+}
 
 //setup token
 //return new token
@@ -96,9 +164,18 @@ Token* tokenCtor(TokenType type, int lineNum, char* data)
     new->data = data; //string already allocated
     new->lineNum = lineNum;
     new->type = type;
+
     if (type == t_functionId)
-    {
         new = getKeyword(new);
+
+    if (type == t_string)
+    {
+        new->data = parseString(new->data);
+        if (new->data == NULL)
+        {
+            debug_print("Line %d: Lexical error inside string",lineNum);
+            return NULL; // error inside string
+        }
     }
     
     return new;
@@ -289,6 +366,7 @@ Token* getToken(FILE* fp,int *lineNum)
             	return tokenCtor(t_colon, *lineNum, data);
             
             debug_print("At line: %d START -> %c : Not recognised\n", *lineNum,curEdge);
+            free(data);
             return NULL;
             break;
 
@@ -351,6 +429,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 ungetc(curEdge,fp); //catch the "force-out" edge
                 return tokenCtor(t_nullType, *lineNum, data);
             }
+            free(data);
             return NULL;
         
         case AlmostEndOfProgram:
@@ -385,16 +464,16 @@ Token* getToken(FILE* fp,int *lineNum)
             return tokenCtor(t_varId, *lineNum, data);
 
         case String:
-            if (curEdge == '"')
+            if (curEdge == '"') //if string should end
             {
                 if (data != NULL)
                 {
-                    int cursor = strlen(data)-1; //loop through the array
+                    int cursor = strlen(data); //loop through the array
                     int count = 0; //number of \\bs
 
-                    while (cursor > 1) // solve repeating \\bs
+                    while (cursor > 0) // solve repeating \\bs
                     {
-                        if(data[cursor] != '\\') // in case there was \\bs before
+                        if(data[cursor-1] != '\\') // in case there was \\bs before
                             break;
                         count++;
                         cursor--;
@@ -406,9 +485,12 @@ Token* getToken(FILE* fp,int *lineNum)
                         break;
                     }
                 }
+                else
+                    data = appendChar(data, '\0'); //append empty string
+
                 return tokenCtor(t_string, *lineNum, data);
             }
-            else if (isprint(curEdge))
+            else if (isprint(curEdge)) //if printable -> append
             {
                 data = appendChar(data, curEdge);
                 break;
@@ -433,6 +515,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 return tokenCtor(t_comparator, *lineNum, data);
             }
             debug_print("Line %d - Lexical Error\n", *lineNum);
+            free(data);
             return NULL;
 
         //numbers
@@ -474,6 +557,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if (data[strlen(data)-1] == '.')
             {
                 debug_print("Line %d - Number cannot end with . sign. \n", *lineNum);
+                free(data);
                 return NULL;
             }
             ungetc(curEdge,fp);//catch the "force-out" edge
@@ -493,6 +577,8 @@ Token* getToken(FILE* fp,int *lineNum)
                 break;
             }
             //cannot end with e as its last character
+            debug_print("Line %d - Number cannot end with e sign. \n", *lineNum);
+            free(data);
             return NULL;
 
         case EulNumExtra:
@@ -503,6 +589,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 break;
             }
             debug_print("Line %d - Number cannot end with operator sign.\n", *lineNum);
+            free(data);
             return NULL; //return error
 
         case EulDouble:
@@ -515,12 +602,14 @@ Token* getToken(FILE* fp,int *lineNum)
             if (data[strlen(data)-1] == 'e' || data[strlen(data)-1] == 'E' )
             {
                 debug_print("Line %d - %c Unpropper double number ending.\n", *lineNum,curEdge);
+                free(data);                
                 return NULL;
             }
             //previous state == EulNUmExtra
             if (data[strlen(data)-1] == '+' || data[strlen(data)-1] == '-' )
             {
                 debug_print("Line %d - %c Unpropper double number ending.\n", *lineNum,curEdge);
+                free(data);
                 return NULL;
             }
             ungetc(curEdge,fp);//catch the "force-out" edge
@@ -534,6 +623,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 curState = ExclamEqual;break;
             }
             debug_print("Line %d - Lexical error.\n", *lineNum);
+            free(data);
             return NULL; //return error
 
         case ExclamEqual:
@@ -543,6 +633,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 return tokenCtor(t_comparator, *lineNum, data);
             }
             debug_print("Line %d - Lexical error.\n", *lineNum);
+            free(data);
             return NULL; //return error
             
         case GreaterThanSign:
@@ -570,13 +661,13 @@ Token* getToken(FILE* fp,int *lineNum)
 
         if(curEdge == EOF && curState != Start)
         {
-            if (data != NULL)
-                free(data);
+            free(data);
             return NULL;
         }
         curEdge = fgetc(fp); //get another edge
     }
     debug_log("unthinkable happend\n"); // should never happen
+    free(data);
     return NULL;
 }
 
