@@ -2,6 +2,7 @@
 #define LEX_ANALYZER_H
 
 #include <stdio.h>
+#include <string.h>
 
 #define GENERATE_ENUM(ENUM) ENUM,
 #define GENERATE_STRING(STRING) #STRING,
@@ -58,7 +59,7 @@ typedef enum
 } AutoState;
 
 // get state string by using STATE_STRING[AutoState]
-static const char* STATE_STRING[] = 
+static const char *STATE_STRING[] = 
 {
     FOREACH_STATE(GENERATE_STRING)
 };
@@ -94,15 +95,14 @@ typedef enum
 } TokenType;
 
 // get token type string by using TOKEN_TYPE_STRING[TokenType]
-static const char* TOKEN_TYPE_STRING[] = 
+static const char *TOKEN_TYPE_STRING[] = 
 {
     FOREACH_TOKEN_TYPE(GENERATE_STRING)
 };
 
 typedef struct 
 {
-    AutoState type; //intiger number which represents lexeme.
-    char* lexeme; //what lexeme it represents.
+    TokenType type; // token type represented by enum TokenType
     char* data; //additional data for some tokens.
     int lineNum; //line on which was token found in a given file. 
 }Token;
@@ -132,7 +132,7 @@ char* appendChar(char *data, char dataToBeInserted);
 /// @param lexeme Token name.
 /// @param data Additional data of token.
 /// @return Pointer to newly created token.
-Token* tokenCtor(AutoState type,int lineNum, char* lexeme, char* data);
+Token* tokenCtor(TokenType type, int lineNum, char* data);
 
 /// @brief Appends token to an array of tokens.
 /// @param list Array of tokens.
@@ -162,7 +162,7 @@ TokenList *lexAnalyser(FILE *fp);
 
 /// @brief Print out given token. [LineNum Lexeme Data]
 /// @param token Token to be prited out.
-void printToken(Token*token);
+void printToken(Token *token);
 
 /// @brief Print out given token array. [LineNum Lexeme Data]
 /// @param list List to be printed out.
