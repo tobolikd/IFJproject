@@ -44,13 +44,13 @@ FILE *prepTmpFile(const char *in)
  *
  * to be inherited
  */
-class testBaseForTokens : public ::testing::TestWithParam<tuple<AutoState, string, string>>
+class testBaseForTokens : public ::testing::TestWithParam<tuple<TokenType, string, string>>
 {
     protected:
         string dataIn;
         int lineNum;
 
-        AutoState expectedType;
+        TokenType expectedType;
         string expectedData;
 
         FILE *tmpFile;
@@ -80,20 +80,21 @@ class testBaseForTokens : public ::testing::TestWithParam<tuple<AutoState, strin
 
         string tokenInfo()
         {
-            string out = "";
+            string out = "\n";
             out += "\nInput file: |" + dataIn + "|";
-            out += "\nExpected Type: " + to_string(expectedType);
+            out += "\nExpected Type: " + string(TOKEN_TYPE_STRING[expectedType]);
             out += "\nExpected Data: |" + expectedData + "|";
 
             if (returnedToken == NULL)
             {
-                out += "\nReturned token <NULL>";
+                out += "\n\nReturned token <NULL>";
                 return out;
             }
-            out += "\nReturned token (" + to_string(reinterpret_cast<intptr_t>(returnedToken)) + ")";
-            out += "\n\tType: " + to_string(returnedToken->type);
+            out += "\n\nReturned token (" + to_string(reinterpret_cast<intptr_t>(returnedToken)) + ")";
+            out += "\n\tType: " + string(TOKEN_TYPE_STRING[returnedToken->type]);
             string data = (returnedToken->data == NULL) ? "<NULL>" : "|" + string(returnedToken->data) + "|";
             out += "\n\tData: " + data;
+            out += "\n\tLine number: " + to_string(lineNum);
             return out; 
         }
 };
@@ -114,15 +115,11 @@ class testBaseForFiles : public ::testing::TestWithParam<tuple<int, string>>
 
         void SetUp() override
         {
-            printf("setting up");
             returnValue = get<0>(GetParam());
             dataIn = get<1>(GetParam()).data();
 
-            printf("got values");
             tmpFile = prepTmpFile(dataIn);
-            printf("got file");
             ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - failed to allocate file" << endl;
-            printf("asserted");
         }
 
         void TearDown() override

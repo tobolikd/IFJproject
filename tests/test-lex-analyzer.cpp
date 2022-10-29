@@ -60,37 +60,59 @@ TEST_P(testGetTokenCorrect, typeAndReturnValue)
 
 INSTANTIATE_TEST_SUITE_P(BASIC, testGetTokenCorrect,
                         testing::Values(
-                            make_tuple(Semicolon, "", ";"),
-                            make_tuple(RPar,"",")"),
-                            make_tuple(LPar,"","("),
-                            make_tuple(RCurl,"","}"),
-                            make_tuple(LCurl,"","{"),
-                            make_tuple(DotSign,"","."),
-                            make_tuple(MulSign,"","*"),
-                            make_tuple(MinusSign,"","-"),
-                            make_tuple(PlusSign,"","+"),
-                            make_tuple(Comma,"",","),
-                            make_tuple(Colons,"",":"),
-                            make_tuple(Backslash,"","\\"), // check
-                            make_tuple(Slash,"","/"),
-                            make_tuple(QuestionMark,"","?"), // check
-                            make_tuple(ID,"ahoj","ahoj"),
-                            make_tuple(ID,"_ahoj","_ahoj"),
-                            make_tuple(DollarSign,"","$"), // check
-                            make_tuple(VarID,"variable","$variable"),
-                            make_tuple(StringEnd,"nejaky string","\"nejaky string\""),
-                            make_tuple(Assign,"","="),
-                            make_tuple(StrictEquality,"","==="),
-                            make_tuple(Int, "94861320", "94861320"),
-                            make_tuple(Double,"97.0","97.0"),
-                            make_tuple(EuldDouble,"78.7e10","78.7e10"),
-                            make_tuple(EuldDouble,"78e10","78e10"),
-                            make_tuple(NotEqual,"","!=="),
-                            make_tuple(GreaterEqualThanSign,"",">="),
-                            make_tuple(GreaterThanSign,"",">"),
-                            make_tuple(LesserEqualThanSign,"","<="),
-                            make_tuple(LesserThanSign,"","<")
-                            )   
+                            make_tuple(t_EOF, "", ""),
+                            make_tuple(t_EOF, "", "// nejaky koment"),
+                            make_tuple(t_EOF, "", "//"),
+                            make_tuple(t_EOF, "", "/* nejaky koment*/"),
+                            make_tuple(t_EOF, "", "// "),
+                            make_tuple(t_semicolon, "", ";"),
+                            make_tuple(t_rPar,"",")"),
+                            make_tuple(t_lPar,"","("),
+                            make_tuple(t_rCurl,"","}"),
+                            make_tuple(t_lCurl,"","{"),
+                            make_tuple(t_operator,".","."),
+                            make_tuple(t_operator,"*","*"),
+                            make_tuple(t_operator,"-","-"),
+                            make_tuple(t_operator,"+","+"),
+                            make_tuple(t_operator,"/","/"),
+                            make_tuple(t_comma,"",","),
+                            make_tuple(t_colon,"",":"),
+                            make_tuple(t_nullType,"string","?string"),
+                            make_tuple(t_nullType,"int","?int"),
+                            make_tuple(t_nullType,"float","?float"),
+                            make_tuple(t_functionId,"ahoj","ahoj"),
+                            make_tuple(t_functionId,"_ahoj","_ahoj"),
+                            make_tuple(t_varId,"variable","$variable"),
+                            make_tuple(t_varId,"variable123","$variable123"),
+                            make_tuple(t_varId,"_v_a1_2__3","$_v_a1_2__3"),
+                            make_tuple(t_string,"nejaky string","\"nejaky string\""),
+                            make_tuple(t_string,"nejaky\044 \%d \%a string","\"nejaky\\045 \%d \%a string\""),
+                            make_tuple(t_assign,"","="),
+                            make_tuple(t_comparator,"===","==="),
+                            make_tuple(t_comparator,"!==","!=="),
+                            make_tuple(t_comparator,">=",">="),
+                            make_tuple(t_comparator,">",">"),
+                            make_tuple(t_comparator,"<=","<="),
+                            make_tuple(t_comparator,"<","<"),
+                            make_tuple(t_int, "94861320", "94861320"),
+                            make_tuple(t_int, "94861320", "94861320a"),
+                            make_tuple(t_float,"97.0","97.0"),
+                            make_tuple(t_float,"78.7e10","78.7e10"),
+                            make_tuple(t_float,"78e10","78e10"),
+                            make_tuple(t_condition,"if","if"),
+                            make_tuple(t_condition,"while","while"),
+                            make_tuple(t_null,"","null"),
+                            make_tuple(t_else,"","else"),
+                            make_tuple(t_return,"","return"),
+                            make_tuple(t_function,"","function"),
+                            make_tuple(t_type,"int","int"),
+                            make_tuple(t_type,"string","string"),
+                            make_tuple(t_type,"float","float"),
+                            make_tuple(t_type,"void","void"),
+                            make_tuple(t_nullType,"string","?string"),
+                            make_tuple(t_nullType,"int","?int"),
+                            make_tuple(t_nullType,"float","?float")
+                            )
                         );
 
 
@@ -101,7 +123,7 @@ TEST_P(testGetTokenIncorrect, returnValue)
 {
     int lineNum;
     Token *returnedToken = getToken(tmpFile, &lineNum);
-    EXPECT_TRUE(returnedToken == NULL) << "RETURNED TOKEN SHOULD BE NULL\nInput: |" << dataIn << "|\nReturned token type: " << returnedToken->type << endl;
+    EXPECT_TRUE(returnedToken == NULL) << "RETURNED TOKEN SHOULD BE NULL\nInput: |" << dataIn << "|\nReturned token type: " << TOKEN_TYPE_STRING[returnedToken->type] << endl;
     if (returnedToken != NULL)
     {
         if (returnedToken->data != NULL)
@@ -114,6 +136,11 @@ TEST_P(testGetTokenIncorrect, returnValue)
 
 INSTANTIATE_TEST_SUITE_P(INTERMEDIATE, testGetTokenIncorrect,
                         testing::Values(
+                                make_tuple(0, "$"),
+                                make_tuple(0, "?"),
+                                make_tuple(0, "?abc"),
+                                make_tuple(0, "?7"),
+                                make_tuple(0, "\\"),
                                 make_tuple(0, "$7a"),
                                 make_tuple(0, "$+"),
                                 make_tuple(0, "\"not ended string\\\""),
@@ -124,7 +151,6 @@ INSTANTIATE_TEST_SUITE_P(INTERMEDIATE, testGetTokenIncorrect,
                                 make_tuple(0, "?4"),
                                 make_tuple(0, "?invalid"),
                                 make_tuple(0, "/*unterminated comment"),
-                                make_tuple(0, "/*terminated comment*/"),
                                 make_tuple(0, "?function"),
                                 make_tuple(0, "?true"),
                                 make_tuple(0, "?_"),
