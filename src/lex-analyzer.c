@@ -25,6 +25,47 @@ int checkProlog(FILE* fp)
     return 1;                   
 }
 
+Token *getKeyword(Token *token)
+{
+    if (token->data!=NULL)
+    {
+        if (!strcmp(token->data,"if") || !strcmp(token->data,"while"))
+        {
+            token->type = t_condition;
+        }
+        else if (!strcmp(token->data,"int")||!strcmp(token->data,"string")||!strcmp(token->data,"float")||!strcmp(token->data,"void"))
+        {
+            token->type = t_type;
+        }
+        else if (!strcmp(token->data,"else"))
+        {
+            token->type = t_else;
+            free(token->data);
+            token->data=NULL;
+        }
+        else if (!strcmp(token->data,"return"))
+        {
+            token->type = t_return;
+            free(token->data);
+            token->data=NULL;
+
+        }
+        else if (!strcmp(token->data,"null"))
+        {
+            token->type = t_null;
+            free(token->data);
+            token->data=NULL;
+        }
+        else if (!strcmp(token->data,"function"))
+        {
+            token->type = t_function;
+            free(token->data);
+            token->data=NULL;
+        }    
+    }
+    return token;
+}
+
 //allocate memory for data
 //return new pointer
 char* appendChar(char *data, char dataToBeInserted)
@@ -55,6 +96,11 @@ Token* tokenCtor(TokenType type, int lineNum, char* data)
     new->data = data; //string already allocated
     new->lineNum = lineNum;
     new->type = type;
+    if (type == t_functionId)
+    {
+        new = getKeyword(new);
+    }
+    
     return new;
 }
 
@@ -128,6 +174,9 @@ Token* getToken(FILE* fp,int *lineNum)
             case CommentStar:
                 return NULL;
 
+            case LineComment:
+                return tokenCtor(t_EOF, *lineNum, data);
+
             case AlmostEndOfProgram:
                 return tokenCtor(t_EOF, *lineNum, data);
 
@@ -155,6 +204,7 @@ Token* getToken(FILE* fp,int *lineNum)
             }
             if (curEdge == '/')
             {
+                data = appendChar(data, curEdge);
                 curState = Slash; break;
             }
             if (curEdge == '?')
@@ -163,14 +213,14 @@ Token* getToken(FILE* fp,int *lineNum)
             }
             if (isalpha(curEdge)|| curEdge == '_')
             {
-                curState = ID;
                 data = appendChar(data, curEdge);//attach the caller
+                curState = ID;
                 break;
             }
             if (isdigit(curEdge))
             {
-                curState = Int; 
                 data = appendChar(data, curEdge); //attach the caller
+                curState = Int; 
                 break;
             }
             if (curEdge == '$')
@@ -184,19 +234,24 @@ Token* getToken(FILE* fp,int *lineNum)
             if (curEdge == '=')
             {
                 curState = Assign;
+                data = appendChar(data, curEdge); //attach the caller
                 break;
-            }
-            if (curEdge =='>')
-            {
-                curState = GreaterThanSign; break;
             }
             if (curEdge =='<')
             {
+                data = appendChar(data, curEdge); //attach the caller
+                curState = GreaterThanSign; break;
+            }
+            if (curEdge =='>')
+            {
+                data = appendChar(data, curEdge); //attach the caller
                 curState = LesserThanSign; break;
             }
             if (curEdge =='!')
             {
-                curState = ExclamMark; break;
+                data = appendChar(data, curEdge); //attach the caller
+                curState = ExclamMark; 
+                break;
             }
             if (curEdge == ';')
             	return tokenCtor(t_semicolon, *lineNum, data);
@@ -210,22 +265,22 @@ Token* getToken(FILE* fp,int *lineNum)
             	return tokenCtor(t_lCurl, *lineNum, data);
             if (curEdge =='*')
             {
-            	appendChar(data, curEdge);
+            	data = appendChar(data, curEdge);
             	return tokenCtor(t_operator, *lineNum, data);
             }
             if (curEdge =='-')
             {
-            	appendChar(data, curEdge);
+            	data = appendChar(data, curEdge);
             	return tokenCtor(t_operator, *lineNum, data);
             }
             if (curEdge =='+')
             {
-            	appendChar(data, curEdge);
+            	data = appendChar(data, curEdge);
             	return tokenCtor(t_operator, *lineNum, data);
             }
             if (curEdge =='.') 
             {
-            	appendChar(data, curEdge);
+            	data = appendChar(data, curEdge);
             	return tokenCtor(t_operator, *lineNum, data);
             }
             if (curEdge ==',')
@@ -240,10 +295,14 @@ Token* getToken(FILE* fp,int *lineNum)
         case Slash:
             if (curEdge == '/')
             {
+                free(data);
+                data = NULL;
                 curState = LineComment; break;
             }
             if (curEdge == '*')
             {
+                free(data);
+                data = NULL;
                 curState = StarComment; break;
             }
             ungetc(curEdge,fp); //catch the "force-out" edge
@@ -317,7 +376,7 @@ Token* getToken(FILE* fp,int *lineNum)
             return NULL; //dollar sign isnt final state 
             
         case VarID:
-            if (isalpha(curEdge) || curEdge == '_')
+            if (isalnum(curEdge) || curEdge == '_')
             {
                 data = appendChar(data, curEdge);
                 break;
@@ -362,13 +421,17 @@ Token* getToken(FILE* fp,int *lineNum)
         case Assign:
             if (curEdge == '=')
             {
+                data = appendChar(data, curEdge);
                 curState = DoubleEqual; break;
             }
             return tokenCtor(t_assign, *lineNum, data);
             
         case DoubleEqual:
             if (curEdge == '=')
+            {
+                data = appendChar(data, curEdge);
                 return tokenCtor(t_comparator, *lineNum, data);
+            }
             debug_print("Line %d - Lexical Error\n", *lineNum);
             return NULL;
 
@@ -467,6 +530,7 @@ Token* getToken(FILE* fp,int *lineNum)
         case ExclamMark:
             if (curEdge == '=')
             {
+                data = appendChar(data, curEdge);
                 curState = ExclamEqual;break;
             }
             debug_print("Line %d - Lexical error.\n", *lineNum);
@@ -474,19 +538,28 @@ Token* getToken(FILE* fp,int *lineNum)
 
         case ExclamEqual:
             if (curEdge == '=')
+            {
+                data = appendChar(data, curEdge);
                 return tokenCtor(t_comparator, *lineNum, data);
+            }
             debug_print("Line %d - Lexical error.\n", *lineNum);
             return NULL; //return error
             
         case GreaterThanSign:
             if (curEdge == '=')
+            {
+                data = appendChar(data, curEdge);
                 return tokenCtor(t_comparator, *lineNum, data);
+            }
             ungetc(curEdge,fp);//catch the "force-out" edge
             return tokenCtor(t_comparator, *lineNum, data);
 
         case LesserThanSign:
             if (curEdge == '=')
+            {
+                data = appendChar(data, curEdge);
                 return tokenCtor(t_comparator, *lineNum, data);
+            }
             ungetc(curEdge,fp);//catch the "force-out" edge
             return tokenCtor(t_comparator, *lineNum, data);
 
@@ -535,10 +608,7 @@ void listDtor(TokenList *list)
 }
 
 /* TODO */
-Token *checkForKeyWord(Token *token)
-{
-    return token;
-}
+
 
 void printToken(Token*token)
 {
@@ -582,12 +652,6 @@ TokenList *lexAnalyser(FILE *fp)
             return NULL;
         }
         
-        //check for keywords if lexeme == id
-        if (curToken->type == t_functionId)
-        {
-            curToken = checkForKeyWord(curToken);
-        }        
-
         //EOF - dont append this token
         if (curToken->type == t_EOF)
         {
