@@ -47,13 +47,12 @@ char* appendChar(char *data, char dataToBeInserted)
 
 //setup token
 //return new token
-Token* tokenCtor(AutoState type, int lineNum, char* lexeme, char* data)
+Token* tokenCtor(TokenType type, int lineNum, char* data)
 {
     Token *new = malloc(sizeof(Token)); //allocates memory for new token
     if (new == NULL) // error alocating memory
         return NULL;
     new->data = data; //string already allocated
-    new->lexeme = lexeme;
     new->lineNum = lineNum;
     new->type = type;
     return new;
@@ -114,14 +113,14 @@ Token* getToken(FILE* fp,int *lineNum)
             switch (curState)
             {
             case Start:
-                return tokenCtor(EndOfProgram,*lineNum, "EndOfProgram", data);
+                return tokenCtor(t_EOF, *lineNum, data);
 
             case String:
                 free(data);
                 return NULL;
 
             case ID:
-                return tokenCtor(ID,*lineNum, "ID", data);
+                return tokenCtor(t_functionId, *lineNum, data);
             
             case StarComment:
                 return NULL;
@@ -130,11 +129,11 @@ Token* getToken(FILE* fp,int *lineNum)
                 return NULL;
 
             case AlmostEndOfProgram:
-                return tokenCtor(EndOfProgram,*lineNum, "EndOfProgram", data);
+                return tokenCtor(t_EOF, *lineNum, data);
 
             case QuestionMark:
                 if (checkDataType(data))
-                    return tokenCtor(nullType, *lineNum, "nullType", data);
+                    return tokenCtor(t_nullType, *lineNum, data);
                 free(data);
                 return NULL;                
 
@@ -200,29 +199,41 @@ Token* getToken(FILE* fp,int *lineNum)
                 curState = ExclamMark; break;
             }
             if (curEdge == ';')
-                return tokenCtor(Semicolon,*lineNum, "Semicolon", data);
+            	return tokenCtor(t_semicolon, *lineNum, data);
             if (curEdge == ')')
-                return tokenCtor(RPar, *lineNum, "RPar", data);
+                return tokenCtor(t_rPar, *lineNum, data);
             if (curEdge == '(')
-                return tokenCtor(LPar,*lineNum, "LPar", data);
+            	return tokenCtor(t_lPar, *lineNum, data);
             if (curEdge == '}')
-                return tokenCtor(RCurl, *lineNum, "RCurl", data);
+                return tokenCtor(t_rCurl, *lineNum, data);
             if (curEdge == '{')
-                return tokenCtor(LCurl,*lineNum, "LCurl", data); 
+            	return tokenCtor(t_lCurl, *lineNum, data);
             if (curEdge =='*')
-                return tokenCtor(MulSign,*lineNum, "MulSign", data);
+            {
+            	appendChar(data, curEdge);
+            	return tokenCtor(t_operator, *lineNum, data);
+            }
             if (curEdge =='-')
-                return tokenCtor(MinusSign,*lineNum, "MinusSign", data);
+            {
+            	appendChar(data, curEdge);
+            	return tokenCtor(t_operator, *lineNum, data);
+            }
             if (curEdge =='+')
-                return tokenCtor(PlusSign,*lineNum, "PlusSign", data);
+            {
+            	appendChar(data, curEdge);
+            	return tokenCtor(t_operator, *lineNum, data);
+            }
             if (curEdge =='.') 
-                return tokenCtor(DotSign,*lineNum, "DotSign", data);
+            {
+            	appendChar(data, curEdge);
+            	return tokenCtor(t_operator, *lineNum, data);
+            }
             if (curEdge ==',')
-                return tokenCtor(Comma,*lineNum, "Comma", data);
+            	return tokenCtor(t_comma, *lineNum, data);
             if (curEdge ==':')
-                return tokenCtor(Colons,*lineNum, "Colons", data);
+            	return tokenCtor(t_colon, *lineNum, data);
             
-            debug_print("At line: %d START -> %c : Not recognised\n",*lineNum,curEdge);
+            debug_print("At line: %d START -> %c : Not recognised\n", *lineNum,curEdge);
             return NULL;
             break;
 
@@ -236,7 +247,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 curState = StarComment; break;
             }
             ungetc(curEdge,fp); //catch the "force-out" edge
-            return tokenCtor(Slash,*lineNum, "Slash",data);            
+            return tokenCtor(t_operator, *lineNum, data);            
 
         case LineComment:
             if (curEdge == '\n')
@@ -279,7 +290,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if (checkDataType(data))//returns 1 it is a valid data type
             {
                 ungetc(curEdge,fp); //catch the "force-out" edge
-                return tokenCtor(nullType, *lineNum, "nullType", data);
+                return tokenCtor(t_nullType, *lineNum, data);
             }
             return NULL;
         
@@ -292,7 +303,7 @@ Token* getToken(FILE* fp,int *lineNum)
             else
             {
                 ungetc(curEdge,fp);
-                return tokenCtor(ID,*lineNum, "ID", data);
+                return tokenCtor(t_functionId, *lineNum, data);
             }
             break;
 
@@ -312,7 +323,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 break;
             }
             ungetc(curEdge,fp);//catch the "force-out" edge
-            return tokenCtor(VarID,*lineNum, "VarID", data);
+            return tokenCtor(t_varId, *lineNum, data);
 
         case String:
             if (curEdge == '"')
@@ -336,7 +347,7 @@ Token* getToken(FILE* fp,int *lineNum)
                         break;
                     }
                 }
-                return tokenCtor(StringEnd,*lineNum, "StringEnd", data);
+                return tokenCtor(t_string, *lineNum, data);
             }
             else if (isprint(curEdge))
             {
@@ -344,7 +355,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 break;
             }
             //weird data on the input
-            debug_print("At line: %d STRING -> %c : Not recognised\n",*lineNum,curEdge);
+            debug_print("At line: %d STRING -> %c : Not recognised\n", *lineNum,curEdge);
 
             return NULL;
 
@@ -353,11 +364,11 @@ Token* getToken(FILE* fp,int *lineNum)
             {
                 curState = DoubleEqual; break;
             }
-            return tokenCtor(Assign,*lineNum, "Assign", data);
+            return tokenCtor(t_assign, *lineNum, data);
             
         case DoubleEqual:
             if (curEdge == '=')
-                return tokenCtor(StrictEquality,*lineNum, "StrictEquality", data);
+                return tokenCtor(t_comparator, *lineNum, data);
             debug_print("Line %d - Lexical Error\n", *lineNum);
             return NULL;
 
@@ -381,7 +392,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 break;
             }
             ungetc(curEdge,fp);//catch the "force-out" edge
-            return tokenCtor(Int,*lineNum, "Int", data);
+            return tokenCtor(t_int, *lineNum, data);
 
         case Double:
             if (isdigit(curEdge))
@@ -399,11 +410,11 @@ Token* getToken(FILE* fp,int *lineNum)
             //but if there is nothing after dot means error
             if (data[strlen(data)-1] == '.')
             {
-                debug_print("Line %d - Number cannot end with . sign. \n",*lineNum);
+                debug_print("Line %d - Number cannot end with . sign. \n", *lineNum);
                 return NULL;
             }
             ungetc(curEdge,fp);//catch the "force-out" edge
-            return tokenCtor(Double,*lineNum, "Double", data);
+            return tokenCtor(t_float, *lineNum, data);
 
         case EulNum:
             if (isdigit(curEdge))
@@ -428,7 +439,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 curState = EulDouble;
                 break;
             }
-            debug_print("Line %d - Number cannot end with operator sign.\n",*lineNum);
+            debug_print("Line %d - Number cannot end with operator sign.\n", *lineNum);
             return NULL; //return error
 
         case EulDouble:
@@ -440,17 +451,17 @@ Token* getToken(FILE* fp,int *lineNum)
             //previous state == EulNum
             if (data[strlen(data)-1] == 'e' || data[strlen(data)-1] == 'E' )
             {
-                debug_print("Line %d - %c Unpropper double number ending.\n",*lineNum,curEdge);
+                debug_print("Line %d - %c Unpropper double number ending.\n", *lineNum,curEdge);
                 return NULL;
             }
             //previous state == EulNUmExtra
             if (data[strlen(data)-1] == '+' || data[strlen(data)-1] == '-' )
             {
-                debug_print("Line %d - %c Unpropper double number ending.\n",*lineNum,curEdge);
+                debug_print("Line %d - %c Unpropper double number ending.\n", *lineNum,curEdge);
                 return NULL;
             }
             ungetc(curEdge,fp);//catch the "force-out" edge
-            return tokenCtor(EuldDouble,*lineNum, "EuldDouble", data);
+            return tokenCtor(t_float, *lineNum, data);
         //end of numbers
 
         case ExclamMark:
@@ -458,26 +469,26 @@ Token* getToken(FILE* fp,int *lineNum)
             {
                 curState = ExclamEqual;break;
             }
-            debug_print("Line %d - Lexical error.\n",*lineNum);
+            debug_print("Line %d - Lexical error.\n", *lineNum);
             return NULL; //return error
 
         case ExclamEqual:
             if (curEdge == '=')
-                return tokenCtor(NotEqual,*lineNum, "NotEqual", data);
-            debug_print("Line %d - Lexical error.\n",*lineNum);
+                return tokenCtor(t_comparator, *lineNum, data);
+            debug_print("Line %d - Lexical error.\n", *lineNum);
             return NULL; //return error
             
         case GreaterThanSign:
             if (curEdge == '=')
-                return tokenCtor(GreaterEqualThanSign,*lineNum, "GreaterEqualThanSign", data);
+                return tokenCtor(t_comparator, *lineNum, data);
             ungetc(curEdge,fp);//catch the "force-out" edge
-            return tokenCtor(GreaterThanSign,*lineNum, "GreaterThanSign", data);
+            return tokenCtor(t_comparator, *lineNum, data);
 
         case LesserThanSign:
             if (curEdge == '=')
-                return tokenCtor(LesserEqualThanSign,*lineNum, "LesserEqualThanSign", data);
+                return tokenCtor(t_comparator, *lineNum, data);
             ungetc(curEdge,fp);//catch the "force-out" edge
-            return tokenCtor(LesserThanSign,*lineNum, "LesserThanSign", data);
+            return tokenCtor(t_comparator, *lineNum, data);
 
         default:
             break;
@@ -532,9 +543,9 @@ Token *checkForKeyWord(Token *token)
 void printToken(Token*token)
 {
     if (token->data == NULL)
-        printf("%d %s\n",token->lineNum,token->lexeme);
+        printf("%d %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type]);
     else
-        printf("%d %s %s\n",token->lineNum,token->lexeme, token->data);
+        printf("%d %s %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type], token->data);
 }
 
 
@@ -572,13 +583,13 @@ TokenList *lexAnalyser(FILE *fp)
         }
         
         //check for keywords if lexeme == id
-        if (curToken->type == ID)
+        if (curToken->type == t_functionId)
         {
             curToken = checkForKeyWord(curToken);
         }        
 
         //EOF - dont append this token
-        if (curToken->type == EndOfProgram)
+        if (curToken->type == t_EOF)
         {
             tokenDtor(curToken);
             break;
