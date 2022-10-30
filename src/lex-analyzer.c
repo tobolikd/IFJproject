@@ -520,6 +520,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge);
                 curState = DoubleEqual; break;
             }
+            ungetc(curEdge, fp);
             return tokenCtor(t_assign, *lineNum, data);
             
         case DoubleEqual:
