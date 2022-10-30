@@ -19,7 +19,7 @@ enum ifjErrCode {
 };
 
 // global variable for errCode storage
-//enum ifjErrCode errorCode = SUCCESS;
+extern enum ifjErrCode errorCode;
 
 /* print debug info using debug_print() macro
  * 0 - OFF

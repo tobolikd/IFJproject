@@ -59,10 +59,7 @@ typedef enum
 } AutoState;
 
 // get state string by using STATE_STRING[AutoState]
-static const char *STATE_STRING[] = 
-{
-    FOREACH_STATE(GENERATE_STRING)
-};
+extern const char *STATE_STRING[];
 
 #define FOREACH_TOKEN_TYPE(TYPE)\
         TYPE(t_EOF)/*data - <NULL>*/\
@@ -95,10 +92,7 @@ typedef enum
 } TokenType;
 
 // get token type string by using TOKEN_TYPE_STRING[TokenType]
-static const char *TOKEN_TYPE_STRING[] = 
-{
-    FOREACH_TOKEN_TYPE(GENERATE_STRING)
-};
+extern const char *TOKEN_TYPE_STRING[];
 
 typedef struct 
 {

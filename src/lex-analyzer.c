@@ -6,6 +6,20 @@
 #include "lex-analyzer.h"
 #include "error-codes.h"
 
+enum ifjErrCode errorCode;
+
+// init STATE_STRING
+const char *STATE_STRING[] = 
+{
+    FOREACH_STATE(GENERATE_STRING)
+};
+
+// init TOKEN_TYPE_STRING
+const char *TOKEN_TYPE_STRING[] = 
+{
+    FOREACH_TOKEN_TYPE(GENERATE_STRING)
+};
+
 //check if prolog is present
 int checkProlog(FILE* fp)
 {
@@ -740,6 +754,7 @@ TokenList *lexAnalyser(FILE *fp)
         if (curToken == NULL) 
         {
             listDtor(list);
+            errorCode = LEXICAL_ERR;
             return NULL;
         }
         
