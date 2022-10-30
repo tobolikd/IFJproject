@@ -32,7 +32,7 @@ int checkProlog(FILE* fp)
                     {
                         char c = fgetc(fp);
                         ungetc(c,fp); //if end of line i want to catch it in KA
-                        if (c=='\n' || c ==EOF || c == ' ')
+                        if (c=='\n' || c ==EOF || c == ' ' || c == '\t')
                             return 0;
                     }
     debug_print("%s : prolog is missing\n",prolog);
