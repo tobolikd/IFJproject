@@ -286,7 +286,7 @@ Token* getToken(FILE* fp,int *lineNum)
         {
         case Start:
             //white signs
-            if (curEdge == ' ') 
+            if (curEdge == ' ' || curEdge == '\t') 
                 break;
             if (curEdge == '\n')//count number of lines for function foundToken & debug
             {
