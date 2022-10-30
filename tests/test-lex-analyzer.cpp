@@ -219,8 +219,8 @@ INSTANTIATE_TEST_SUITE_P(ADVANCED, testLexAnalyzerCorrect,
                                 "<?php $null\t=9+$_456a"),
                             make_tuple(
                                 array<TokenType, 5>{t_condition, t_nullType, t_comparator, t_null, t_colon},
-                                array<string, 5>{"if","last","===","",""},
-                                "<?php if?last===null:"),
+                                array<string, 5>{"if","string","===","",""},
+                                "<?php if?string===null:"),
                             make_tuple(
                                 array<TokenType, 5>{t_condition, t_lPar, t_int, t_comparator, t_lCurl},
                                 array<string, 5>{"while","","5",">=",""},
