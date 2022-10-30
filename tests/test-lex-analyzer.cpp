@@ -121,7 +121,7 @@ class testGetTokenIncorrect : public testBaseForFiles {};
 
 TEST_P(testGetTokenIncorrect, returnValue)
 {
-    int lineNum;
+    int lineNum = 0;
     Token *returnedToken = getToken(tmpFile, &lineNum);
     EXPECT_TRUE(returnedToken == NULL) << "RETURNED TOKEN SHOULD BE NULL\nInput: |" << dataIn << "|\nReturned token type: " << TOKEN_TYPE_STRING[returnedToken->type] << endl;
     if (returnedToken != NULL)
