@@ -3,6 +3,8 @@
 #include "code-gen.h"
 #include "error-codes.h"
 
+enum ifjErrCode errorCode = SUCCESS;
+
 int main () {
     /* SCANNER */
     FILE *fp;
@@ -14,7 +16,7 @@ int main () {
     if(list == NULL) // there was an error in lexAnalyser
     {
         fclose(fp);
-        return 1;
+        return errorCode;
     }
 #if (DEBUG == 1)
     prinTokenList(list);
@@ -25,5 +27,5 @@ int main () {
     fclose(fp);
     /* END OF SCANNER */
 
-    return 0;
+    return errorCode;
 }
