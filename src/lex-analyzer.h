@@ -63,7 +63,8 @@ extern const char *STATE_STRING[];
 
 #define FOREACH_TOKEN_TYPE(TYPE)\
         TYPE(t_EOF)/*data - <NULL>*/\
-        TYPE(t_condition)/*data - if | while*/\
+        TYPE(t_if)/*data - <NULL>*/\
+        TYPE(t_while)/*data - <NULL>*/\
         TYPE(t_else)/*data - <NULL>*/\
         TYPE(t_null)/*data - <NULL>*/\
         TYPE(t_return)/*data - <NULL>*/\

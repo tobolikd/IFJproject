@@ -43,9 +43,17 @@ Token *getKeyword(Token *token)
 {
     if (token->data!=NULL)
     {
-        if (!strcmp(token->data,"if") || !strcmp(token->data,"while"))
+        if (!strcmp(token->data,"if"))
         {
-            token->type = t_condition;
+            token->type = t_if;
+            free(token->data);
+            token->data=NULL;
+        }
+        else if (!strcmp(token->data,"while"))
+        {
+            token->type = t_while;
+            free(token->data);
+            token->data=NULL;
         }
         else if (!strcmp(token->data,"int")||!strcmp(token->data,"string")||!strcmp(token->data,"float")||!strcmp(token->data,"void"))
         {
