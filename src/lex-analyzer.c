@@ -6,6 +6,20 @@
 #include "lex-analyzer.h"
 #include "error-codes.h"
 
+enum ifjErrCode errorCode;
+
+// init STATE_STRING
+const char *STATE_STRING[] = 
+{
+    FOREACH_STATE(GENERATE_STRING)
+};
+
+// init TOKEN_TYPE_STRING
+const char *TOKEN_TYPE_STRING[] = 
+{
+    FOREACH_TOKEN_TYPE(GENERATE_STRING)
+};
+
 //check if prolog is present
 int checkProlog(FILE* fp)
 {
@@ -18,7 +32,7 @@ int checkProlog(FILE* fp)
                     {
                         char c = fgetc(fp);
                         ungetc(c,fp); //if end of line i want to catch it in KA
-                        if (c=='\n' || c ==EOF || c == ' ')
+                        if (c=='\n' || c ==EOF || c == ' ' || c == '\t')
                             return 0;
                     }
     debug_print("%s : prolog is missing\n",prolog);
@@ -29,9 +43,17 @@ Token *getKeyword(Token *token)
 {
     if (token->data!=NULL)
     {
-        if (!strcmp(token->data,"if") || !strcmp(token->data,"while"))
+        if (!strcmp(token->data,"if"))
         {
-            token->type = t_condition;
+            token->type = t_if;
+            free(token->data);
+            token->data=NULL;
+        }
+        else if (!strcmp(token->data,"while"))
+        {
+            token->type = t_while;
+            free(token->data);
+            token->data=NULL;
         }
         else if (!strcmp(token->data,"int")||!strcmp(token->data,"string")||!strcmp(token->data,"float")||!strcmp(token->data,"void"))
         {
@@ -279,7 +301,7 @@ Token* getToken(FILE* fp,int *lineNum)
         {
         case Start:
             //white signs
-            if (curEdge == ' ') 
+            if (curEdge == ' ' || curEdge == '\t') 
                 break;
             if (curEdge == '\n')//count number of lines for function foundToken & debug
             {
@@ -513,6 +535,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge);
                 curState = DoubleEqual; break;
             }
+            ungetc(curEdge, fp);
             return tokenCtor(t_assign, *lineNum, data);
             
         case DoubleEqual:
@@ -747,6 +770,7 @@ TokenList *lexAnalyser(FILE *fp)
         if (curToken == NULL) 
         {
             listDtor(list);
+            errorCode = LEXICAL_ERR;
             return NULL;
         }
         

@@ -59,14 +59,12 @@ typedef enum
 } AutoState;
 
 // get state string by using STATE_STRING[AutoState]
-static const char *STATE_STRING[] = 
-{
-    FOREACH_STATE(GENERATE_STRING)
-};
+extern const char *STATE_STRING[];
 
 #define FOREACH_TOKEN_TYPE(TYPE)\
         TYPE(t_EOF)/*data - <NULL>*/\
-        TYPE(t_condition)/*data - if | while*/\
+        TYPE(t_if)/*data - <NULL>*/\
+        TYPE(t_while)/*data - <NULL>*/\
         TYPE(t_else)/*data - <NULL>*/\
         TYPE(t_null)/*data - <NULL>*/\
         TYPE(t_return)/*data - <NULL>*/\
@@ -79,7 +77,7 @@ static const char *STATE_STRING[] =
         TYPE(t_comparator)/*data - === | !== | < | > | <= | >= */\
         TYPE(t_int)/*data - <int value>*/\
         TYPE(t_float)/*data - <float value>*/\
-        TYPE(t_string)/*data - <string value>*/\
+        TYPE(t_string)/*data - <string value> | <NULL> */\
         TYPE(t_semicolon)/*data - <NULL>*/\
         TYPE(t_assign)/*data - <NULL>*/\
         TYPE(t_lPar)/*data - <NULL>*/\
@@ -95,10 +93,7 @@ typedef enum
 } TokenType;
 
 // get token type string by using TOKEN_TYPE_STRING[TokenType]
-static const char *TOKEN_TYPE_STRING[] = 
-{
-    FOREACH_TOKEN_TYPE(GENERATE_STRING)
-};
+extern const char *TOKEN_TYPE_STRING[];
 
 typedef struct 
 {
