@@ -112,6 +112,10 @@ char *parseString(char *data)
     int i = 0;
     char *new = NULL;
 
+    if (data[i] == '\0')
+        return data;
+    
+
     while (data[i] != '\0')
     {
         if (data[i] == '\\') //if bs appears go through valid sequenses
@@ -192,11 +196,14 @@ Token* tokenCtor(TokenType type, int lineNum, char* data)
 
     if (type == t_string)
     {
-        new->data = parseString(new->data);
-        if (new->data == NULL)
+        if (new->data != NULL)
         {
-            debug_print("Line %d: Lexical error inside string",lineNum);
-            return NULL; // error inside string
+            new->data = parseString(new->data);
+            if (new->data == NULL)
+            {
+                debug_print("Line %d: Lexical error inside string-parseString",lineNum);
+                return NULL; // error inside string
+            }
         }
     }
     
