@@ -158,6 +158,7 @@ INSTANTIATE_TEST_SUITE_P(INTERMEDIATE, testGetTokenIncorrect,
                                 make_tuple(0, "\\"),
                                 make_tuple(0, "1e-"),
                                 make_tuple(0, "1e+"),
+                                make_tuple(0, "?\na"),
                                 make_tuple(0, "1.e+"),
                                 make_tuple(0, "1.2e-")
                             )
@@ -186,7 +187,7 @@ TEST_P(testLexAnalyzerCorrect, tokenArray)
             break;
         }
 
-        EXPECT_EQ(expectedType[tokenNum], returnedList->TokenArray[tokenNum]->type) << listInfo(tokenNum - 1) << "\nInvalid token type\nExpected: " << TOKEN_TYPE_STRING[expectedType[tokenNum]] << "\nGot: " << TOKEN_TYPE_STRING[returnedList->TokenArray[tokenNum]->type] << endl;
+        EXPECT_EQ(expectedType[tokenNum], returnedList->TokenArray[tokenNum]->type) << listInfo(tokenNum - 1) << "\nInvalid token type\nExpected: " << TOKEN_TYPE_STRING[expectedType[tokenNum]] << "\nGot: |" << TOKEN_TYPE_STRING[returnedList->TokenArray[tokenNum]->type] << "|" << endl;
         if (expectedData[tokenNum] != "")
         {
             ASSERT_FALSE(returnedList->TokenArray[tokenNum]->data == NULL) << listInfo(tokenNum - 1) << "\nINCORRECT TOKEN:" << tokenInfo(tokenNum) << endl;
@@ -224,6 +225,26 @@ INSTANTIATE_TEST_SUITE_P(ADVANCED, testLexAnalyzerCorrect,
                             make_tuple(
                                 array<TokenType, 5>{t_condition, t_lPar, t_int, t_comparator, t_lCurl},
                                 array<string, 5>{"while","","5",">=",""},
-                                "<?php while(5>={")
+                                "<?php while(5>={"),
+                            make_tuple(
+                                array<TokenType, 5>{t_rCurl, t_operator, t_string, t_nullType, t_varId},
+                                array<string, 5>{"",".","\x4A\"$\043\"\tahojstring\n","float","string"},
+                                "<?php }.\t\"\\x4A\\\"\\$\\043\\\"\\tahojstring\\n\"\t\n?float$string"),
+                            make_tuple(
+                                array<TokenType, 5>{t_semicolon, t_semicolon, t_lCurl, t_rCurl, t_lPar},
+                                array<string, 5>{"","","","",""},
+                                "<?php ;;{}()"),
+                            make_tuple(
+                                array<TokenType, 5>{t_function, t_functionId, t_lPar, t_rPar, t_colon},
+                                array<string, 5>{"","_my0fnc","","",""},
+                                "<?php function\t_my0fnc\t()\n:\t"),
+                            make_tuple(
+                                array<TokenType, 5>{t_varId, t_functionId, t_colon, t_null, t_EOF},
+                                array<string, 5>{"ah","oj","","",""},
+                                "<?php $ah\noj:null\t\n"),
+                            make_tuple(
+                                array<TokenType, 5>{t_string, t_comparator, t_comparator, t_varId, t_float},
+                                array<string, 5>{" ","<","<","var","456.7e123"},
+                                "<?php \" \"<<$var\t456.7e123")
                             )
                         );   
