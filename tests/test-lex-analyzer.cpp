@@ -21,23 +21,33 @@ class testCheckProlog : public testBaseForFiles {};
 
 TEST_P(testCheckProlog, returnValue)
 {
-    EXPECT_EQ(returnValue, checkProlog(tmpFile)) << "Processed input: |" << dataIn << "|" << endl;
+    int lineNum=0;
+    EXPECT_EQ(returnValue, checkProlog(tmpFile,&lineNum)) << "Processed input: |" << dataIn << "|" << endl;
 }
 
 INSTANTIATE_TEST_CASE_P(BASIC, testCheckProlog,
                         testing::Values(
-                            make_tuple(0, "<?php"),
-                            make_tuple(0, "<?php "),
-                            make_tuple(0, "<?php\ndeclare()"),
-                            make_tuple(1, " <?php"),
-                            make_tuple(0, "<?phpp"),
+                            make_tuple(0, "<?php declare(strict_types=1);"),
+                            make_tuple(0, "<?php\ndeclare(strict_types=1);"),
+                            make_tuple(0, "<?php\tdeclare\t(\t\n\nstrict_types=1);"),
+                            make_tuple(0, "<?phpdeclare(strict_types=1)\n\n;"),
+                            make_tuple(0, "<?phpdeclare(strict_types=1);smthg after"),
+                            make_tuple(0, "<?phpdeclare(strict_types=1);?>"),
+                            make_tuple(0, "<?php//myLineCommen\n declare(strict_types=1);"),
+                            make_tuple(0, "<?php/* myStarComment */ declare(strict_types=1);"),
+                            make_tuple(1, "<?php\ndeclare(declare(strict_types=1);"),
+                            make_tuple(1, " <?phpdeclare(strict_types=1);"),
                             make_tuple(1, ""),
-                            make_tuple(1, "<?ph"),
+                            make_tuple(1, "<?php//declare(strict_types=1);"),
+                            make_tuple(1, "<?php/* declare(strict_types=1); */"),
+                            make_tuple(1, "declare(strict_types=1);"),
+                            make_tuple(1, "<?phpdeclare(strict_types=2);"),
                             make_tuple(1, "<"),
                             make_tuple(1, "< ?php"),
+                            make_tuple(1, "<?php \tdeclare\t(\t\n\nstrict_types=1)"),
+                            make_tuple(1, "<?phpdeclare{strict_types=1)"),
                             make_tuple(1, "<\n?php"),
-                            make_tuple(1, "<<"),
-                            make_tuple(0, "<?php?>")
+                            make_tuple(1, "<<")
                             )
                         );
 

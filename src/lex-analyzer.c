@@ -21,7 +21,7 @@ const char *TOKEN_TYPE_STRING[] =
 };
 
 //check if prolog is present
-int checkProlog(FILE* fp)
+int checkProlog(FILE* fp, int *lineNum)
 {
     char *prolog = "<?php";
     if(prolog[0]==fgetc(fp) )
@@ -29,7 +29,8 @@ int checkProlog(FILE* fp)
             if(prolog[2]==fgetc(fp))
                 if(prolog[3]==fgetc(fp))  
                     if(prolog[4]==fgetc(fp))
-                        return 0;
+                        if(!checkDeclare(fp,lineNum))
+                            return 0;
     debug_print("%s : Mistake in prolog.\n",prolog);
     return 1;                   
 }
@@ -38,7 +39,7 @@ int checkDeclare(FILE *fp,int *lineNum)
 {
     TokenList *tmpList = NULL; 
     //comparable types,data
-    char *cmpData[7] = {"declare'\0'",NULL,"strict_types",NULL,"1",NULL,NULL};
+    char *cmpData[7] = {"declare",NULL,"strict_types",NULL,"1",NULL,NULL};
     TokenType cmpType[7] = {t_functionId,t_lPar,t_functionId,t_assign,t_int,t_rPar,t_semicolon};
 
     for (int i = 0; i < 7; i++) //get all tokens declare ( strict_types = 1 ) ; = 7 in total
@@ -53,7 +54,7 @@ int checkDeclare(FILE *fp,int *lineNum)
 
         if (tmpList->TokenArray[i]->type == cmpType[i])//compare token type
         {
-            if(cmpType[i] == t_functionId)//if id
+            if(cmpType[i] == t_functionId || cmpType[i] == t_int)//if id / int
             {    // if those are the same go onto another token
                 if (!strcmp(tmpList->TokenArray[i]->data , cmpData[i])) 
                     continue; //data are valid
@@ -61,12 +62,9 @@ int checkDeclare(FILE *fp,int *lineNum)
             else
                 continue; //type is valid, where data is irelevant
         }
-        else
-        {
-            listDtor(tmpList); //either type or data is not right
-            debug_print("%d - Mistake in declare - types\n",i); 
-            return 1;
-        }
+        listDtor(tmpList); //either type or data is not right
+        debug_print("%d - Mistake in declare - types\n",i); 
+        return 1;
     }
     listDtor(tmpList);
     return 0;                    
@@ -792,9 +790,7 @@ TokenList *lexAnalyser(FILE *fp)
 {
     int lineNum = 0; //lin number
 
-    if (checkProlog(fp))
-        return NULL;
-    if (checkDeclare(fp, &lineNum))
+    if (checkProlog(fp,&lineNum))
         return NULL;
     
     TokenList *list = NULL; //structure to string tokens together

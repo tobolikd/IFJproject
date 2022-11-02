@@ -114,7 +114,7 @@ typedef struct
 /// @param fp Pointer to a readable file.
 /// @param lineNum Pointer to line count.
 /// @return 0 if <?php is present, if not return 1.
-int checkProlog(FILE* fp);
+int checkProlog(FILE* fp, int *lineNum);
 
 /// @brief Checks if next 7 tokens are declare type..
 /// @param fp Pointer to input stream.
