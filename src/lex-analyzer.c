@@ -120,7 +120,7 @@ char *parseString(char *data)
     {
         if (data[i] == '\\') //if bs appears go through valid sequenses
         {
-            i++;//look i ahead.
+            i++;//look 1 ahead.
             switch (data[i])
             {
             case '\\':
@@ -138,8 +138,8 @@ char *parseString(char *data)
                 new = appendChar(new, data[i]);
                 break;
             case 'x':
-                i++;//move pointer
-                if ( 256 > strtol(data+i,NULL,16)&& isxdigit(data[i+1]))
+                i++;//look 1 ahead
+                if ( 256 > strtol(data+i,NULL,16) && strtol(data+i,NULL,16) > 0 && isxdigit(data[i+1])) // 2 xdigits must follow , check value
                 {
                     new = appendChar(new,(char)strtol(data+i,NULL,16) );//strtol converts
                     i +=1;//move pointer
@@ -149,11 +149,19 @@ char *parseString(char *data)
                 free(new);
                 return NULL; // error
             case '0' ... '7':
-                if( 256 > (int)strtol(data+i,NULL,8)&& isdigit(data[i+1]) && isdigit(data[i+2]))
+                if(isdigit(data[i+1]) && isdigit(data[i+2])) // 3 hexa digits must following
                 {
-                    new = appendChar(new, (char)strtol(data+i,NULL,8));//strtol converts
-                    i +=2;//move poiter
-                    break;
+                    if (((int)data[i]-'0')<=3 && ((int)data[i+1]-'0')<=7 && ((int)data[i+2]-'0')<=7)// ouch ... check if its hexa
+                    {
+                        char tmp[4] = {data[i], data[i+1], data[i+2], '\0'}; //temporary array to only take into accout first 3 digits
+
+                        if ( 256 > (int)strtol(tmp,NULL,8) && (int)strtol(tmp,NULL,8) > 0) //check value
+                        {
+                            new = appendChar(new, (char)strtol(tmp,NULL,8));//strtol converts
+                            i +=2;//move poiter
+                            break;
+                        }
+                    }
                 }
                 free(data);
                 free(new);
@@ -175,7 +183,7 @@ char *parseString(char *data)
             new = appendChar(new, data[i]);
         }
         i++;//move onto next character
-    }
+    }   //while cycle
     free(data);
     return new;
 }
@@ -202,6 +210,7 @@ Token* tokenCtor(TokenType type, int lineNum, char* data)
             if (new->data == NULL)
             {
                 debug_print("Line %d: Lexical error inside string-parseString",lineNum);
+                tokenDtor(new);
                 return NULL; // error inside string
             }
         }
