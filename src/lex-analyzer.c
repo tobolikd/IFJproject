@@ -29,15 +29,49 @@ int checkProlog(FILE* fp)
             if(prolog[2]==fgetc(fp))
                 if(prolog[3]==fgetc(fp))  
                     if(prolog[4]==fgetc(fp))
-                    {
-                        char c = fgetc(fp);
-                        ungetc(c,fp); //if end of line i want to catch it in KA
-                        if (c=='\n' || c ==EOF || c == ' ' || c == '\t')
-                            return 0;
-                    }
-    debug_print("%s : prolog is missing\n",prolog);
+                        return 0;
+    debug_print("%s : Mistake in prolog.\n",prolog);
     return 1;                   
 }
+
+int checkDeclare(FILE *fp,int *lineNum)
+{
+    TokenList *tmpList = NULL; 
+    //comparable types,data
+    char *cmpData[7] = {"declare'\0'",NULL,"strict_types",NULL,"1",NULL,NULL};
+    TokenType cmpType[7] = {t_functionId,t_lPar,t_functionId,t_assign,t_int,t_rPar,t_semicolon};
+
+    for (int i = 0; i < 7; i++) //get all tokens declare ( strict_types = 1 ) ; = 7 in total
+    {
+        tmpList = appendToken(tmpList,getToken(fp,lineNum)); //append next token to list of token
+        
+        if(tmpList->TokenArray[i] == NULL)//not  complete
+        {
+            free(tmpList);
+            return 1;
+        }
+
+        if (tmpList->TokenArray[i]->type == cmpType[i])//compare token type
+        {
+            if(cmpType[i] == t_functionId)//if id
+            {    // if those are the same go onto another token
+                if (!strcmp(tmpList->TokenArray[i]->data , cmpData[i])) 
+                    continue; //data are valid
+            }
+            else
+                continue; //type is valid, where data is irelevant
+        }
+        else
+        {
+            listDtor(tmpList); //either type or data is not right
+            debug_print("%d - Mistake in declare - types\n",i); 
+            return 1;
+        }
+    }
+    listDtor(tmpList);
+    return 0;                    
+}
+
 
 Token *getKeyword(Token *token)
 {
@@ -188,8 +222,6 @@ char *parseString(char *data)
     return new;
 }
 
-//setup token
-//return new token
 Token* tokenCtor(TokenType type, int lineNum, char* data)
 {
     Token *new = malloc(sizeof(Token)); //allocates memory for new token
@@ -737,9 +769,6 @@ void listDtor(TokenList *list)
     }
 }
 
-/* TODO */
-
-
 void printToken(Token*token)
 {
     if (token->data == NULL)
@@ -761,14 +790,15 @@ void prinTokenList(TokenList *list)
 //NULL to propagate error
 TokenList *lexAnalyser(FILE *fp)
 {
+    int lineNum = 0; //lin number
+
     if (checkProlog(fp))
+        return NULL;
+    if (checkDeclare(fp, &lineNum))
         return NULL;
     
     TokenList *list = NULL; //structure to string tokens together
     Token* curToken = NULL; //token cursor
-
-    int lineNum = 1; //on what line token is found
-                     //starts on line number (prolog is on line 1)
 
     //loop through the program - get & append tokens
     while (1)

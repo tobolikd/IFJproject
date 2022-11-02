@@ -112,8 +112,15 @@ typedef struct
 
 /// @brief Function checks if string of characters <?php follows.
 /// @param fp Pointer to a readable file.
+/// @param lineNum Pointer to line count.
 /// @return 0 if <?php is present, if not return 1.
 int checkProlog(FILE* fp);
+
+/// @brief Checks if next 7 tokens are declare type..
+/// @param fp Pointer to input stream.
+/// @param lineNum Refference to line counter.
+/// @return 0 if next 7 tokens are correct, else 1
+int checkDeclare(FILE* fp, int *lineNum);
 
 /// @brief Compares tokens data to known keywords.
 /// @param token Token with type t_functionId.
@@ -127,9 +134,8 @@ Token *getKeyword(Token *token);
 char *appendChar(char *data, char dataToBeInserted);
 
 /// @brief Creates token.
-/// @param type Autostate of token.
+/// @param type Type of token.
 /// @param lineNum On what line was token found.
-/// @param lexeme Token name.
 /// @param data Additional data of token.
 /// @return Pointer to newly created token.
 Token *tokenCtor(TokenType type, int lineNum, char* data);
