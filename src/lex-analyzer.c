@@ -29,8 +29,15 @@ int checkProlog(FILE* fp, int *lineNum)
             if(prolog[2]==fgetc(fp))
                 if(prolog[3]==fgetc(fp))  
                     if(prolog[4]==fgetc(fp))
-                        if(!checkDeclare(fp,lineNum))
-                            return 0;
+                        {
+                            char c = fgetc(fp);
+                            ungetc(c,fp); //if end of line i want to catch it in KA
+                            //white sign, comment.. 
+                            if (c=='\n' || c ==EOF || c == ' ' || c == '\t' || c == '/') 
+                                //check declare type ..
+                                if(!checkDeclare(fp,lineNum)) 
+                                    return 0;
+                        }
     debug_print("%s : Mistake in prolog.\n",prolog);
     return 1;                   
 }
@@ -38,7 +45,8 @@ int checkProlog(FILE* fp, int *lineNum)
 int checkDeclare(FILE *fp,int *lineNum)
 {
     TokenList *tmpList = NULL; 
-    //comparable types,data
+    
+    //arrays to compare with
     char *cmpData[7] = {"declare",NULL,"strict_types",NULL,"1",NULL,NULL};
     TokenType cmpType[7] = {t_functionId,t_lPar,t_functionId,t_assign,t_int,t_rPar,t_semicolon};
 
@@ -46,7 +54,7 @@ int checkDeclare(FILE *fp,int *lineNum)
     {
         tmpList = appendToken(tmpList,getToken(fp,lineNum)); //append next token to list of token
         
-        if(tmpList->TokenArray[i] == NULL)//not  complete
+        if(tmpList->TokenArray[i] == NULL)//expected 7 tokens, not less
         {
             free(tmpList);
             return 1;
@@ -148,7 +156,7 @@ char *parseString(char *data)
         return data;
     
 
-    while (data[i] != '\0')
+    while (data[i] != '\0') //look through the whole data string
     {
         if (data[i] == '\\') //if bs appears go through valid sequenses
         {
@@ -169,23 +177,31 @@ char *parseString(char *data)
             case '$':
                 new = appendChar(new, data[i]);
                 break;
-            case 'x':
-                i++;//look 1 ahead
-                if ( 256 > strtol(data+i,NULL,16) && strtol(data+i,NULL,16) > 0 && isxdigit(data[i+1])) // 2 xdigits must follow , check value
+
+            case 'x'://look for haxa num
+                i++;//look 1 ahead = now i is pointing to first digit
+                //strtol functioni returns value of number in string, stops only when the sequence of numbers is broken
+                //could possibly read more or less than 2 digits
+                //works on base of 10/8/16 -> transfers it to decimal
+                //could move a pointer with 2nd argument but it is not wanted
+                if ( 256 > strtol(data+i,NULL,16) && strtol(data+i,NULL,16) > 0 && isxdigit(data[i+1])) // check if there are 2 digits
                 {
-                    new = appendChar(new,(char)strtol(data+i,NULL,16) );//strtol converts
+                    new = appendChar(new,(char)strtol(data+i,NULL,16) );//strtol converts -> append value to new arr
                     i +=1;//move pointer
                     break;
                 }
                 free(data);
                 free(new);
                 return NULL; // error
-            case '0' ... '7':
-                if(isdigit(data[i+1]) && isdigit(data[i+2])) // 3 hexa digits must following
+
+            case '0' ... '7'://look for okta numbers
+                if(isdigit(data[i+1]) && isdigit(data[i+2])) // 2 hexa digits must following 
                 {
-                    if (((int)data[i]-'0')<=3 && ((int)data[i+1]-'0')<=7 && ((int)data[i+2]-'0')<=7)// ouch ... check if its hexa
+                    //from characters value subs value ord value of 0 and we get an integer value representing the number in char
+                    if (((int)data[i]-'0')<=3 && ((int)data[i+1]-'0')<=7 && ((int)data[i+2]-'0')<=7)//check if its okta number
                     {
-                        char tmp[4] = {data[i], data[i+1], data[i+2], '\0'}; //temporary array to only take into accout first 3 digits
+                        //temporary array to only take into accout first 3 digits so strol(conversion) can be performed on only firs 3 digits
+                        char tmp[4] = {data[i], data[i+1], data[i+2], '\0'}; 
 
                         if ( 256 > (int)strtol(tmp,NULL,8) && (int)strtol(tmp,NULL,8) > 0) //check value
                         {
@@ -199,8 +215,9 @@ char *parseString(char *data)
                 free(new);
                 return NULL; // error 
                 
-            default:
-                new = appendChar(new, (char)strtol(data+i,NULL,8));
+            default: //not an escape sequence put bs back into the array
+                i--;//needs to go 1 back 
+                new = appendChar(new,'\\');
 
             }//end of switch
         }
@@ -214,7 +231,9 @@ char *parseString(char *data)
             }
             new = appendChar(new, data[i]);
         }
+        
         i++;//move onto next character
+
     }   //while cycle
     free(data);
     return new;
