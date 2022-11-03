@@ -194,7 +194,7 @@ char *parseString(char *data)
                 free(new);
                 return NULL; // error
 
-            case '0' ... '7'://look for okta numbers
+            case '0' ... '9'://look for okta numbers
                 if(isdigit(data[i+1]) && isdigit(data[i+2])) // 2 hexa digits must following 
                 {
                     //from characters value subs value ord value of 0 and we get an integer value representing the number in char
