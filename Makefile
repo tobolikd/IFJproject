@@ -4,6 +4,7 @@ SOURCE_DIR=./src/
 SOURCES += lex-analyzer.c
 SOURCES += syn-analyzer.c
 SOURCES += code-gen.c
+SOURCER += symtable.c
 SOURCES += main.c
 
 TARGETS = $(addprefix $(SOURCE_DIR), $(SOURCES))
