@@ -1,6 +1,8 @@
 #ifndef IFJ_SYN_ANALYZER_H
 #define IFJ_SYN_ANALYZER_H
 
+#include <stdbool.h>
+
 typedef enum
 {
     void_t,
@@ -26,6 +28,6 @@ typedef struct
     VarType returnType;
 } FunctionInfo;
 
-extern const FunctionInfo integratedFunctions[];
+bool isIntegrated(char *functionId);
 
 #endif // IFJ_SYN_ANALYZER_H
