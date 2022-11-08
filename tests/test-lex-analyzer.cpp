@@ -21,23 +21,33 @@ class testCheckProlog : public testBaseForFiles {};
 
 TEST_P(testCheckProlog, returnValue)
 {
-    EXPECT_EQ(returnValue, checkProlog(tmpFile)) << "Processed input: |" << dataIn << "|" << endl;
+    int lineNum=0;
+    EXPECT_EQ(returnValue, checkProlog(tmpFile,&lineNum)) << "Processed input: |" << dataIn << "|" << endl;
 }
 
 INSTANTIATE_TEST_CASE_P(BASIC, testCheckProlog,
                         testing::Values(
-                            make_tuple(0, "<?php"),
-                            make_tuple(0, "<?php "),
-                            make_tuple(0, "<?php\ndeclare()"),
-                            make_tuple(1, " <?php"),
-                            make_tuple(1, "<?phpp"),
+                            make_tuple(0, "<?php declare(strict_types=1);"),
+                            make_tuple(0, "<?php\ndeclare(strict_types=1);"),
+                            make_tuple(0, "<?php\tdeclare\t(\t\n\nstrict_types=1);"),
+                            make_tuple(0, "<?php declare(strict_types=1)\n\n;"),
+                            make_tuple(0, "<?php declare(strict_types=1);smthg after"),
+                            make_tuple(0, "<?php declare(strict_types=1);?>"),
+                            make_tuple(0, "<?php//myLineCommen\n declare(strict_types=1);"),
+                            make_tuple(0, "<?php/* myStarComment */ declare(strict_types=1);"),
+                            make_tuple(1, "<?php\ndeclare(declare(strict_types=1);"),
+                            make_tuple(1, " <?phpdeclare(strict_types=1);"),
                             make_tuple(1, ""),
-                            make_tuple(1, "<?ph"),
+                            make_tuple(1, "<?php//declare(strict_types=1);"),
+                            make_tuple(1, "<?php/* declare(strict_types=1); */"),
+                            make_tuple(1, "declare(strict_types=1);"),
+                            make_tuple(1, "<?php declare(strict_types=2);"),
                             make_tuple(1, "<"),
                             make_tuple(1, "< ?php"),
+                            make_tuple(1, "<?php declare(strict_types=1)"),
+                            make_tuple(1, "<?php declare{strict_types=1}"),
                             make_tuple(1, "<\n?php"),
-                            make_tuple(1, "<<"),
-                            make_tuple(1, "<?php?>")
+                            make_tuple(1, "<<")
                             )
                         );
 
@@ -91,6 +101,8 @@ INSTANTIATE_TEST_SUITE_P(BASIC, testGetTokenCorrect,
                             make_tuple(t_string,"ah\xffoj","\"ah\\xFfoj\""),
                             make_tuple(t_string,"ah\001oj","\"ah\\001oj\""),
                             make_tuple(t_string,"ah\377oj","\"ah\\377oj\""),
+                            make_tuple(t_string,"ah\3777oj","\"ah\\3777oj\""),
+                            make_tuple(t_string,"ah\10021","\"ah\\10021\""),
                             make_tuple(t_string,"", "\"\""),
                             make_tuple(t_assign,"","="),
                             make_tuple(t_comparator,"===","==="),
@@ -214,46 +226,46 @@ INSTANTIATE_TEST_SUITE_P(ADVANCED, testLexAnalyzerCorrect,
                             make_tuple(
                                 array<TokenType, 5>{t_functionId, t_lPar, t_functionId, t_assign, t_int},
                                 array<string, 5>{"declare","","strict_types","","1"},
-                                "<?php declare(strict_types=1);"),
+                                "<?php declare(strict_types=1);declare(strict_types=1);"),//
                             make_tuple(
                                 array<TokenType, 5>{t_varId, t_assign, t_int, t_semicolon, t_EOF},
                                 array<string, 5>{"int","","5","",""},
-                                "<?php\t$int=5; // nejaky koment"),
+                                "<?php\tdeclare(strict_types=1);\t$int=5; // nejaky koment"),
                             make_tuple(
                                 array<TokenType, 5>{t_functionId, t_lPar, t_varId, t_rPar, t_semicolon},
                                 array<string, 5>{"func","","int","",""},
-                                "<?php\nfunc\t($int);"),
+                                "<?php\ndeclare(strict_types=1);func\t($int);"),
                             make_tuple(
                                 array<TokenType, 5>{t_varId, t_assign, t_int, t_operator, t_varId},
                                 array<string, 5>{"null","","9","+","_456a"},
-                                "<?php $null\t=9+$_456a"),
+                                "<?php declare(strict_types=1);$null\t=9+$_456a"),
                             make_tuple(
                                 array<TokenType, 5>{t_if, t_nullType, t_comparator, t_null, t_colon},
                                 array<string, 5>{"","string","===","",""},
-                                "<?php if?string===null:"),
+                                "<?php declare(strict_types=1);if?string===null:"),
                             make_tuple(
                                 array<TokenType, 5>{t_while, t_lPar, t_int, t_comparator, t_lCurl},
                                 array<string, 5>{"","","5",">=",""},
-                                "<?php while(5>={"),
+                                "<?php\ndeclare(strict_types=1); while(5>={"),
                             make_tuple(
                                 array<TokenType, 5>{t_rCurl, t_operator, t_string, t_nullType, t_varId},
                                 array<string, 5>{"",".","\x4A\"$\043\"\tahojstring\n","float","string"},
-                                "<?php }.\t\"\\x4A\\\"\\$\\043\\\"\\tahojstring\\n\"\t\n?float$string"),
+                                "<?php declare(strict_types=1); }.\t\"\\x4A\\\"\\$\\043\\\"\\tahojstring\\n\"\t\n?float$string"),
                             make_tuple(
                                 array<TokenType, 5>{t_semicolon, t_semicolon, t_lCurl, t_rCurl, t_lPar},
                                 array<string, 5>{"","","","",""},
-                                "<?php ;;{}()"),
+                                "<?php/* ano */declare(strict_types=1); ;;{}()"),
                             make_tuple(
                                 array<TokenType, 5>{t_function, t_functionId, t_lPar, t_rPar, t_colon},
                                 array<string, 5>{"","_my0fnc","","",""},
-                                "<?php function\t_my0fnc\t()\n:\t"),
+                                "<?php declare(strict_types=1);function\t_my0fnc\t()\n:\t"),
                             make_tuple(
                                 array<TokenType, 5>{t_varId, t_functionId, t_colon, t_null, t_EOF},
                                 array<string, 5>{"ah","oj","","",""},
-                                "<?php $ah\noj:null\t\n"),
+                                "<?php declare( strict_types=  1) \n;$ah\noj:null\t\n"),
                             make_tuple(
                                 array<TokenType, 5>{t_string, t_comparator, t_comparator, t_varId, t_float},
                                 array<string, 5>{" ","<","<","var","456.7e123"},
-                                "<?php \" \"<<$var\t456.7e123")
+                                "<?php declare(     strict_types\n=1);\" \"<<$var\t456.7e123")
                             )
                         );   

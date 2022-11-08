@@ -21,7 +21,7 @@ const char *TOKEN_TYPE_STRING[] =
 };
 
 //check if prolog is present
-int checkProlog(FILE* fp)
+int checkProlog(FILE* fp, int *lineNum)
 {
     char *prolog = "<?php";
     if(prolog[0]==fgetc(fp) )
@@ -29,15 +29,55 @@ int checkProlog(FILE* fp)
             if(prolog[2]==fgetc(fp))
                 if(prolog[3]==fgetc(fp))  
                     if(prolog[4]==fgetc(fp))
-                    {
-                        char c = fgetc(fp);
-                        ungetc(c,fp); //if end of line i want to catch it in KA
-                        if (c=='\n' || c ==EOF || c == ' ' || c == '\t')
-                            return 0;
-                    }
-    debug_print("%s : prolog is missing\n",prolog);
+                        {
+                            char c = fgetc(fp);
+                            ungetc(c,fp); //if end of line i want to catch it in KA
+                            //white sign, comment.. 
+                            if (c=='\n' || c ==EOF || c == ' ' || c == '\t' || c == '/') 
+                                //check declare type ..
+                                if(!checkDeclare(fp,lineNum)) 
+                                    return 0;
+                        }
+    debug_print("%s : Mistake in prolog.\n",prolog);
     return 1;                   
 }
+
+int checkDeclare(FILE *fp,int *lineNum)
+{
+    TokenList *tmpList = NULL; 
+    
+    //arrays to compare with
+    char *cmpData[7] = {"declare",NULL,"strict_types",NULL,"1",NULL,NULL};
+    TokenType cmpType[7] = {t_functionId,t_lPar,t_functionId,t_assign,t_int,t_rPar,t_semicolon};
+
+    for (int i = 0; i < 7; i++) //get all tokens declare ( strict_types = 1 ) ; = 7 in total
+    {
+        tmpList = appendToken(tmpList,getToken(fp,lineNum)); //append next token to list of token
+        
+        if(tmpList->TokenArray[i] == NULL)//expected 7 tokens, not less
+        {
+            free(tmpList);
+            return 1;
+        }
+
+        if (tmpList->TokenArray[i]->type == cmpType[i])//compare token type
+        {
+            if(cmpType[i] == t_functionId || cmpType[i] == t_int)//if id / int
+            {    // if those are the same go onto another token
+                if (!strcmp(tmpList->TokenArray[i]->data , cmpData[i])) 
+                    continue; //data are valid
+            }
+            else
+                continue; //type is valid, where data is irelevant
+        }
+        listDtor(tmpList); //either type or data is not right
+        debug_print("%d - Mistake in declare - types\n",i); 
+        return 1;
+    }
+    listDtor(tmpList);
+    return 0;                    
+}
+
 
 Token *getKeyword(Token *token)
 {
@@ -116,11 +156,11 @@ char *parseString(char *data)
         return data;
     
 
-    while (data[i] != '\0')
+    while (data[i] != '\0') //look through the whole data string
     {
         if (data[i] == '\\') //if bs appears go through valid sequenses
         {
-            i++;//look i ahead.
+            i++;//look 1 ahead.
             switch (data[i])
             {
             case '\\':
@@ -137,30 +177,47 @@ char *parseString(char *data)
             case '$':
                 new = appendChar(new, data[i]);
                 break;
-            case 'x':
-                i++;//move pointer
-                if ( 256 > strtol(data+i,NULL,16)&& isxdigit(data[i+1]))
+
+            case 'x'://look for haxa num
+                i++;//look 1 ahead = now i is pointing to first digit
+                //strtol functioni returns value of number in string, stops only when the sequence of numbers is broken
+                //could possibly read more or less than 2 digits
+                //works on base of 10/8/16 -> transfers it to decimal
+                //could move a pointer with 2nd argument but it is not wanted
+                if ( 256 > strtol(data+i,NULL,16) && strtol(data+i,NULL,16) > 0 && isxdigit(data[i+1])) // check if there are 2 digits
                 {
-                    new = appendChar(new,(char)strtol(data+i,NULL,16) );//strtol converts
+                    new = appendChar(new,(char)strtol(data+i,NULL,16) );//strtol converts -> append value to new arr
                     i +=1;//move pointer
                     break;
                 }
                 free(data);
                 free(new);
                 return NULL; // error
-            case '0' ... '7':
-                if( 256 > (int)strtol(data+i,NULL,8)&& isdigit(data[i+1]) && isdigit(data[i+2]))
+
+            case '0' ... '9'://look for okta numbers
+                if(isdigit(data[i+1]) && isdigit(data[i+2])) // 2 hexa digits must following 
                 {
-                    new = appendChar(new, (char)strtol(data+i,NULL,8));//strtol converts
-                    i +=2;//move poiter
-                    break;
+                    //from characters value subs value ord value of 0 and we get an integer value representing the number in char
+                    if (((int)data[i]-'0')<=3 && ((int)data[i+1]-'0')<=7 && ((int)data[i+2]-'0')<=7)//check if its okta number
+                    {
+                        //temporary array to only take into accout first 3 digits so strol(conversion) can be performed on only firs 3 digits
+                        char tmp[4] = {data[i], data[i+1], data[i+2], '\0'}; 
+
+                        if ( 256 > (int)strtol(tmp,NULL,8) && (int)strtol(tmp,NULL,8) > 0) //check value
+                        {
+                            new = appendChar(new, (char)strtol(tmp,NULL,8));//strtol converts
+                            i +=2;//move poiter
+                            break;
+                        }
+                    }
                 }
                 free(data);
                 free(new);
                 return NULL; // error 
                 
-            default:
-                new = appendChar(new, (char)strtol(data+i,NULL,8));
+            default: //not an escape sequence put bs back into the array
+                i--;//needs to go 1 back 
+                new = appendChar(new,'\\');
 
             }//end of switch
         }
@@ -174,14 +231,14 @@ char *parseString(char *data)
             }
             new = appendChar(new, data[i]);
         }
+        
         i++;//move onto next character
-    }
+
+    }   //while cycle
     free(data);
     return new;
 }
 
-//setup token
-//return new token
 Token* tokenCtor(TokenType type, int lineNum, char* data)
 {
     Token *new = malloc(sizeof(Token)); //allocates memory for new token
@@ -202,6 +259,7 @@ Token* tokenCtor(TokenType type, int lineNum, char* data)
             if (new->data == NULL)
             {
                 debug_print("Line %d: Lexical error inside string-parseString",lineNum);
+                tokenDtor(new);
                 return NULL; // error inside string
             }
         }
@@ -728,9 +786,6 @@ void listDtor(TokenList *list)
     }
 }
 
-/* TODO */
-
-
 void printToken(Token*token)
 {
     if (token->data == NULL)
@@ -752,14 +807,13 @@ void prinTokenList(TokenList *list)
 //NULL to propagate error
 TokenList *lexAnalyser(FILE *fp)
 {
-    if (checkProlog(fp))
+    int lineNum = 0; //lin number
+
+    if (checkProlog(fp,&lineNum))
         return NULL;
     
     TokenList *list = NULL; //structure to string tokens together
     Token* curToken = NULL; //token cursor
-
-    int lineNum = 1; //on what line token is found
-                     //starts on line number (prolog is on line 1)
 
     //loop through the program - get & append tokens
     while (1)
