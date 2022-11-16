@@ -7,6 +7,9 @@ VarInfo substringParams[] = {{string_t, "s"},{int_t, "i"},{int_t, "j"}};
 VarInfo ordParams[] = {{string_t, "c"}};
 VarInfo chrParams[] = {{int_t, "i"}};
 
+
+//Function info
+
 const FunctionInfo integratedFunctions[] =
 {
     {"reads", 0, NULL, null_string_t},
