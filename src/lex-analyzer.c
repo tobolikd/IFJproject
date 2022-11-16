@@ -501,14 +501,19 @@ Token* getToken(FILE* fp,int *lineNum)
             break;
 
         case QuestionMark:
-            if (curEdge == '>')
-            {
-                curState = AlmostEndOfProgram; 
-                break;
-            }
-            else if (isalpha(curEdge))//look for data type
+            if (isalpha(curEdge))//look for data type
             {
                 data = appendChar(data, curEdge);
+                break;
+            }
+            else if (curEdge == '>')
+            {
+                if (data != NULL) // > came after some characters
+                {
+                    free(data);
+                    return NULL;
+                }
+                curState = AlmostEndOfProgram; 
                 break;
             }
             if (checkDataType(data))//returns 1 it is a valid data type
