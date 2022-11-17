@@ -7,6 +7,7 @@ set(PROJECT_FILES
     src/syn-analyzer.c
     src/symtable.c
     src/ast.c
+    src/stack.c
     src/code-gen.c
 )
 
