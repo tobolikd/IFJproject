@@ -5,6 +5,7 @@ SOURCES += lex-analyzer.c
 SOURCES += syn-analyzer.c
 SOURCES += code-gen.c
 SOURCES += ast.c
+SOURCES += stack.c
 SOURCES += symtable.c
 SOURCES += main.c
 
