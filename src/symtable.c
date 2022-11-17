@@ -21,12 +21,20 @@ value_t ht_value_ctor(var_type_t dataType, char* data )
 
   //attach the correct value based on data type
   if (dataType == int_t || dataType == null_int_t)
+  {
+    new.intVal = malloc(sizeof(int));
     *new.intVal = atoi(data);
+  }
   else if (dataType == float_t || dataType == null_float_t)
+  {
+    new.intVal = malloc(sizeof(float));
     *new.floatVal = atof(data);
+  }
   else if (dataType == string_t || dataType == null_string_t)
+  {
+    new.intVal = malloc((strlen(data)+1)*sizeof(char));
     new.stringVal = data;
-
+  }
   return new;
 }
 
@@ -52,12 +60,6 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
   return;
 }
 
-/// @brief 
-/// @param identifier name of the funciton
-/// @param type 
-/// @param tokenData NULL when function 
-/// @param  
-/// @return 
 ht_item_t *ht_item_ctor(char* identifier, var_type_t type, char *tokenData, bool isFunction)
 {
   ht_item_t *new = malloc(sizeof(ht_item_t));
@@ -320,4 +322,3 @@ char *ht_list_get_string(ht_list_t* list, char *key)
   }
   return NULL;
 }
-

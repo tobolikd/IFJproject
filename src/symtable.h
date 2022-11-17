@@ -56,7 +56,7 @@ typedef union
 {
   var_info_t var_data;
   fnc_info_t fnc_data;
-}symbol_data;
+} symbol_data;
 
 /// @brief general item in hash table - could be variable or fnc 
 typedef struct ht_item {
@@ -74,7 +74,7 @@ typedef struct
 {
   ht_table_t table; //list of hash tables
   int len;
-}ht_list_t;
+} ht_list_t;
 
 /// @brief Returns hash for key. 
 int get_hash(char *key);
