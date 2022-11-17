@@ -1,7 +1,7 @@
 #include "lex-analyzer.h"
 #include "sem-analyzer.h"
 #include "error-codes.h"
-#include "hashtable.h"
+#include "symtable.h"
 
 #include <stdbool.h>
 #include <string.h>

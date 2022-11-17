@@ -34,7 +34,7 @@ valgrind: compile_tests
 	valgrind --leak-check=full --show-leak-kinds=all build/tests-all ./build/tests-all || true
 
 clean:
-	@rm -f $(PROJECT)
+	rm -f $(PROJECT)
 
 purge: clean
-	@rm -fr build
+	rm -fr build
