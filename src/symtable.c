@@ -15,27 +15,66 @@ int get_hash(char *key) {
   return (result % HT_SIZE); 
 }
 
-value_t ht_create_value(TokenType dataType, char* value, bool isNullType )
+value_t ht_value_ctor(var_type_t dataType, char* data )
 {
   value_t new;
-  new.floatVal = NULL;
-  new.intVal = NULL;
-  new.stringVal = NULL;
-
-  //these data types may contain NULL
-  if (isNullType)
-    new.nullType = true;
-  else
-    new.nullType = false;
 
   //attach the correct value based on data type
-  if (dataType == t_int)
-    *new.intVal = atoi(value);
-  else if (dataType == t_float)
-    *new.floatVal = atof(value);
-  else if (dataType == t_string)
-    new.stringVal = value;
+  if (dataType == int_t || dataType == null_int_t)
+    *new.intVal = atoi(data);
+  else if (dataType == float_t || dataType == null_float_t)
+    *new.floatVal = atof(data);
+  else if (dataType == string_t || dataType == null_string_t)
+    new.stringVal = data;
 
+  return new;
+}
+
+void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
+{
+  param_info_t *new = malloc(sizeof(param_info_t));
+  new->type = type;
+  new->varId = name;
+
+  if (appendTo->data.fnc_data.paramCount == 0)
+  {
+    appendTo->data.fnc_data.params = new;
+    appendTo->data.fnc_data.paramCount = 1;
+  }
+  else
+  {
+    param_info_t *cur = appendTo->data.fnc_data.params;
+    appendTo->data.fnc_data.paramCount++;
+    while(cur->next != NULL) // append as last.
+      cur = appendTo->data.fnc_data.params->next; 
+    cur->next = new;
+  }
+  return;
+}
+
+/// @brief 
+/// @param identifier name of the funciton
+/// @param type 
+/// @param tokenData NULL when function 
+/// @param  
+/// @return 
+ht_item_t *ht_item_ctor(char* identifier, var_type_t type, char *tokenData, bool isFunction)
+{
+  ht_item_t *new = malloc(sizeof(ht_item_t));
+  new->identifier = identifier;
+  new->isfnc = isFunction;
+  new->next = NULL;
+  if (isFunction)
+  {
+    new->data.fnc_data.returnType = type;
+    new->data.fnc_data.paramCount = 0;
+    new->data.fnc_data.params = NULL;
+  }
+  else
+  {
+    new->data.var_data.value = ht_value_ctor(type,tokenData); 
+    new->data.var_data.type = type;
+  }
   return new;
 }
 
@@ -51,38 +90,39 @@ ht_item_t *ht_search(ht_table_t table, char *key) {
   ht_item_t *item = table[hash]; 
   while (item != NULL)
   {
-    if (item->key == key)
+    if (item->identifier == key)
       return item;
-    if (item->next != NULL)
-      item = item->next;
-    else 
-      return NULL;
+    item = item->next;
   }
   return item;//either NULL or poinetr
 }
 
-void ht_insert(ht_table_t table, char *key, value_t value) {
-  ht_item_t *item = ht_search(table,key); // look if exists
-  if (item == NULL) // key doesnt exists in the table
-  {
-    int hash = get_hash(key);
-    ht_item_t *new = malloc(sizeof(ht_item_t)); //create new
-    new->key=key;
-    new->value=value;
-    new->next=table[hash];
-    table[hash] = new; //insert first
-  }
-  else //there already exists key
-  {
-    item->value = value;
-  }
+void ht_insert(ht_table_t table, ht_item_t *item) 
+{
+  ht_item_t *searched = ht_search(table,item->identifier); // look if exists
+  int hash = get_hash(item->identifier);
+
+  if (searched != NULL) //item exists, replace.
+    ht_delete(table,item->identifier);
+
+  item->next=table[hash];
+  table[hash] = item; //insert first
 }
 
-float *ht_get_float(ht_table_t table, char *key) {
+float *ht_get_float(ht_table_t table, char *key) 
+{
   ht_item_t *item = ht_search(table, key);
+  
   if (item != NULL)
   {
-    return item->value.floatVal;
+    if (item->data.var_data.value.floatVal == NULL )
+    {
+      if (item->data.var_data.type != null_float_t)
+      {
+        /* ERROR */
+      }
+    }
+    return item->data.var_data.value.floatVal;
   }
   return NULL;
 }
@@ -91,7 +131,7 @@ int *ht_get_int(ht_table_t table, char *key) {
   ht_item_t *item = ht_search(table, key);
   if (item != NULL)
   {
-    return item->value.intVal;
+    return item->data.var_data.value.intVal;
   }
   return NULL;
 }
@@ -100,9 +140,34 @@ char *ht_get_string(ht_table_t table, char *key) {
   ht_item_t *item = ht_search(table, key);
   if (item != NULL)
   {
-    return item->value.stringVal;
+    return item->data.var_data.value.stringVal;
   }
   return NULL;
+}
+
+void ht_item_dtor(ht_item_t *item)
+{
+  if (item->isfnc)
+  {
+    param_info_t *cur = item->data.fnc_data.params;
+    param_info_t *tmp = cur;
+    while (cur != NULL)
+    {
+      free(cur);
+      cur = tmp->next;
+      tmp = cur;
+    }
+  }
+  else
+  {
+    if (item->data.var_data.type == int_t || item->data.var_data.type == null_int_t)
+      free(item->data.var_data.value.intVal);
+    else if (item->data.var_data.type == float_t || item->data.var_data.type == null_float_t)
+      free(item->data.var_data.value.floatVal);
+    else if (item->data.var_data.type == string_t || item->data.var_data.type == null_string_t)
+      free(item->data.var_data.value.stringVal);
+  }
+  free(item);
 }
 
 void ht_delete(ht_table_t table, char *key) {
@@ -112,7 +177,7 @@ void ht_delete(ht_table_t table, char *key) {
   
   while (item != NULL) // it might exist 
   {
-    if (item->key == key)// del me
+    if (item->identifier == key)// del me
     {
       if (prev == item) // meaning the very first
       {
@@ -120,10 +185,7 @@ void ht_delete(ht_table_t table, char *key) {
           table[hash] = item->next;
         else
           table[hash] = NULL;
-        free(item->value.floatVal);
-        free(item->value.intVal);
-        free(item->value.stringVal);
-        free(item);
+        ht_item_dtor(item);
         return;
       }
       else  
@@ -133,11 +195,7 @@ void ht_delete(ht_table_t table, char *key) {
         else
           prev->next = NULL;
 
-        free(item->value.floatVal);
-        free(item->value.intVal);
-        free(item->value.stringVal);
-        free(item);
-
+        ht_item_dtor(item);
         return;
       }
     }
@@ -162,10 +220,7 @@ void ht_delete_all(ht_table_t table) {
     if (*destroyLater!=NULL)
       for (int j = 0; j < count; j++)
       {
-        free(destroyLater[j]->value.floatVal);
-        free(destroyLater[j]->value.stringVal);
-        free(destroyLater[j]->value.intVal);
-        free(destroyLater[j]);
+        ht_item_dtor(destroyLater[j]);
         destroyLater[j] = NULL;
       }
     table[i] = NULL; //to init state

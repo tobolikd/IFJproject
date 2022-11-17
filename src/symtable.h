@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include "lex-analyzer.h"
+#include "syn-analyzer.h"
 
 #define MAX_HT_SIZE 251 // highest prime number < 256
 
@@ -15,29 +16,55 @@ typedef struct{
 } variable_t ;
 
 /// @brief access to all data types
-typedef struct{
+typedef union{
   char *stringVal;    
   float *floatVal;     
   int *intVal;
-  bool nullType;            // can be null - "?" declaration
 } value_t ;
 
-/// @brief general item in hash table - could be variable or function 
-typedef struct ht_item {
-  char *key;                 // function / variable name
-  //return type / variable type
-  TokenType dataType;       // expect t_int t_float t_string
-  
-  //for Function
-  bool declared;            // if declaration => true
-  variable_t *argument;     // list of arguments
+ typedef enum
+{
+    void_t,
+    int_t,
+    string_t,
+    float_t,
+    null_int_t,
+    null_string_t,
+    null_float_t
+} var_type_t;
 
-  //for Variables
-  value_t value;            // value of variable
-  
+typedef struct param_info_t
+{
+    char *varId;
+    var_type_t type;
+    struct param_info_t *next;
+} param_info_t;
+
+typedef struct
+{
+    var_type_t type;
+    value_t value;
+} var_info_t;
+typedef struct
+{
+    int paramCount;
+    param_info_t *params;
+    var_type_t returnType;
+} fnc_info_t;
+
+typedef union 
+{
+  var_info_t var_data;
+  fnc_info_t fnc_data;
+}symbol_data;
+
+/// @brief general item in hash table - could be variable or fnc 
+typedef struct ht_item {
+  bool isfnc;                 
+  char *identifier;
+  symbol_data data;
   struct ht_item *next;     // next alias
 } ht_item_t;
-
 
 /// @brief hash table 
 typedef ht_item_t *ht_table_t[MAX_HT_SIZE];
@@ -48,23 +75,36 @@ typedef struct
   ht_table_t table; //list of hash tables
   int len;
 }ht_list_t;
- 
 
 /// @brief Returns hash for key. 
 int get_hash(char *key);
 
+/// @brief Creates ht_value_t structure.
+/// @param data Data to be converted into its respective value.
+value_t ht_value_ctor(var_type_t dataType, char* data );
+
+/// @brief Appends new parameter to an existig item.
+/// @param appendTo Item to append the parameter to.
+/// @param name Id of parameter.
+/// @param type Data type of parameter.
+void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type);
+
+/// @brief Creates pointer to item.
+/// @param identifier Id of the item.
+/// @param type Return type of function / data type of variable.
+/// @param tokenData Data of token. Stored in string.
+/// @param isFunction Switch between function / variable.
+ht_item_t *ht_item_ctor(char* identifier, var_type_t type, char *tokenData, bool isFunction);
+
 /// @brief Initiates table. 
 void ht_init(ht_table_t table);
-
-/// @brief Generates value_t. 
-value_t ht_create_value(TokenType dataType, char* value, bool isNullType);
 
 /// @brief Searches table for wanted item.
 /// @return Pointer to item or NULL.
 ht_item_t *ht_search(ht_table_t table, char *key);
 
 /// @brief Insert item to table as first item in alias list.
-void ht_insert(ht_table_t table, char *key, value_t value);
+void ht_insert(ht_table_t table, ht_item_t *item);
 
 /// @brief Return value .
 /// @return NULL if there is not wanted item.
@@ -81,11 +121,17 @@ int *ht_get_int(ht_table_t table, char *key);
 /// @return Pointer to string.
 char *ht_get_string(ht_table_t table, char *key);
 
+void ht_item_dtor(ht_item_t *item);
+
 /// @brief Deletes key item. 
 void ht_delete(ht_table_t table, char *key);
 
 /// @brief Deletes whole hash table.
 void ht_delete_all(ht_table_t table);
+
+
+
+/* LIST */
 
 void ht_list_init(ht_list_t *table);
 
