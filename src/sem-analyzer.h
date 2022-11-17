@@ -4,58 +4,12 @@
 #include "symtable.h"
 #include "lex-analyzer.h"
 
-// type of variable
-typedef enum
-{
-    void_t,
-    int_t,
-    string_t,
-    float_t,
-    null_int_t,
-    null_string_t,
-    null_float_t
-} VarType;
-
-/* variable info
- * type - VarType
- * varId - variable name (aka identifier)
- */
-typedef struct
-{
-    VarType type;
-    char *varId;
-} VarInfo;
-
-/* variable info
- * type - VarType
- * varId - variable name (aka identifier)
- */
-typedef struct param_info_t
-{
-    VarType type;
-    char *varId;
-    struct param_info_t *next;
-} ParamInfo;
-
-/* function info
- * functionId - function name (aka identifier)
- * paramCount - number of parametres
- * params - pointer to list of parametres
- * returnType - VarType of return value
- */
-typedef struct
-{
-    char *functionId;
-    int paramCount;
-    ParamInfo *params;
-    VarType returnType;
-} FunctionInfo;
-
 #define FOREACH_EXPR_TYPE(TYPE)\
     TYPE(FunDeclare)\
     TYPE(Assign)\
     TYPE(Operation)\
     TYPE(VarDeclare)\
+
 
 typedef enum
 {
@@ -72,6 +26,6 @@ extern const char *EXPR_TYPE_STRING[];
  *
  * @return true of false according to check result
  */
-bool semCheck(ExprType type, Token *start, Token *end);
+bool semCheck(ExprType type, TokenList *tokenArray, int startToken, int endToken);
 
 #endif // IFJ_SEM_ANALYZER_H
