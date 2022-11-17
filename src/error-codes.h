@@ -7,7 +7,7 @@ enum ifjErrCode {
     SUCCESS = 0, // no error
     LEXICAL_ERR = 1, // incorrect lexeme structure
     SYNTAX_ERR = 2, // incorrect syntax
-    SEMANTIC_FUNCTION_DEFINITION_ERR = 3, // undefined function, 
+    SEMANTIC_FUNCTION_DEFINITION_ERR = 3, // undefined function,
     SEMANTIC_RUN_PARAMETER_ERR = 4, // incorrect type/count in function call
                                     // or incorrect return value type
     SEMANTIC_VARIABLE_ERR = 5, // usage of undefined variable

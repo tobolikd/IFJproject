@@ -22,7 +22,7 @@ int main () {
     printTokenList(list);
 #endif
 
-    // free memory 
+    // free memory
     listDtor(list);
     fclose(fp);
     /* END OF SCANNER */

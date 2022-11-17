@@ -41,7 +41,7 @@ typedef struct
     var_type_t returnType;
 } fnc_info_t;
 
-typedef union 
+typedef union
 {
   var_info_t var_data;
   fnc_info_t fnc_data;
@@ -79,7 +79,7 @@ ht_item_t *ht_item_ctor(char* identifier, var_type_t type, bool isFunction);
 
 /// @brief Creates hash table with MAX_HT_SIZE size.
 /// @return Pointer to newly created hash table.
-ht_table_t *ht_init() ;
+ht_table_t *ht_init();
 
 /// @brief Searches symtable for item with coresponding key.
 /// @return Pointer to item.

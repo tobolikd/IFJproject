@@ -8,13 +8,13 @@
 enum ifjErrCode errorCode;
 
 // init STATE_STRING
-const char *STATE_STRING[] = 
+const char *STATE_STRING[] =
 {
     FOREACH_STATE(GENERATE_STRING)
 };
 
 // init TOKEN_TYPE_STRING
-const char *TOKEN_TYPE_STRING[] = 
+const char *TOKEN_TYPE_STRING[] =
 {
     FOREACH_TOKEN_TYPE(GENERATE_STRING)
 };
@@ -26,25 +26,25 @@ int checkProlog(FILE* fp, int *lineNum)
     if(prolog[0]==fgetc(fp) )
         if(prolog[1]==fgetc(fp))
             if(prolog[2]==fgetc(fp))
-                if(prolog[3]==fgetc(fp))  
+                if(prolog[3]==fgetc(fp))
                     if(prolog[4]==fgetc(fp))
                         {
                             char c = fgetc(fp);
                             ungetc(c,fp); //if end of line i want to catch it in KA
-                            //white sign, comment.. 
-                            if (c=='\n' || c ==EOF || c == ' ' || c == '\t' || c == '/') 
+                            //white sign, comment..
+                            if (c=='\n' || c ==EOF || c == ' ' || c == '\t' || c == '/')
                                 //check declare type ..
-                                if(!checkDeclare(fp,lineNum)) 
+                                if(!checkDeclare(fp,lineNum))
                                     return 0;
                         }
     debug_print("%s : Mistake in prolog.\n",prolog);
-    return 1;                   
+    return 1;
 }
 
 int checkDeclare(FILE *fp,int *lineNum)
 {
-    TokenList *tmpList = NULL; 
-    
+    TokenList *tmpList = NULL;
+
     //arrays to compare with
     char *cmpData[7] = {"declare",NULL,"strict_types",NULL,"1",NULL,NULL};
     TokenType cmpType[7] = {t_functionId,t_lPar,t_functionId,t_assign,t_int,t_rPar,t_semicolon};
@@ -52,7 +52,7 @@ int checkDeclare(FILE *fp,int *lineNum)
     for (int i = 0; i < 7; i++) //get all tokens declare ( strict_types = 1 ) ; = 7 in total
     {
         tmpList = appendToken(tmpList,getToken(fp,lineNum)); //append next token to list of token
-        
+
         if(tmpList->TokenArray[i] == NULL)//expected 7 tokens, not less
         {
             free(tmpList);
@@ -63,18 +63,18 @@ int checkDeclare(FILE *fp,int *lineNum)
         {
             if(cmpType[i] == t_functionId || cmpType[i] == t_int)//if id / int
             {    // if those are the same go onto another token
-                if (!strcmp(tmpList->TokenArray[i]->data , cmpData[i])) 
+                if (!strcmp(tmpList->TokenArray[i]->data , cmpData[i]))
                     continue; //data are valid
             }
             else
                 continue; //type is valid, where data is irelevant
         }
         listDtor(tmpList); //either type or data is not right
-        debug_print("%d - Mistake in declare - types\n",i); 
+        debug_print("%d - Mistake in declare - types\n",i);
         return 1;
     }
     listDtor(tmpList);
-    return 0;                    
+    return 0;
 }
 
 
@@ -122,7 +122,7 @@ Token *getKeyword(Token *token)
             token->type = t_function;
             free(token->data);
             token->data=NULL;
-        }    
+        }
     }
     return token;
 }
@@ -136,7 +136,7 @@ char* appendChar(char *data, char dataToBeInserted)
         len = 1;
     else
         len = strlen(data)+1; // length of string + 1 + terminating null byte ('\0')
-    
+
     data = realloc(data,(len+1)*sizeof(char));
     CHECK_MALLOC_PTR(data);
 
@@ -152,7 +152,7 @@ char *parseString(char *data)
 
     if (data[i] == '\0')
         return data;
-    
+
 
     while (data[i] != '\0') //look through the whole data string
     {
@@ -193,13 +193,13 @@ char *parseString(char *data)
                 return NULL; // error
 
             case '0' ... '9'://look for okta numbers
-                if(isdigit(data[i+1]) && isdigit(data[i+2])) // 2 hexa digits must following 
+                if(isdigit(data[i+1]) && isdigit(data[i+2])) // 2 hexa digits must following
                 {
                     //from characters value subs value ord value of 0 and we get an integer value representing the number in char
                     if (((int)data[i]-'0')<=3 && ((int)data[i+1]-'0')<=7 && ((int)data[i+2]-'0')<=7)//check if its okta number
                     {
                         //temporary array to only take into accout first 3 digits so strol(conversion) can be performed on only firs 3 digits
-                        char tmp[4] = {data[i], data[i+1], data[i+2], '\0'}; 
+                        char tmp[4] = {data[i], data[i+1], data[i+2], '\0'};
 
                         if ( 256 > (int)strtol(tmp,NULL,8) && (int)strtol(tmp,NULL,8) > 0) //check value
                         {
@@ -211,25 +211,25 @@ char *parseString(char *data)
                 }
                 free(data);
                 free(new);
-                return NULL; // error 
-                
+                return NULL; // error
+
             default: //not an escape sequence put bs back into the array
-                i--;//needs to go 1 back 
+                i--;//needs to go 1 back
                 new = appendChar(new,'\\');
 
             }//end of switch
         }
-        else //if there cur is not backslash 
+        else //if there cur is not backslash
         {
             if (data[i] == '$') //dollar may only be inserted after backslash
             {
                 free(data);
                 free(new);
-                return NULL; // error 
+                return NULL; // error
             }
             new = appendChar(new, data[i]);
         }
-        
+
         i++;//move onto next character
 
     }   //while cycle
@@ -261,7 +261,7 @@ Token* tokenCtor(TokenType type, int lineNum, char* data)
             }
         }
     }
-    
+
     return new;
 }
 
@@ -278,7 +278,7 @@ TokenList *appendToken(TokenList *list, Token* newToken)
     }
     else
     {
-        //allocate memory for new token 
+        //allocate memory for new token
         list->length++;
         list->TokenArray = realloc(list->TokenArray,(list->length+1)*sizeof(Token));
     }
@@ -302,7 +302,7 @@ int checkDataType(char *data)
         return 1;
     else if (!strcmp(data,"float"))
         return 1;
-    return 0;    
+    return 0;
 }
 
 
@@ -314,7 +314,7 @@ Token* getToken(FILE* fp,int *lineNum)
     char curEdge = fgetc(fp);
     char *data = NULL;
 
-    while (1) //until you get a token -> whole finite state 
+    while (1) //until you get a token -> whole finite state
     {
         if (curEdge == EOF)
         {
@@ -329,7 +329,7 @@ Token* getToken(FILE* fp,int *lineNum)
 
             case ID:
                 return tokenCtor(t_functionId, *lineNum, data);
-            
+
             case StarComment:
                 return NULL;
 
@@ -346,18 +346,18 @@ Token* getToken(FILE* fp,int *lineNum)
                 if (checkDataType(data))
                     return tokenCtor(t_nullType, *lineNum, data);
                 free(data);
-                return NULL;                
+                return NULL;
 
             default:
                 break;
             }
         }
-        
+
         switch (curState)
         {
         case Start:
             //white signs
-            if (curEdge == ' ' || curEdge == '\t') 
+            if (curEdge == ' ' || curEdge == '\t')
                 break;
             if (curEdge == '\n')//count number of lines for function foundToken & debug
             {
@@ -382,7 +382,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if (isdigit(curEdge))
             {
                 data = appendChar(data, curEdge); //attach the caller
-                curState = Int; 
+                curState = Int;
                 break;
             }
             if (curEdge == '$')
@@ -412,7 +412,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if (curEdge =='!')
             {
                 data = appendChar(data, curEdge); //attach the caller
-                curState = ExclamMark; 
+                curState = ExclamMark;
                 break;
             }
             if (curEdge == ';')
@@ -440,7 +440,7 @@ Token* getToken(FILE* fp,int *lineNum)
             	data = appendChar(data, curEdge);
             	return tokenCtor(t_operator, *lineNum, data);
             }
-            if (curEdge =='.') 
+            if (curEdge =='.')
             {
             	data = appendChar(data, curEdge);
             	return tokenCtor(t_operator, *lineNum, data);
@@ -449,7 +449,7 @@ Token* getToken(FILE* fp,int *lineNum)
             	return tokenCtor(t_comma, *lineNum, data);
             if (curEdge ==':')
             	return tokenCtor(t_colon, *lineNum, data);
-            
+
             debug_print("At line: %d START -> %c : Not recognised\n", *lineNum,curEdge);
             free(data);
             return NULL;
@@ -469,7 +469,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 curState = StarComment; break;
             }
             ungetc(curEdge,fp); //catch the "force-out" edge
-            return tokenCtor(t_operator, *lineNum, data);            
+            return tokenCtor(t_operator, *lineNum, data);
 
         case LineComment:
             if (curEdge == '\n')
@@ -511,7 +511,7 @@ Token* getToken(FILE* fp,int *lineNum)
                     free(data);
                     return NULL;
                 }
-                curState = AlmostEndOfProgram; 
+                curState = AlmostEndOfProgram;
                 break;
             }
             if (checkDataType(data))//returns 1 it is a valid data type
@@ -521,9 +521,9 @@ Token* getToken(FILE* fp,int *lineNum)
             }
             free(data);
             return NULL;
-        
+
         case AlmostEndOfProgram:
-            return NULL; //nothing should come after ?>    
+            return NULL; //nothing should come after ?>
 
         case ID:
             if (isalnum(curEdge) || curEdge == '_')  //alphanumeric or punctuation mark
@@ -542,8 +542,8 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge); //attach the caller
                 break;
             }
-            return NULL; //dollar sign isnt final state 
-            
+            return NULL; //dollar sign isnt final state
+
         case VarID:
             if (isalnum(curEdge) || curEdge == '_')
             {
@@ -598,7 +598,7 @@ Token* getToken(FILE* fp,int *lineNum)
             }
             ungetc(curEdge, fp);
             return tokenCtor(t_assign, *lineNum, data);
-            
+
         case DoubleEqual:
             if (curEdge == '=')
             {
@@ -693,7 +693,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if (data[strlen(data)-1] == 'e' || data[strlen(data)-1] == 'E' )
             {
                 debug_print("Line %d - %c Unpropper double number ending.\n", *lineNum,curEdge);
-                free(data);                
+                free(data);
                 return NULL;
             }
             //previous state == EulNUmExtra
@@ -726,7 +726,7 @@ Token* getToken(FILE* fp,int *lineNum)
             debug_print("Line %d - Lexical error.\n", *lineNum);
             free(data);
             return NULL; //return error
-            
+
         case GreaterThanSign:
             if (curEdge == '=')
             {
@@ -748,7 +748,7 @@ Token* getToken(FILE* fp,int *lineNum)
         default:
             break;
 
-        } // end of switch 
+        } // end of switch
 
         if(curEdge == EOF && curState != Start)
         {
@@ -782,7 +782,7 @@ void listDtor(TokenList *list)
             if (list->TokenArray[i] != NULL)
                 tokenDtor(list->TokenArray[i]);
         }
-    
+
         if (list->TokenArray != NULL)
             free(list->TokenArray);
         free(list);
@@ -814,7 +814,7 @@ TokenList *lexAnalyser(FILE *fp)
 
     if (checkProlog(fp,&lineNum))
         return NULL;
-    
+
     TokenList *list = NULL; //structure to string tokens together
     Token* curToken = NULL; //token cursor
 
@@ -823,14 +823,14 @@ TokenList *lexAnalyser(FILE *fp)
     {
         curToken = getToken(fp,&lineNum); //get token
 
-        //getToken returned NULL this means error ! 
-        if (curToken == NULL) 
+        //getToken returned NULL this means error !
+        if (curToken == NULL)
         {
             listDtor(list);
             errorCode = LEXICAL_ERR;
             return NULL;
         }
-        
+
         //EOF - dont append this token
         if (curToken->type == t_EOF)
         {
