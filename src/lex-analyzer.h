@@ -55,7 +55,7 @@
 
 typedef enum
 {
-    FOREACH_STATE(GENERATE_ENUM) 
+    FOREACH_STATE(GENERATE_ENUM)
 } AutoState;
 
 // get state string by using STATE_STRING[AutoState]
@@ -89,21 +89,21 @@ extern const char *STATE_STRING[];
 
 typedef enum
 {
-   FOREACH_TOKEN_TYPE(GENERATE_ENUM) 
+   FOREACH_TOKEN_TYPE(GENERATE_ENUM)
 } TokenType;
 
 // get token type string by using TOKEN_TYPE_STRING[TokenType]
 extern const char *TOKEN_TYPE_STRING[];
 
-typedef struct 
+typedef struct
 {
     TokenType type; // token type represented by enum TokenType
     char* data; //additional data for some tokens.
-    int lineNum; //line on which was token found in a given file. 
+    int lineNum; //line on which was token found in a given file.
 }Token;
 
 /// @brief Structure to keep information about a length of array of tokens.
-typedef struct 
+typedef struct
 {
     Token **TokenArray; //array of tokens.
     int length; //length of the list.
@@ -154,16 +154,16 @@ TokenList *appendToken(TokenList *list, Token* newToken);
 Token *getToken(FILE* fp,int *lineNum);
 
 /// @brief Frees memory of tokens data and token itslef.
-/// @param token 
+/// @param token
 void tokenDtor(Token *token);
 
 /// @brief Frees token array with its data and tokenList itself.
-/// @param list 
+/// @param list
 void listDtor(TokenList*list);
 
 /// @brief Searches file for tokens. Saves them gradually in token array.
 /// @param fp Pointer to a searched file.
-/// @return Pointer to TokenList with every found tokens in an array of tokens with its additional data. NULL if data were not recognized or fail. 
+/// @return Pointer to TokenList with every found tokens in an array of tokens with its additional data. NULL if data were not recognized or fail.
 TokenList *lexAnalyser(FILE *fp);
 
 /// @brief Print out given token. [LineNum Lexeme Data]

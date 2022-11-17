@@ -13,7 +13,7 @@ int get_hash(char *key)
   for (int i = 0; i < length; i++) { // sum of every character x characters index into result
     result += key[i] * (i+1);
   }
-  return (result % HT_SIZE); 
+  return (result % HT_SIZE);
 }
 
 
@@ -37,7 +37,7 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
     param_info_t *cur = appendTo->data.fnc_data.params;
     appendTo->data.fnc_data.paramCount++;
     while(cur->next != NULL)          // append as last.
-      cur = appendTo->data.fnc_data.params->next; 
+      cur = appendTo->data.fnc_data.params->next;
     cur->next = new;
   }
   return;
@@ -139,7 +139,7 @@ void ht_delete(ht_table_t *table, char *key) {
   int hash = get_hash(key);
   ht_item_t *item = table->items[hash];
   ht_item_t *prev = table->items[hash];
-  
+
   while (item != NULL) // item exists
   {
     if (item->identifier == key)// item found
