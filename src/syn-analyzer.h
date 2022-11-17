@@ -1,7 +1,7 @@
 #ifndef IFJ_SYN_ANALYZER_H
 #define IFJ_SYN_ANALYZER_H
 
-#include "hashtable.h"
+#include "symtable.h"
 
 // extern const fnc_info_t integratedFunctions[];
 

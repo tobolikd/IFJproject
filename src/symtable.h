@@ -1,5 +1,5 @@
-#ifndef IFJ_HASH_TABLE_H
-#define IFJ_HASH_TABLE_H
+#ifndef IFJ_SYM_TABLE_H
+#define IFJ_SYM_TABLE_H
 
 #include <stdbool.h>
 #include "lex-analyzer.h"
@@ -39,6 +39,7 @@ typedef struct
     var_type_t type;
     value_t value;
 } var_info_t;
+
 typedef struct
 {
     int paramCount;
@@ -50,7 +51,7 @@ typedef union
 {
   var_info_t var_data;
   fnc_info_t fnc_data;
-}symbol_data;
+} symbol_data;
 
 /// @brief general item in hash table - could be variable or fnc 
 typedef struct ht_item {
@@ -68,7 +69,7 @@ typedef struct
 {
   ht_table_t table; //list of hash tables
   int len;
-}ht_list_t;
+} ht_list_t;
 
 /// @brief Returns hash for key. 
 int get_hash(char *key);
@@ -115,18 +116,16 @@ int *ht_get_int(ht_table_t table, char *key);
 /// @return Pointer to string.
 char *ht_get_string(ht_table_t table, char *key);
 
+/// @brief Deletes item. Used in ht_delete
 void ht_item_dtor(ht_item_t *item);
 
-/// @brief Deletes key item. 
+/// @brief Deletes item with coresponding key. 
 void ht_delete(ht_table_t table, char *key);
 
 /// @brief Deletes whole hash table.
 void ht_delete_all(ht_table_t table);
 
-
-
 /* LIST */
-
 void ht_list_init(ht_list_t *table);
 
 /// @brief Push new ht_table to the list.
@@ -154,4 +153,4 @@ int *ht_list_get_int(ht_list_t *list, char *key);
 /// @return Pointer to string. 
 char *ht_list_get_string(ht_list_t *list, char *key);
 
-#endif // IFJ_HASH_TABLE_H
+#endif // IFJ_SYM_TABLE_H
