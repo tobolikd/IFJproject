@@ -1,5 +1,5 @@
-#ifndef IFJ_SYMTABLE_H
-#define IFJ_SYMTABLE_H
+#ifndef IFJ_HASH_TABLE_H
+#define IFJ_HASH_TABLE_H
 
 #include <stdbool.h>
 #include "lex-analyzer.h"
@@ -8,12 +8,6 @@
 #define MAX_HT_SIZE 251 // highest prime number < 256
 
 extern int HT_SIZE;
-
-/// @brief data type for variable
-typedef struct{
-  TokenType dataType;    // expect t_int t_float t_string
-  char *name;             
-} variable_t ;
 
 /// @brief access to all data types
 typedef union{
@@ -121,9 +115,10 @@ int *ht_get_int(ht_table_t table, char *key);
 /// @return Pointer to string.
 char *ht_get_string(ht_table_t table, char *key);
 
+/// @brief Deletes item. Used in ht_delete
 void ht_item_dtor(ht_item_t *item);
 
-/// @brief Deletes key item. 
+/// @brief Deletes item with coresponding key. 
 void ht_delete(ht_table_t table, char *key);
 
 /// @brief Deletes whole hash table.
@@ -160,4 +155,4 @@ int *ht_list_get_int(ht_list_t *list, char *key);
 /// @return Pointer to string. 
 char *ht_list_get_string(ht_list_t *list, char *key);
 
-#endif // IFJ_SYMTABLE_H
+#endif // IFJ_HASH_TABLE_H

@@ -1,7 +1,6 @@
-#include "symtable.h"
-
 #include <stdlib.h>
 #include <string.h>
+#include "symtable.h"
 
 int HT_SIZE = MAX_HT_SIZE;
 
@@ -10,7 +9,7 @@ int get_hash(char *key) {
   int result = 1;
   int length = strlen(key);
   for (int i = 0; i < length; i++) { // sum of every character x characters index into result
-    result += key[i] * i;
+    result += key[i] * (i+1);
   }
   return (result % HT_SIZE); 
 }
@@ -60,6 +59,12 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
   return;
 }
 
+/// @brief 
+/// @param identifier name of the funciton
+/// @param type 
+/// @param tokenData NULL when function 
+/// @param  
+/// @return 
 ht_item_t *ht_item_ctor(char* identifier, var_type_t type, char *tokenData, bool isFunction)
 {
   ht_item_t *new = malloc(sizeof(ht_item_t));
@@ -183,12 +188,8 @@ void ht_delete(ht_table_t table, char *key) {
     {
       if (prev == item) // meaning the very first
       {
-        if (item->next != NULL)
-          table[hash] = item->next;
-        else
-          table[hash] = NULL;
+        table[hash] = item->next;
         ht_item_dtor(item);
-        return;
       }
       else  
       {
@@ -198,8 +199,8 @@ void ht_delete(ht_table_t table, char *key) {
           prev->next = NULL;
 
         ht_item_dtor(item);
-        return;
       }
+      return;
     }
     prev = item;
     item = item->next;
@@ -322,3 +323,4 @@ char *ht_list_get_string(ht_list_t* list, char *key)
   }
   return NULL;
 }
+
