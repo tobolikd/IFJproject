@@ -1,5 +1,5 @@
-#ifndef IFJ_HASH_TABLE_H
-#define IFJ_HASH_TABLE_H
+#ifndef IFJ_SYM_TABLE_H
+#define IFJ_SYM_TABLE_H
 
 #include <stdbool.h>
 #include "lex-analyzer.h"
@@ -39,6 +39,7 @@ typedef struct
     var_type_t type;
     value_t value;
 } var_info_t;
+
 typedef struct
 {
     int paramCount;
@@ -124,10 +125,7 @@ void ht_delete(ht_table_t table, char *key);
 /// @brief Deletes whole hash table.
 void ht_delete_all(ht_table_t table);
 
-
-
 /* LIST */
-
 void ht_list_init(ht_list_t *table);
 
 /// @brief Push new ht_table to the list.
@@ -155,4 +153,4 @@ int *ht_list_get_int(ht_list_t *list, char *key);
 /// @return Pointer to string. 
 char *ht_list_get_string(ht_list_t *list, char *key);
 
-#endif // IFJ_HASH_TABLE_H
+#endif // IFJ_SYM_TABLE_H

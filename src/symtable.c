@@ -59,12 +59,6 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
   return;
 }
 
-/// @brief 
-/// @param identifier name of the funciton
-/// @param type 
-/// @param tokenData NULL when function 
-/// @param  
-/// @return 
 ht_item_t *ht_item_ctor(char* identifier, var_type_t type, char *tokenData, bool isFunction)
 {
   ht_item_t *new = malloc(sizeof(ht_item_t));
@@ -193,11 +187,7 @@ void ht_delete(ht_table_t table, char *key) {
       }
       else  
       {
-        if (item->next != NULL)
-          prev->next = item->next;
-        else
-          prev->next = NULL;
-
+        prev->next = item->next;
         ht_item_dtor(item);
       }
       return;
