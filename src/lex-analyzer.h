@@ -77,7 +77,7 @@ extern const char *STATE_STRING[];
         TYPE(t_comparator)/*data - === | !== | < | > | <= | >= */\
         TYPE(t_int)/*data - <int value>*/\
         TYPE(t_float)/*data - <float value>*/\
-        TYPE(t_string)/*data - <string value> | <NULL> */\
+        TYPE(t_string)/*data - <string value> */\
         TYPE(t_semicolon)/*data - <NULL>*/\
         TYPE(t_assign)/*data - <NULL>*/\
         TYPE(t_lPar)/*data - <NULL>*/\

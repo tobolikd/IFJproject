@@ -41,6 +41,10 @@ extern enum ifjErrCode errorCode;
 // will NOT be printer in final solution
 #define debug_log(...) do { if (DEBUG_LOGS == 1) fprintf(stderr, __VA_ARGS__); } while (0)
 
+// check malloc success, on fail return
+#define CHECK_MALLOC(ptr) do { if (ptr == NULL) {errorCode = INTERNAL_ERR; return;} } while (0)
 
+// check malloc success, on fail return NULL
+#define CHECK_MALLOC_PTR(ptr) do { if (ptr == NULL) {errorCode = INTERNAL_ERR; return NULL;} } while (0)
 
 #endif // IFJ_ERROR_CODES_H

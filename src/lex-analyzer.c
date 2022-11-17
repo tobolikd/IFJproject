@@ -1,4 +1,3 @@
-
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
@@ -139,9 +138,8 @@ char* appendChar(char *data, char dataToBeInserted)
         len = strlen(data)+1; // length of string + 1 + terminating null byte ('\0')
     
     data = realloc(data,(len+1)*sizeof(char));
-    if (data == NULL) // error alocating memory
-        return NULL;
-    
+    CHECK_MALLOC_PTR(data);
+
     data[len-1] = dataToBeInserted;
     data[len] = '\0';
     return data;
@@ -242,8 +240,7 @@ char *parseString(char *data)
 Token* tokenCtor(TokenType type, int lineNum, char* data)
 {
     Token *new = malloc(sizeof(Token)); //allocates memory for new token
-    if (new == NULL) // error alocating memory
-        return NULL;
+    CHECK_MALLOC_PTR(new);
     new->data = data; //string already allocated
     new->lineNum = lineNum;
     new->type = type;
@@ -275,6 +272,7 @@ TokenList *appendToken(TokenList *list, Token* newToken)
     if(list == NULL)
     {
         list = malloc(sizeof(TokenList));
+        CHECK_MALLOC_PTR(list);
         list->TokenArray = malloc(2*sizeof(Token));
         list->length = 1;
     }
@@ -284,8 +282,8 @@ TokenList *appendToken(TokenList *list, Token* newToken)
         list->length++;
         list->TokenArray = realloc(list->TokenArray,(list->length+1)*sizeof(Token));
     }
-    if (list->TokenArray == NULL) // error allocating memory
-        return NULL;
+    CHECK_MALLOC_PTR(list->TokenArray);
+
     list->TokenArray[list->length-1] = newToken;
     list->TokenArray[list->length] = NULL;
     return list;
