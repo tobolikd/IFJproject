@@ -46,10 +46,10 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
 ht_item_t *ht_item_ctor(char* identifier, var_type_t type, bool isFunction)
 {
   ht_item_t *new = malloc(sizeof(ht_item_t));
-  CHECK_MALLOC(new);
+  CHECK_MALLOC_PTR(new);
   
   new->identifier = malloc((strlen(identifier)+1) * sizeof(char));
-  CHECK_MALLOC(new->identifier);
+  CHECK_MALLOC_PTR(new->identifier);
 
   strcpy(new->identifier,identifier); 
 
@@ -73,7 +73,7 @@ ht_item_t *ht_item_ctor(char* identifier, var_type_t type, bool isFunction)
 ht_table_t *ht_init() 
 {
   ht_table_t *table = malloc(sizeof(ht_table_t));
-  CHECK_MALLOC(table);
+  CHECK_MALLOC_PTR(table);
   table->size = 0;
   for (int i = 0; i < HT_SIZE; i++)
     table->items[i] = NULL;
