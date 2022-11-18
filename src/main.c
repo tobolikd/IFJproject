@@ -9,7 +9,7 @@ int main () {
     /* SCANNER */
     FILE *fp;
 
-    fp = stdin;
+    fp = fopen("./input.php", "r");
 
     TokenList *list = lexAnalyser(fp); // get list of tokens
 
@@ -21,11 +21,13 @@ int main () {
 #if (DEBUG == 1)
     printTokenList(list);
 #endif
+    synAnalyser(list);  // start syn analyzer
 
     // free memory
     listDtor(list);
     fclose(fp);
     /* END OF SCANNER */
 
+    printf("\nError code: %i\n", errorCode);
     return errorCode;
 }
