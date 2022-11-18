@@ -10,7 +10,7 @@ int get_hash(char *key)
   int result = 1;
   int length = strlen(key);
   for (int i = 0; i < length; i++) { // sum of every character x characters index into result
-    result += key[i] * i;
+    result += key[i] * (i+1);
   }
   return (result % HT_SIZE); 
 }
