@@ -172,7 +172,7 @@ void printToken(Token *token);
 
 /// @brief Print out given token array. [LineNum Lexeme Data]
 /// @param list List to be printed out.
-void prinTokenList(TokenList *list);
+void printTokenList(TokenList *list);
 
 
 #endif // LEX_ANALYZER_H

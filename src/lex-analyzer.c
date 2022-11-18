@@ -798,7 +798,7 @@ void printToken(Token*token)
 }
 
 
-void prinTokenList(TokenList *list)
+void printTokenList(TokenList *list)
 {
     for (int i = 0; i < list->length; i++)
     {
@@ -810,7 +810,7 @@ void prinTokenList(TokenList *list)
 //NULL to propagate error
 TokenList *lexAnalyser(FILE *fp)
 {
-    int lineNum = 0; //lin number
+    int lineNum = 1; //lin number
 
     if (checkProlog(fp,&lineNum))
         return NULL;

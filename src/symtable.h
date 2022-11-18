@@ -1,117 +1,107 @@
-#ifndef IFJ_SYMTABLE_H
-#define IFJ_SYMTABLE_H
+#ifndef IFJ_SYM_TABLE_H
+#define IFJ_SYM_TABLE_H
 
 #include <stdbool.h>
 #include "lex-analyzer.h"
+#include "syn-analyzer.h"
 
 #define MAX_HT_SIZE 251 // highest prime number < 256
 
 extern int HT_SIZE;
 
-/// @brief data type for variable
-typedef struct{
-  TokenType dataType;    // expect t_int t_float t_string
-  char *name;             
-} variable_t ;
 
-/// @brief access to all data types
-typedef struct{
-  char *stringVal;    
-  float *floatVal;     
-  int *intVal;
-  bool nullType;            // can be null - "?" declaration
-} value_t ;
+ typedef enum
+{
+    void_t,
+    int_t,
+    string_t,
+    float_t,
+    null_int_t,
+    null_string_t,
+    null_float_t
+} var_type_t;
 
-/// @brief general item in hash table - could be variable or function 
+typedef struct param_info_t
+{
+    char *varId;
+    var_type_t type;
+    struct param_info_t *next;
+} param_info_t;
+
+typedef struct
+{
+    char *varId;
+    var_type_t type;
+} var_info_t;
+
+typedef struct
+{
+    unsigned paramCount;
+    param_info_t *params;
+    var_type_t returnType;
+} fnc_info_t;
+
+typedef union 
+{
+  var_info_t var_data;
+  fnc_info_t fnc_data;
+} symbol_data;
+
+/// @brief general item in hash table
 typedef struct ht_item {
-  char *key;                 // function / variable name
-  //return type / variable type
-  TokenType dataType;       // expect t_int t_float t_string
-  
-  //for Function
-  bool declared;            // if declaration => true
-  variable_t *argument;     // list of arguments
-
-  //for Variables
-  value_t value;            // value of variable
-  
-  struct ht_item *next;     // next alias
+  bool isfnc;                   // switch between diferent data
+  char *identifier;             // name of the item
+  symbol_data data;             // relevant data to item    
+  unsigned referenceCounter;    // how many times was item referenced
+  struct ht_item *next;     
 } ht_item_t;
 
+typedef struct ht_table_t {
+    unsigned size;        
+    ht_item_t *items[MAX_HT_SIZE];         
+} ht_table_t;
 
-/// @brief hash table 
-typedef ht_item_t *ht_table_t[MAX_HT_SIZE];
-
-/// @brief hash table list to keep track of frameworks 
-typedef struct 
-{
-  ht_table_t table; //list of hash tables
-  int len;
-}ht_list_t;
- 
-
-/// @brief Returns hash for key. 
+/// @brief Returns hash for entered key value. 
 int get_hash(char *key);
 
-/// @brief Initiates table. 
-void ht_init(ht_table_t table);
+/// @brief Appends new parameter to an existig item.
+/// @param appendTo Item to append the parameter to.
+/// @param name Id of parameter.
+/// @param type Data type of parameter.
+void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type);
 
-/// @brief Generates value_t. 
-value_t ht_create_value(TokenType dataType, char* value, bool isNullType);
+/// @brief Creates pointer to item.
+/// @param identifier Id of the item.
+/// @param type Return type of function / data type of variable.
+/// @param isFunction Switch between function / variable.
+/// @returns Pointer to newly created item.
+ht_item_t *ht_item_ctor(char* identifier, var_type_t type, bool isFunction);
 
-/// @brief Searches table for wanted item.
-/// @return Pointer to item or NULL.
-ht_item_t *ht_search(ht_table_t table, char *key);
+/// @brief Creates hash table with MAX_HT_SIZE size.
+/// @return Pointer to newly created hash table.
+ht_table_t *ht_init() ;
 
-/// @brief Insert item to table as first item in alias list.
-void ht_insert(ht_table_t table, char *key, value_t value);
+/// @brief Searches symtable for item with coresponding key.
+/// @return Pointer to item.
+/// @return NULL when item is not in the symtable.
+ht_item_t *ht_search(ht_table_t *table, char *key);
 
-/// @brief Return value .
-/// @return NULL if there is not wanted item.
-/// @return Pointer to float value.
-float *ht_get_float(ht_table_t table, char *key);
+/// @brief Inserts or updates item in symtable.
+/// @param table Symtable to insert item to.
+/// @param identifier Id of the item.
+/// @param type Return type of function / data type of variable.
+/// @param isFunction Switch between function / variable.
+/// @return Pointer to created/updated item in symtable.
+/// @return NULL when it tries to redeclare function.
+ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool isFunction) ;
 
-/// @brief Return value.
-/// @return NULL if there is not wanted item.
-/// @return Pointer to int value.
-int *ht_get_int(ht_table_t table, char *key);
+/// @brief Deletes item and frees all its data.
+void ht_item_dtor(ht_item_t *item);
 
-/// @brief Return value.
-/// @return NULL if there is not wanted item.
-/// @return Pointer to string.
-char *ht_get_string(ht_table_t table, char *key);
-
-/// @brief Deletes key item. 
-void ht_delete(ht_table_t table, char *key);
+/// @brief Deletes item with coresponding key. 
+void ht_delete(ht_table_t *table, char *key);
 
 /// @brief Deletes whole hash table.
-void ht_delete_all(ht_table_t table);
+void ht_delete_all(ht_table_t *table);
 
-void ht_list_init(ht_list_t *table);
-
-/// @brief Push new ht_table to the list.
-void ht_list_push(ht_table_t table , ht_list_t *list);
-
-/// @brief Pop the latest ht_table.
-void ht_list_pop(ht_list_t *list);
-
-/// @brief Returns the lastest declared item with wanted key.
-/// @return Item when found. Null if item is not in the list. 
-ht_item_t *ht_list_search(ht_list_t *list, char * key);
-
-/// @brief Return value of the latest declared variable.
-/// @return NULL if there is not wanted item.
-/// @return Pointer to float value.
-float *ht_list_get_float(ht_list_t *list, char *key);
-
-/// @brief Return value of the latest declared variable.
-/// @return NULL if there is not wanted item.
-/// @return Pointer to int value.
-int *ht_list_get_int(ht_list_t *list, char *key);
-
-/// @brief Return value of the latest declared variable. 
-/// @return NULL if there is not wanted item. 
-/// @return Pointer to string. 
-char *ht_list_get_string(ht_list_t *list, char *key);
-
-#endif // IFJ_SYMTABLE_H
+#endif // IFJ_SYM_TABLE_H
