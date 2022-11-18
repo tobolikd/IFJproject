@@ -1,45 +1,25 @@
+#include "symtable.h"
 #include <stdlib.h>
 #include <string.h>
-#include "symtable.h"
 
 int HT_SIZE = MAX_HT_SIZE;
 
 /* SUPPORT FUNCTIONS */
-int get_hash(char *key) {
+int get_hash(char *key) 
+{
   int result = 1;
   int length = strlen(key);
   for (int i = 0; i < length; i++) { // sum of every character x characters index into result
-    result += key[i] * (i+1);
+    result += key[i] * i;
   }
   return (result % HT_SIZE); 
 }
 
-value_t ht_value_ctor(var_type_t dataType, char* data )
-{
-  value_t new;
-
-  //attach the correct value based on data type
-  if (dataType == int_t || dataType == null_int_t)
-  {
-    new.intVal = malloc(sizeof(int));
-    *new.intVal = atoi(data);
-  }
-  else if (dataType == float_t || dataType == null_float_t)
-  {
-    new.intVal = malloc(sizeof(float));
-    *new.floatVal = atof(data);
-  }
-  else if (dataType == string_t || dataType == null_string_t)
-  {
-    new.intVal = malloc((strlen(data)+1)*sizeof(char));
-    new.stringVal = data;
-  }
-  return new;
-}
 
 void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
 {
   param_info_t *new = malloc(sizeof(param_info_t));
+  CHECK_MALLOC(new);
   new->type = type;
   new->varId = name;
 
@@ -52,17 +32,23 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
   {
     param_info_t *cur = appendTo->data.fnc_data.params;
     appendTo->data.fnc_data.paramCount++;
-    while(cur->next != NULL) // append as last.
+    while(cur->next != NULL)          // append as last.
       cur = appendTo->data.fnc_data.params->next; 
     cur->next = new;
   }
   return;
 }
 
-ht_item_t *ht_item_ctor(char* identifier, var_type_t type, char *tokenData, bool isFunction)
+ht_item_t *ht_item_ctor(char* identifier, var_type_t type, bool isFunction)
 {
   ht_item_t *new = malloc(sizeof(ht_item_t));
-  new->identifier = identifier;
+  CHECK_MALLOC(new);
+  
+  new->identifier = malloc((strlen(identifier)+1) * sizeof(char));
+  CHECK_MALLOC(new->identifier);
+
+  strcpy(new->identifier,identifier); 
+
   new->isfnc = isFunction;
   new->next = NULL;
   if (isFunction)
@@ -73,7 +59,6 @@ ht_item_t *ht_item_ctor(char* identifier, var_type_t type, char *tokenData, bool
   }
   else
   {
-    new->data.var_data.value = ht_value_ctor(type,tokenData); 
     new->data.var_data.type = type;
   }
   return new;
@@ -81,69 +66,41 @@ ht_item_t *ht_item_ctor(char* identifier, var_type_t type, char *tokenData, bool
 
 /* HT_TABLE FUNCTIONS*/
 
-void ht_init(ht_table_t table) {
+ht_table_t *ht_init() 
+{
+  ht_table_t *table = malloc(sizeof(ht_table_t));
+  CHECK_MALLOC(table);
+  table->size = 0;
   for (int i = 0; i < HT_SIZE; i++)
-    table[i] = NULL;
+    table->items[i] = NULL;
+  return table;
 }
 
-ht_item_t *ht_search(ht_table_t table, char *key) {
+ht_item_t *ht_search(ht_table_t *table, char *key) 
+{
   int hash = get_hash(key);
-  ht_item_t *item = table[hash]; 
+  ht_item_t *item = table->items[hash]; 
   while (item != NULL)
   {
     if (item->identifier == key)
       return item;
     item = item->next;
   }
-  return item;//either NULL or poinetr
+  return NULL;
 }
 
-void ht_insert(ht_table_t table, ht_item_t *item) 
+ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool isFunction) 
 {
-  ht_item_t *searched = ht_search(table,item->identifier); // look if exists
-  int hash = get_hash(item->identifier);
-
-  if (searched != NULL) //item exists, replace.
-    ht_delete(table,item->identifier);
-
-  item->next=table[hash];
-  table[hash] = item; //insert first
-}
-
-float *ht_get_float(ht_table_t table, char *key) 
-{
-  ht_item_t *item = ht_search(table, key);
-  
+  ht_item_t *item = ht_search(table,item->identifier); // look if exists
   if (item != NULL)
-  {
-    if (item->data.var_data.value.floatVal == NULL )
-    {
-      if (item->data.var_data.type != null_float_t)
-      {
-        /* ERROR */
-      }
-    }
-    return item->data.var_data.value.floatVal;
-  }
-  return NULL;
-}
+    return NULL; //ERROR item should not exist
 
-int *ht_get_int(ht_table_t table, char *key) {
-  ht_item_t *item = ht_search(table, key);
-  if (item != NULL)
-  {
-    return item->data.var_data.value.intVal;
-  }
-  return NULL;
-}
+  unsigned hash = get_hash(item->identifier); 
+  item = ht_item_ctor(identifier,type,isFunction);  //create item
 
-char *ht_get_string(ht_table_t table, char *key) {
-  ht_item_t *item = ht_search(table, key);
-  if (item != NULL)
-  {
-    return item->data.var_data.value.stringVal;
-  }
-  return NULL;
+  item->next=table->items[hash];
+  table->items[hash] = item; 
+  return item;
 }
 
 void ht_item_dtor(ht_item_t *item)
@@ -159,22 +116,14 @@ void ht_item_dtor(ht_item_t *item)
       tmp = cur;
     }
   }
-  else
-  {
-    if (item->data.var_data.type == int_t || item->data.var_data.type == null_int_t)
-      free(item->data.var_data.value.intVal);
-    else if (item->data.var_data.type == float_t || item->data.var_data.type == null_float_t)
-      free(item->data.var_data.value.floatVal);
-    else if (item->data.var_data.type == string_t || item->data.var_data.type == null_string_t)
-      free(item->data.var_data.value.stringVal);
-  }
+  free(item->identifier);
   free(item);
 }
 
-void ht_delete(ht_table_t table, char *key) {
+void ht_delete(ht_table_t *table, char *key) {
   int hash = get_hash(key);
-  ht_item_t *item = table[hash];
-  ht_item_t *prev = table[hash];
+  ht_item_t *item = table->items[hash];
+  ht_item_t *prev = table->items[hash];
   
   while (item != NULL) // it might exist 
   {
@@ -182,28 +131,36 @@ void ht_delete(ht_table_t table, char *key) {
     {
       if (prev == item) // meaning the very first
       {
-        table[hash] = item->next;
+        if (item->next != NULL)
+          table->items[hash] = item->next;
+        else
+          table->items[hash] = NULL;
         ht_item_dtor(item);
+        return;
       }
       else  
       {
-        prev->next = item->next;
+        if (item->next != NULL)
+          prev->next = item->next;
+        else
+          prev->next = NULL;
+
         ht_item_dtor(item);
+        return;
       }
-      return;
     }
     prev = item;
     item = item->next;
   }
 }
 
-void ht_delete_all(ht_table_t table) {
+void ht_delete_all(ht_table_t *table) {
   for (int i = 0; i < HT_SIZE; i++)
   {
     ht_item_t *destroyLater[255];
     *destroyLater=NULL;
     int count = 0;
-    ht_item_t *cur = table[i];
+    ht_item_t *cur = table->items[i];
 
     while (cur != NULL)
     {
@@ -216,101 +173,7 @@ void ht_delete_all(ht_table_t table) {
         ht_item_dtor(destroyLater[j]);
         destroyLater[j] = NULL;
       }
-    table[i] = NULL; //to init state
+    table->items[i] = NULL; //to init state
   }
+  free(table);
 }
-
-/* HT_LIST FUNCTIONS*/
-
-void ht_list_init(ht_list_t *list)
-{
-  list = NULL;
-  list->len = 0;
-}
-
-/// @brief Push new ht_table to the list.
-void ht_list_push(ht_table_t table , ht_list_t *list)
-{
-  if (list->len == 0) // empty
-  {
-    list->len = 1;
-    list->table[0] = malloc(1 *sizeof(ht_table_t));
-    list->table[0] = *table;
-  }
-  else
-  {
-    list = realloc(list,++list->len * sizeof(ht_table_t));
-    list->table[list->len - 1] = *table;
-  }
-}
-
-/// @brief Delete the latest ht_table.
-void ht_list_pop(ht_list_t *list)
-{
-  if (list->len != 0)
-  {
-    ht_delete_all(&list->table[list->len -1]); //delete the latest
-    list->table[list->len -1] = NULL;
-    list->len--;
-  }
-}
-
-/// @brief Returns the lastest declared item with wanted key.
-/// @return Item when found. Null if item is not in the list. 
-ht_item_t *ht_list_search(ht_list_t *list, char * key)
-{
-  ht_item_t *item = NULL;
-  for (int i = list->len - 1; i >=0; i++)
-  {
-    item = ht_search(&list->table[i],key); // search in every table from the latest to newest
-    if (item != NULL)
-      return item;
-  }
-  return NULL;  
-}
-
-/// @brief Return value of the latest declared variable.
-/// @return NULL if there is not wanted item.
-/// @return Pointer to float value.
-float *ht_list_get_float(ht_list_t* list, char *key)
-{
-  float *value = NULL;
-  for (int i = list->len -1; i >= 0; i++)
-  {
-    value = ht_get_float(&list->table[i],key);
-    if (value != NULL)
-      return value;
-  }
-  return NULL;
-}
-
-/// @brief Return value of the latest declared variable.
-/// @return NULL if there is not wanted item.
-/// @return Pointer to int value.
-int *ht_list_get_int(ht_list_t* list, char *key)
-{
-  int *value = NULL;
-  for (int i = list->len -1; i >= 0; i++)
-  {
-    value = ht_get_int(&list->table[i],key);
-    if (value != NULL)
-      return value;
-  }
-  return NULL;
-}
-
-/// @brief Return value of the latest declared variable. 
-/// @return NULL if there is not wanted item. 
-/// @return Pointer to string. 
-char *ht_list_get_string(ht_list_t* list, char *key)
-{
-  char *value = NULL;
-  for (int i = list->len -1; i >= 0; i++)
-  {
-    value = ht_get_string(&list->table[i],key);
-    if (value != NULL)
-      return value;
-  }
-  return NULL;
-}
-
