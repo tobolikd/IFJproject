@@ -30,8 +30,8 @@ typedef struct param_info_t
 
 typedef struct
 {
-    var_type_t type;
     char *varId;
+    var_type_t type;
 } var_info_t;
 
 typedef struct
@@ -47,13 +47,13 @@ typedef union
   fnc_info_t fnc_data;
 } symbol_data;
 
-/// @brief general item in hash table - could be variable or fnc 
+/// @brief general item in hash table
 typedef struct ht_item {
-  bool isfnc;                 
-  char *identifier;
-  symbol_data data;
-  unsigned referenceCounter;
-  struct ht_item *next;     // next alias
+  bool isfnc;                   // switch between diferent data
+  char *identifier;             // name of the item
+  symbol_data data;             // relevant data to item    
+  unsigned referenceCounter;    // how many times was item referenced
+  struct ht_item *next;     
 } ht_item_t;
 
 typedef struct ht_table_t {
@@ -61,8 +61,7 @@ typedef struct ht_table_t {
     ht_item_t *items[MAX_HT_SIZE];         
 } ht_table_t;
 
-/// @brief hash table list to keep track of frameworks 
-/// @brief Returns hash for key. 
+/// @brief Returns hash for entered key value. 
 int get_hash(char *key);
 
 /// @brief Appends new parameter to an existig item.
@@ -74,22 +73,29 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type);
 /// @brief Creates pointer to item.
 /// @param identifier Id of the item.
 /// @param type Return type of function / data type of variable.
-/// @param tokenData Data of token. Stored in string.
 /// @param isFunction Switch between function / variable.
+/// @returns Pointer to newly created item.
 ht_item_t *ht_item_ctor(char* identifier, var_type_t type, bool isFunction);
 
 /// @brief Creates hash table with MAX_HT_SIZE size.
-/// @return Pointer to hash table.
+/// @return Pointer to newly created hash table.
 ht_table_t *ht_init() ;
 
-/// @brief Searches table for wanted item.
-/// @return Pointer to item or NULL.
+/// @brief Searches symtable for item with coresponding key.
+/// @return Pointer to item.
+/// @return NULL when item is not in the symtable.
 ht_item_t *ht_search(ht_table_t *table, char *key);
 
-/// @brief Insert item to table as first item in alias list.
+/// @brief Inserts or updates item in symtable.
+/// @param table Symtable to insert item to.
+/// @param identifier Id of the item.
+/// @param type Return type of function / data type of variable.
+/// @param isFunction Switch between function / variable.
+/// @return Pointer to created/updated item in symtable.
+/// @return NULL when it tries to redeclare function.
 ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool isFunction) ;
 
-/// @brief Deletes item. Used in ht_delete
+/// @brief Deletes item and frees all its data.
 void ht_item_dtor(ht_item_t *item);
 
 /// @brief Deletes item with coresponding key. 

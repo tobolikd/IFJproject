@@ -798,7 +798,7 @@ void printToken(Token*token)
 }
 
 
-void prinTokenList(TokenList *list)
+void printTokenList(TokenList *list)
 {
     for (int i = 0; i < list->length; i++)
     {

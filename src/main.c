@@ -19,7 +19,7 @@ int main () {
         return errorCode;
     }
 #if (DEBUG == 1)
-    prinTokenList(list);
+    printTokenList(list);
 #endif
 
     // free memory 
