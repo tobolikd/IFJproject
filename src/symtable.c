@@ -91,7 +91,7 @@ ht_item_t *ht_search(ht_table_t *table, char *key)
 
 ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool isFunction) 
 {
-  ht_item_t *item = ht_search(table,item->identifier); // look if exists
+  ht_item_t *item = ht_search(table,identifier); // look if exists
   if (item != NULL)
     return NULL; //ERROR item should not exist
 
