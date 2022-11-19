@@ -26,6 +26,7 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
   CHECK_MALLOC(new->varId);
   strcpy(new->varId,name); //copy name to varId
   new->type = type;
+  new->next = NULL;
   
   if (appendTo->data.fnc_data.paramCount == 0) //first parameter
   {
@@ -37,7 +38,11 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
     param_info_t *cur = appendTo->data.fnc_data.params;
     appendTo->data.fnc_data.paramCount++;
     while(cur->next != NULL)          // append as last.
+<<<<<<< HEAD
+      cur = appendTo->data.fnc_data.params->next;
+=======
       cur = cur->next; 
+>>>>>>> c9f8058 (Redo delete_all Fix search, append. tested)
     cur->next = new;
   }
   return;
@@ -95,6 +100,7 @@ ht_item_t *ht_search(ht_table_t *table, char *key)
 
 ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool isFunction) 
 {
+
   ht_item_t *item = ht_search(table,identifier); // look if exists
   if (item != NULL) // if item already exists in the symtable
   {
@@ -140,7 +146,7 @@ void ht_delete(ht_table_t *table, char *key) {
   int hash = get_hash(key);
   ht_item_t *item = table->items[hash];
   ht_item_t *prev = table->items[hash];
-  
+
   while (item != NULL) // item exists
   {
     if (item->identifier == key)// item found
