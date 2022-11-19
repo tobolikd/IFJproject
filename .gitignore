@@ -13,3 +13,4 @@ src/lex-anal
 !CMakeLists.txt
 !notes.md
 !grammar.md
+!input.php
