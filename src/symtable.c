@@ -26,6 +26,7 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
   CHECK_MALLOC(new->varId);
   strcpy(new->varId,name); //copy name to varId
   new->type = type;
+  new->next = NULL;
   
   if (appendTo->data.fnc_data.paramCount == 0) //first parameter
   {
@@ -37,7 +38,7 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
     param_info_t *cur = appendTo->data.fnc_data.params;
     appendTo->data.fnc_data.paramCount++;
     while(cur->next != NULL)          // append as last.
-      cur = appendTo->data.fnc_data.params->next;
+      cur = cur->next; 
     cur->next = new;
   }
   return;
@@ -86,7 +87,7 @@ ht_item_t *ht_search(ht_table_t *table, char *key)
   ht_item_t *item = table->items[hash]; 
   while (item != NULL)
   {
-    if (item->identifier == key)
+    if (!strcmp(item->identifier,key))
       return item;
     item = item->next;
   }
@@ -108,11 +109,12 @@ ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool
   }
   else //item does not exists in the symtable
   {
-    unsigned hash = get_hash(item->identifier); 
+    int hash = get_hash(identifier); 
     item = ht_item_ctor(identifier,type,isFunction);  //create new item
     
     item->next=table->items[hash]; // link with aliases
     table->items[hash] = item; // insert first
+    table->size++;
   }
   return item;
 }
@@ -139,7 +141,7 @@ void ht_delete(ht_table_t *table, char *key) {
   int hash = get_hash(key);
   ht_item_t *item = table->items[hash];
   ht_item_t *prev = table->items[hash];
-
+  
   while (item != NULL) // item exists
   {
     if (item->identifier == key)// item found
@@ -163,24 +165,17 @@ void ht_delete(ht_table_t *table, char *key) {
 }
 
 void ht_delete_all(ht_table_t *table) {
+  ht_item_t *cur = table->items[0];
+  ht_item_t *tmp;
   for (int i = 0; i < HT_SIZE; i++)
   {
-    ht_item_t *destroyLater[255]; //support array to temporary store every item
-    *destroyLater=NULL;
-    int count = 0;
-    ht_item_t *cur = table->items[i];
-
+    cur = table->items[i];
     while (cur != NULL)
     {
-      destroyLater[count++]=cur; // attach to destroy later
-      cur =cur->next; // go to next alias
+      tmp = cur; // attach to destroy later
+      cur = cur->next;
+      ht_item_dtor(tmp);
     }
-    if (*destroyLater!=NULL)
-      for (int j = 0; j < count; j++) // free every item temporary stored
-      {
-        ht_item_dtor(destroyLater[j]);
-        destroyLater[j] = NULL;
-      }
     table->items[i] = NULL; //to init state
   }
   free(table);
