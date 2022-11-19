@@ -7,7 +7,7 @@
 
 #include "ast.h"
 #include "error-codes.h"
-#include <malloc.h>
+#include <stdlib.h>
 
 void ast_item_destr(AST_item *item) {
     if (item == NULL)
