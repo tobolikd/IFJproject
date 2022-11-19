@@ -6,6 +6,15 @@
 #include "error-codes.h"
 #include "symtable.h"
 
+void params(TokenList *list, int *index);
+void param(TokenList *list, int *index);
+void type(TokenList *list, int *index);
+void functionType(TokenList *list, int *index);
+void statList(TokenList *list, int *index);
+void functionDeclare(TokenList *list, int *index);
+void stat(TokenList *list, int *index);
+void seqStats(TokenList *list, int *index);
+void checkSyntax(TokenList *list, int *index);
 void synAnalyser(TokenList *list);
 
 #endif // IFJ_SYN_ANALYZER_H

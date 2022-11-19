@@ -1,7 +1,8 @@
 # ignore all 
 # dont save binary files
 /*
-src/lex-anal 
+src/lex-anal
+src/mymain.c
 
 # except
 !src
