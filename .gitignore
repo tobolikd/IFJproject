@@ -12,3 +12,5 @@ src/lex-anal
 !.gitignore
 !CMakeLists.txt
 !notes.md
+!grammar.md
+!input.php

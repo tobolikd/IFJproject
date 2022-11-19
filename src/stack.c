@@ -11,7 +11,7 @@
 #include "lex-analyzer.h"
 #include "ast.h"
 
-#include <malloc.h>
+#include <stdlib.h>
 
 #define STACK_DEFINITION(TYPE, NAME, DESTRUCTOR)                                \
     void stack_##NAME##_init(stack_##NAME##_t *stack) {                         \
