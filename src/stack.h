@@ -6,6 +6,36 @@
 
 #include <stdbool.h>
 
+/* Functions and data structures for ast
+ *
+ * Note: name is {token, ast}
+ *       type is {Token *, AST_item *}
+ * Functions:
+ *
+ * void stack_name_init(stack_name_t *stack)
+ *  - initialize stack
+ *
+ * void stack_name_push(stack_name_t *stack, type item)
+ *  - push item to top of the stack
+ *
+ * void stack_name_pop(stack_name_t *stack)
+ *  - remove the top item from stack
+ *
+ * TYPE stack_name_top(stack_name_t *stack)
+ *  - return pointer to item on stack top
+ *
+ * bool stack_name_empty(stack_name_t *stack)
+ *  - predicate whether stack is empty or not
+ *
+ * Structures:
+ * stack_name_item_t
+ *  |- data - useful data
+ *  |- next - pointer to the next item
+ *
+ * stack_name_t
+ *  |- top - pointer to the top of stack
+ */
+
 #define STACK_DECLARATION(TYPE, NAME)                           \
     typedef struct stack_##NAME##_item {                        \
         TYPE data;                                              \
