@@ -47,4 +47,38 @@ extern enum ifjErrCode errorCode;
 // check malloc success, on fail return NULL
 #define CHECK_MALLOC_PTR(ptr) do { if (ptr == NULL) {errorCode = INTERNAL_ERR; return NULL;} } while (0)
 
+#define THROW_ERROR(CODE,LINE)                                  \
+    errorCode = CODE;                                           \
+    switch (errorCode){                                         \
+    case LEXICAL_ERR:                                           \
+        debug_print("LEXICAL ERROR on line number: %d\n",LINE); \
+        break;                                                  \
+    case SYNTAX_ERR:                                            \
+        debug_print("SYNTAX ERROR on line number: %d\n",LINE);  \
+        break;                                                  \
+    case SEMANTIC_FUNCTION_DEFINITION_ERR:                      \
+        debug_print("SEMANTIC FUNCTION DEFINITION ERROR on line number: %d\n",LINE);\
+        break;                                                  \
+    case SEMANTIC_RUN_PARAMETER_ERR:                            \
+        debug_print("SEMANTIC RUN PARAMETER ERROR on line number: %d\n",LINE);\
+        break;                                                  \
+    case SEMANTIC_VARIABLE_ERR:                                 \
+        debug_print("SEMANTIC VARIABLE ERROR on line number: %d\n",LINE);\
+        break;                                                  \
+    case SEMANTIC_RUN_RETURN_ERR:                               \
+        debug_print("SEMANTIC RUN RETURN ERROR on line number: %d\n",LINE);\
+        break;                                                  \
+    case SEMANTIC_RUN_TYPE_ERR:                                 \
+        debug_print("SEMANTIC RUN TYPE ERROR on line number: %d\n",LINE);\
+        break;                                                  \
+    case SEMANTIC_OTHER_ERR:                                    \
+        debug_print("SEMANTIC OTHER ERROR on line number: %d\n",LINE);\
+        break;                                                  \
+    case INTERNAL_ERR:                                          \
+        debug_print("INTERNAL ERROR ");                         \
+        break;                                                  \
+    default:                                                    \
+        printf("UNKNOWN ERROR. ADD TO LIST? \n");               \
+    } 
+
 #endif // IFJ_ERROR_CODES_H
