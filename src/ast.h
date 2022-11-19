@@ -10,6 +10,31 @@
 
 #include "symtable.h"
 
+/* Overview of structures
+ *
+ * AST_item
+ *  |- type - see AST_type
+ *  |- data
+ *      |- one of:
+ *      variable - pointer to var in symtable
+ *      function - pointer to fnc in symtable
+ *      intValue - integer constant
+ *      stringvalue - string constant
+ *      floatValue - float constant
+ *      blank - if the return statement returns value or not
+ *      functionCallData - structure with fnc call attribs
+ *          |- functionId - label of the function
+ *          |- params - list of parametres
+ *              |- type - data type of parameter
+ *              |- data - data of the parameter
+ *                  |- one of:
+ *                  variable - pointer to var in symtable
+ *                  intValue - integer constant
+ *                  stringvalue - string constant
+ *                  floatValue - float constant
+ *              |- next - pointer to next parameter
+ */
+
 /* AST_type - type of AST item
  *
  * some types are connected with data (see comments next to them)
@@ -50,7 +75,7 @@ typedef enum
 
     // program control (jumps)
     AST_FUNCTION_CALL,  // data - AST_function_call_data *functionCallData
-    AST_RETURN, // data - AST_type returnType
+    AST_RETURN, // data - bool blank
     AST_IF,
     AST_ELSE,
     AST_WHILE,
@@ -76,7 +101,7 @@ typedef union ast_param_data
 
 typedef struct ast_fnc_param
 {
-    AST_type type; // allowed - AST_INT, AST_FLOAT, AST_string, AST_VAR
+    AST_type type; // allowed - AST_INT, AST_FLOAT, AST_STRING, AST_VAR, AST_NULL
     AST_param_data *data;
     struct ast_fnc_param *next;
 } AST_fnc_param;
@@ -84,12 +109,7 @@ typedef struct ast_fnc_param
 /* function call data
  *
  * functionId - called function
- * params - param_info_t
- *          {
- *              char *varId;
- *              var_type_t type;
- *              struct param_info_t *next;
- *          }
+ * params - list of parametres
  */
 typedef struct
 {
@@ -109,7 +129,10 @@ typedef union
     float floatValue;       // AST_FLOAT
     ht_item_t *function;    // AST_DECLARE
     AST_function_call_data *functionCallData;   // AST_FUNCTION_CALL
-    AST_type returnType;    // AST_RETURN
+    bool blank;             // AST_RETURN
+                            // whether the return statement is empty or not
+                            // needed to determine if another item is part of
+                            // the return call
 } AST_data;
 
 /* AST_item - items in the AST
@@ -121,13 +144,33 @@ typedef union
 typedef struct
 {
     AST_type type;
-    AST_data *data;
+    AST_data *data; // NULL or some data acording to type
+                    // see AST_data
 } AST_item;
 
+/* ast_item_const
+ *  - item constructor
+ *  - returns allocated item with type and data
+ */
 AST_item *ast_item_const(AST_type type, AST_data *data);
 
+/* ast_item_destr
+ *  - frees AST item with all data EXCEPT for the symtable data
+ *  note: symtable data will be freed on symtable destruction
+ */
 void ast_item_destr(AST_item *deleted);
 
+/* get_function_call_data
+ *  - parses tokens to function call data
+ *  - expects the given function call to be syntactically correct
+ *    (from the label to the closing bracket)
+ */
+AST_function_call_data *get_function_call_data(TokenList *tokenArray, int fncCallIndex);
+
+/* function_call_data_destr
+ *  - frees function call data EXCEPT for the symtable data
+ *  note: symtable data will be freed on symtable destruction
+ */
 void function_call_data_destr(AST_function_call_data *data);
 
 #endif // IFJ_AST_H
