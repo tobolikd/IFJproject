@@ -26,6 +26,7 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
   CHECK_MALLOC(new->varId);
   strcpy(new->varId,name); //copy name to varId
   new->type = type;
+  new->next = NULL;
   
   if (appendTo->data.fnc_data.paramCount == 0) //first parameter
   {
