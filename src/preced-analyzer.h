@@ -38,25 +38,6 @@ typedef struct
     bool reduction;
 }PrecedItem;
 
-typedef enum {
-    OPERATOR_MULTIPLY,
-    OPERATOR_DIVIDE,
-    OPERATOR_PLUS,
-    OPERATOR_MINUS,
-    OPERATOR_CONCAT,
-    OPERATOR_GT,
-    OPERATOR_LT,
-    OPERATOR_GE,
-    OPERATOR_LE,
-    OPERATOR_E,
-    OPERATOR_NE,
-    LEFT_BRACKET,
-    RIGHT_BRACKET,
-    VARIABLE,
-    CLOSING_TAG
-}terminalIndex;
-
-//RULES
 
 
 #endif // IFJ_SYN_ANALYZER_H
