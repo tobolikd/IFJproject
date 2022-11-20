@@ -5,6 +5,7 @@ project(IFJ-tests)
 set(PROJECT_FILES
     src/lex-analyzer.c
     src/syn-analyzer.c
+    src/preced-analyzer.c
     src/symtable.c
     src/ast.c
     src/stack.c
@@ -16,6 +17,7 @@ set(UNIT_TESTS
     tests/test-ast.cpp
     tests/test-lex-analyzer.cpp
     tests/test-syn-analyzer.cpp
+    tests/test-preced-analyzer.cpp
     tests/test-code-gen.cpp
 )
 
