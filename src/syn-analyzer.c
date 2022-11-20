@@ -71,7 +71,7 @@ void type(TokenList *list, int *index)
     switch (list->TokenArray[*index]->type)
     {
     case t_nullType:
-        // debug_print("in NULL TYPE\n");
+        // debug_log("in NULL TYPE\n");
         if (!strcmp(list->TokenArray[*index]->data, "int"))
         {
             return;
@@ -90,7 +90,7 @@ void type(TokenList *list, int *index)
             return;
         }
     case t_type:
-        // debug_print("in TYPE\n");
+        // debug_log("in TYPE\n");
         if (!strcmp(list->TokenArray[*index]->data, "int"))
         {
             return;
@@ -119,7 +119,7 @@ void functionType(TokenList *list, int *index)
 {
     if (!strcmp(list->TokenArray[*index]->data, "void"))
     {
-        // debug_print("in void\n");
+        // debug_log("in void\n");
         if (list->TokenArray[*index]->type == t_type)
         {
             return;
@@ -128,7 +128,7 @@ void functionType(TokenList *list, int *index)
     }
     else if (list->TokenArray[*index]->type == t_type || list->TokenArray[*index]->type == t_nullType)
     {
-        // debug_print("in FNC TYPE\n");
+        // debug_log("in FNC TYPE\n");
         type(list, index);
         return;
     }
@@ -138,10 +138,10 @@ void functionType(TokenList *list, int *index)
 // <fnc-decl> -> function functionId ( <param> ) : <fnc-type> { <st-list> }
 void functionDeclare(TokenList *list, int *index)
 {
-    debug_print("FNC-DECL %i ", *index);
+    debug_log("FNC-DECL %i ", *index);
     if (list->TokenArray[*index]->type == t_function)
     {
-        debug_print("FNC-DECL FUNCTION FUNCTION %i ", *index);
+        debug_log("FNC-DECL FUNCTION FUNCTION %i ", *index);
         (*index)++;
         if (list->TokenArray[*index]->type == t_functionId)
         {
@@ -190,15 +190,15 @@ void statList(TokenList *list, int *index)
         return;
     }
     statList(list, index);
-    debug_print("ST-LIST %i ", *index);
-    debug_print("%s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
+    debug_log("ST-LIST %i ", *index);
+    debug_log("%s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
     return;
 }
 
 // <stat> -> if || while || assign || return || eps
 void stat(TokenList *list, int *index)
 {
-    debug_print("STAT %i ", *index);
+    debug_log("STAT %i ", *index);
     switch (list->TokenArray[*index]->type)
     {
     case t_if: // if ( <expr> ) { <st-list> } else { <st-list> }
@@ -241,6 +241,7 @@ void stat(TokenList *list, int *index)
                 }
             }
             errorCode = SYNTAX_ERR;
+            return;
         }
     case t_while: // while ( <expr> ) { <st-list> }
         (*index)++;
@@ -266,6 +267,7 @@ void stat(TokenList *list, int *index)
                 }
             }
             errorCode = SYNTAX_ERR;
+            return;
         }
     case t_return: // return <expr> ;
         (*index)++;
@@ -286,7 +288,9 @@ void stat(TokenList *list, int *index)
         }
         else if (list->TokenArray[*index]->type == t_varId) // <assign> -> <var> <r-side>
         {
+            debug_log("\nINDEX: %s\n",TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
             (*index)++;
+            debug_log("\nINDEX: %s\n",TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
             if (list->TokenArray[*index]->type == t_semicolon) // <r-side> -> eps
             {
                 return;
@@ -321,14 +325,14 @@ void stat(TokenList *list, int *index)
 // <seq-stats> -> <stat> <fnc-decl> <seq-stats> || eps
 void seqStats(TokenList *list, int *index)
 {
-    // debug_print("SEQ-STAT %i ", *index);
+    // debug_log("SEQ-STAT %i ", *index);
     stat(list, index);
     functionDeclare(list, index);
     (*index)++;
-    debug_print("\nLIST LENGHT: %d\n", list->length);
+    debug_log("\nLIST LENGHT: %d\n", list->length);
     if ((*index) == list->length)
     {
-        debug_print("End of program\n");
+        debug_log("End of program\n");
         return;
     }
     seqStats(list, index);
@@ -338,7 +342,7 @@ void seqStats(TokenList *list, int *index)
 // <prog> -> <prolog> <seq-stats> <epilog>
 void checkSyntax(TokenList *list, int *index)
 {
-    debug_print("PROGRAM %i\n", *index);
+    debug_log("PROGRAM %i\n", *index);
     seqStats(list, index);
     return;
 }
