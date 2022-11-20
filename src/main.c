@@ -3,9 +3,8 @@
 #include "code-gen.h"
 #include "error-codes.h"
 
-enum ifjErrCode errorCode = SUCCESS;
-
 int main () {
+    errorCode = SUCCESS;
     /* SCANNER */
     FILE *fp;
 

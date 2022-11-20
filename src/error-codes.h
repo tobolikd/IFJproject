@@ -47,6 +47,8 @@ extern enum ifjErrCode errorCode;
 // check malloc success, on fail return NULL
 #define CHECK_MALLOC_PTR(ptr) do { if (ptr == NULL) {errorCode = INTERNAL_ERR; return NULL;} } while (0)
 
+#define MALLOC_ERR do{errorCode = INTERNAL_ERR; fprintf(stderr, "INTERNAL: malloc returned NULL"); } while(0)
+
 #define THROW_ERROR(CODE, ...)                                  \
     errorCode = CODE;                                           \
     switch (errorCode){                                         \
@@ -79,6 +81,6 @@ extern enum ifjErrCode errorCode;
         break;                                                  \
     default:                                                    \
         printf("UNKNOWN ERROR. ADD TO LIST? \n");               \
-    } 
+    }
 
 #endif // IFJ_ERROR_CODES_H
