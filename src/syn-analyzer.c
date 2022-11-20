@@ -1,3 +1,9 @@
+/**
+ * @file syn-analyzer.c
+ * @author Jakub Mikysek (xmikys03)
+ * @brief Syntatic Analyser for interpreter IFJcode22
+ */
+
 #include "lex-analyzer.h"
 #include "syn-analyzer.h"
 #include "symtable.h"
@@ -7,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// TOKEN_TYPE_STRING[list->TokenArray[index]->type] == t_string | takhle pristupuju k tokenum a jejich typum
+// list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
 
 // <params> -> , <type> <var> <params> || eps
@@ -195,7 +201,7 @@ void stat(TokenList *list, int *index)
     debug_print("STAT %i ", *index);
     switch (list->TokenArray[*index]->type)
     {
-    case t_if:  // if ( <expr> ) { <st-list> } else { <st-list> }
+    case t_if: // if ( <expr> ) { <st-list> } else { <st-list> }
         (*index)++;
         if (list->TokenArray[*index]->type == t_lPar)
         {
@@ -236,7 +242,7 @@ void stat(TokenList *list, int *index)
             }
             errorCode = SYNTAX_ERR;
         }
-    case t_while:   // while ( <expr> ) { <st-list> }
+    case t_while: // while ( <expr> ) { <st-list> }
         (*index)++;
         if (list->TokenArray[*index]->type == t_lPar)
         {
@@ -261,7 +267,7 @@ void stat(TokenList *list, int *index)
             }
             errorCode = SYNTAX_ERR;
         }
-    case t_return:  // return <expr> ;
+    case t_return: // return <expr> ;
         (*index)++;
         // precendAnalyser();
         if (list->TokenArray[*index]->type == t_semicolon)
@@ -271,8 +277,42 @@ void stat(TokenList *list, int *index)
         else
         {
             errorCode = SYNTAX_ERR;
+            return;
         }
     default:
+        if (list->TokenArray[*index]->type == t_semicolon) // <assign> -> eps
+        {
+            return;
+        }
+        else if (list->TokenArray[*index]->type == t_varId) // <assign> -> <var> <r-side>
+        {
+            (*index)++;
+            if (list->TokenArray[*index]->type == t_semicolon) // <r-side> -> eps
+            {
+                return;
+            }
+            else if (list->TokenArray[*index]->type == t_assign) // <r-side> -> = <expr>
+            {
+                // (*index)++;
+                // precendAnalyser();
+                if (list->TokenArray[*index]->type == t_semicolon) // <r-side> -> eps
+                {
+                    return;
+                }
+            }
+            else
+            {
+                errorCode = SYNTAX_ERR;
+                return;
+            }
+        }
+        else // <assign> -> <expr> || <stat> -> eps
+        {
+            /* TODO - EPS STAT */
+
+            // (*index)++;
+            // precendAnalyser();
+        }
         return;
     }
     return;
@@ -293,7 +333,6 @@ void seqStats(TokenList *list, int *index)
     }
     seqStats(list, index);
     return;
-    // printf("%s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
 }
 
 // <prog> -> <prolog> <seq-stats> <epilog>

@@ -1,3 +1,9 @@
+/**
+ * @file syn-analyzer.h
+ * @author Jakub Mikysek (xmikys03)
+ * @brief Syntatic Analyser for interpreter IFJcode22 - Header File
+ */
+
 #ifndef IFJ_SYN_ANALYZER_H
 #define IFJ_SYN_ANALYZER_H
 
