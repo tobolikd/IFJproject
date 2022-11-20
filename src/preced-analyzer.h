@@ -1,6 +1,10 @@
 #ifndef IFJ_PRECED_ANALYZER_H
 #define IFJ_PRECED_ANALYZER_H 1
 
+#include "lex-analyzer.h"
+#include "syn-analyzer.h"
+#include "error-codes.h"
+#include "symtable.h"
 
 #include <stdbool.h>
 
