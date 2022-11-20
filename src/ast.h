@@ -23,7 +23,7 @@
  *      floatValue - float constant
  *      blank - if the return statement returns value or not
  *      functionCallData - structure with fnc call attribs
- *          |- functionId - label of the function
+ *          |- function - pointer to fnc in symtable
  *          |- params - list of parametres
  *              |- type - data type of parameter
  *              |- data - data of the parameter
@@ -32,6 +32,7 @@
  *                  intValue - integer constant
  *                  stringvalue - string constant
  *                  floatValue - float constant
+ *                  NULL - in case of AST_P_NULL
  *              |- next - pointer to next parameter
  */
 
@@ -91,6 +92,15 @@ typedef enum
     AST_END_BLOCK
 } AST_type;
 
+typedef enum
+{
+    AST_P_INT,
+    AST_P_STRING,
+    AST_P_FLOAT,
+    AST_P_NULL,
+    AST_P_VAR
+} AST_param_type;
+
 typedef union ast_param_data
 {
     ht_item_t *variable;
@@ -101,19 +111,19 @@ typedef union ast_param_data
 
 typedef struct ast_fnc_param
 {
-    AST_type type; // allowed - AST_INT, AST_FLOAT, AST_STRING, AST_VAR, AST_NULL
+    AST_param_type type; // allowed - AST_P_INT, AST_P_FLOAT, AST_P_STRING, AST_P_VAR, AST_P_NULL
     AST_param_data *data;
     struct ast_fnc_param *next;
 } AST_fnc_param;
 
 /* function call data
  *
- * functionId - called function
+ * function - pointer to symtable
  * params - list of parametres
  */
 typedef struct
 {
-    char *functionId;
+    ht_item_t *function;
     AST_fnc_param *params;
 } AST_function_call_data;
 
@@ -160,12 +170,20 @@ AST_item *ast_item_const(AST_type type, AST_data *data);
  */
 void ast_item_destr(AST_item *deleted);
 
-/* get_function_call_data
- *  - parses tokens to function call data
- *  - expects the given function call to be syntactically correct
- *    (from the label to the closing bracket)
+/* fnc_call_data_init
+ *  - initialize function call data structure
+ *  data - pointer to data to be initialized
+ *  function - pointer to symtable
  */
-AST_function_call_data *get_function_call_data(TokenList *tokenArray, int fncCallIndex);
+void fnc_call_data_init(AST_function_call_data *data, ht_item_t *function);
+
+/* fnc_call_data_add_param
+ *  - adds parameter to function call data acording to param type
+ *  data - pointer to data where param will be added
+ *  type - type of parameter {AST_P_NULL, AST_P_INT, AST_P_STRING, AST_P_FLOAT, AST_P_VAR}
+ *  param - pointer to the parameter {NULL, int *, char *, float *, ht_item_t *}
+ */
+void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, void *param);
 
 /* function_call_data_destr
  *  - frees function call data EXCEPT for the symtable data
