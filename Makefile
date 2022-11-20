@@ -7,6 +7,7 @@ SOURCES += code-gen.c
 SOURCES += ast.c
 SOURCES += stack.c
 SOURCES += symtable.c
+SOURCES += devel.c
 SOURCES += main.c
 
 TARGETS = $(addprefix $(SOURCE_DIR), $(SOURCES))
@@ -19,12 +20,12 @@ CFLAGS=-std=c99 -Wall -Wextra -pedantic -lm -fcommon
 all: clean compile
 
 compile:
-	$(CC) $(CFLAGS) $(TARGETS) -o $(PROJECT) 
+	$(CC) $(CFLAGS) $(TARGETS) -o $(PROJECT)
 
 run: compile
 	./$(PROJECT)
 
-compile_tests: 
+compile_tests:
 	cmake -S . -B build
 	cmake --build build
 

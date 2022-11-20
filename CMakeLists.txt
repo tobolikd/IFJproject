@@ -10,9 +10,11 @@ set(PROJECT_FILES
     src/ast.c
     src/stack.c
     src/code-gen.c
+    src/devel.c
 )
 
 set(UNIT_TESTS
+    tests/test-ast.cpp
     tests/test-lex-analyzer.cpp
     tests/test-syn-analyzer.cpp
     tests/test-preced-analyzer.cpp
