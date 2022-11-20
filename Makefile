@@ -10,6 +10,7 @@ SOURCES += ast.c
 SOURCES += symtable.c
 SOURCES += devel.c
 SOURCES += stack.c
+SOURCES += symtable.c
 SOURCES += main.c
 
 TARGETS = $(addprefix $(SOURCE_DIR), $(SOURCES))
