@@ -45,16 +45,16 @@
 typedef enum
 {
     // arithmetic operations
-    AST_ADD,
+    AST_ADD = 0,
     AST_SUBTRACT,
     AST_DIVIDE,
     AST_MULTIPLY,
 
     // string operation
-    AST_CONCAT,
+    AST_CONCAT = 10,
 
     // relation operations
-    AST_EQUAL,
+    AST_EQUAL = 20,
     AST_NOT_EQUAL,
     AST_GREATER,
     AST_GREATER_EQUAL,
@@ -62,20 +62,20 @@ typedef enum
     AST_LESS_EQUAL,
 
     // data control
-    AST_ASSIGN,
+    AST_ASSIGN = 30,
     AST_VAR,    // data - ht_item_t *variable
 
     // constants
-    AST_INT,    // data - int intValue
+    AST_INT = 40,    // data - int intValue
     AST_STRING, // data - char *stringValue
     AST_FLOAT,  // data - float floatValue
     AST_NULL,
 
     // fnc declaration
-    AST_FUNCTION_DECLARE,   // data - ht_item_t *function
+    AST_FUNCTION_DECLARE = 50,   // data - ht_item_t *function
 
     // program control (jumps)
-    AST_FUNCTION_CALL,  // data - AST_function_call_data *functionCallData
+    AST_FUNCTION_CALL = 60,  // data - AST_function_call_data *functionCallData
     AST_RETURN, // data - bool blank
     AST_IF,
     AST_ELSE,
@@ -89,7 +89,7 @@ typedef enum
      * AST_ELSE
      * AST_WHILE
      */
-    AST_END_BLOCK
+    AST_END_BLOCK = 99
 } AST_type;
 
 typedef enum
@@ -162,7 +162,7 @@ typedef struct
  *  - item constructor
  *  - returns allocated item with type and data
  */
-AST_item *ast_item_const(AST_type type, AST_data *data);
+AST_item *ast_item_const(AST_type type, void *data);
 
 /* ast_item_destr
  *  - frees AST item with all data EXCEPT for the symtable data
@@ -189,6 +189,6 @@ void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, 
  *  - frees function call data EXCEPT for the symtable data
  *  note: symtable data will be freed on symtable destruction
  */
-void function_call_data_destr(AST_function_call_data *data);
+void fnc_call_data_destr(AST_function_call_data *data);
 
 #endif // IFJ_AST_H
