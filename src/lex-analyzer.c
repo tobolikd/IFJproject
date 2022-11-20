@@ -829,14 +829,10 @@ TokenList *lexAnalyser(FILE *fp)
             return NULL;
         }
 
-        //EOF - dont append this token
-        if (curToken->type == t_EOF)
-        {
-            tokenDtor(curToken);
-            break;
-        }
-
         list = appendToken(list,curToken); //append to list
+
+        if (curToken->type == t_EOF)
+            break;
     }
 
     return list;
