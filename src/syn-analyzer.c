@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum ifjErrCode errorCode;
-
 // TOKEN_TYPE_STRING[list->TokenArray[index]->type] == t_string | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
 
@@ -157,7 +155,10 @@ void functionDeclare(TokenList *list, int *index)
                         if (list->TokenArray[*index]->type == t_lCurl)
                         {
                             (*index)++;
-                            statList(list, index);
+                            if (list->TokenArray[*index]->type != t_rCurl)
+                            {
+                                statList(list, index);
+                            }
                             if (list->TokenArray[*index]->type == t_rCurl)
                             {
                                 return;
@@ -177,13 +178,12 @@ void functionDeclare(TokenList *list, int *index)
 void statList(TokenList *list, int *index)
 {
     stat(list, index);
-    //(*index)++;
-    if ((*index) == list->length)
+    (*index)++;
+    if (list->TokenArray[*index]->type == t_rCurl)
     {
-        debug_print("End of program\n");
         return;
     }
-    //statList(list, index);
+    statList(list, index);
     debug_print("ST-LIST %i ", *index);
     debug_print("%s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
     return;
@@ -195,7 +195,7 @@ void stat(TokenList *list, int *index)
     debug_print("STAT %i ", *index);
     switch (list->TokenArray[*index]->type)
     {
-    case t_if:
+    case t_if:  // if ( <expr> ) { <st-list> } else { <st-list> }
         (*index)++;
         if (list->TokenArray[*index]->type == t_lPar)
         {
@@ -236,7 +236,7 @@ void stat(TokenList *list, int *index)
             }
             errorCode = SYNTAX_ERR;
         }
-    case t_while:
+    case t_while:   // while ( <expr> ) { <st-list> }
         (*index)++;
         if (list->TokenArray[*index]->type == t_lPar)
         {
@@ -261,7 +261,7 @@ void stat(TokenList *list, int *index)
             }
             errorCode = SYNTAX_ERR;
         }
-    case t_return:
+    case t_return:  // return <expr> ;
         (*index)++;
         // precendAnalyser();
         if (list->TokenArray[*index]->type == t_semicolon)
@@ -306,6 +306,7 @@ void checkSyntax(TokenList *list, int *index)
 
 void synAnalyser(TokenList *list)
 {
+    int index = 0;
     if (!list->TokenArray[0])
     {
         errorCode = SYNTAX_ERR;
