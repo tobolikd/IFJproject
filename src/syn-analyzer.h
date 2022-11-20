@@ -18,7 +18,7 @@ void type(TokenList *list, int *index);
 void functionType(TokenList *list, int *index);
 void statList(TokenList *list, int *index);
 void functionDeclare(TokenList *list, int *index);
-void stat(TokenList *list, int *index);
+void statement(TokenList *list, int *index);
 void seqStats(TokenList *list, int *index);
 void checkSyntax(TokenList *list, int *index);
 void synAnalyser(TokenList *list);

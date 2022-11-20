@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+enum ifjErrCode errorCode;
+
 void ast_item_destr(AST_item *item) {
     if (item == NULL)
         return;

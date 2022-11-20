@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+enum ifjErrCode errorCode;
+
 // list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
 
@@ -183,7 +185,7 @@ void functionDeclare(TokenList *list, int *index)
 // <st-list> -> <stat> <st-list> || eps
 void statList(TokenList *list, int *index)
 {
-    stat(list, index);
+    statement(list, index);
     (*index)++;
     if (list->TokenArray[*index]->type == t_rCurl)
     {
@@ -196,7 +198,7 @@ void statList(TokenList *list, int *index)
 }
 
 // <stat> -> if || while || assign || return || eps
-void stat(TokenList *list, int *index)
+void statement(TokenList *list, int *index)
 {
     debug_log("STAT %i ", *index);
     switch (list->TokenArray[*index]->type)
@@ -326,7 +328,7 @@ void stat(TokenList *list, int *index)
 void seqStats(TokenList *list, int *index)
 {
     // debug_log("SEQ-STAT %i ", *index);
-    stat(list, index);
+    statement(list, index);
     functionDeclare(list, index);
     (*index)++;
     debug_log("\nLIST LENGHT: %d\n", list->length);
