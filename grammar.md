@@ -26,12 +26,18 @@
 24. <type> -> ?string
 25. <type> -> ?float
 26. <assign> -> <expr>
-27. <assign> -> functionId ( <param> )
+27. <assign> -> functionId ( <call-param> )
 28. <assign> -> <var> <r-side>
 29. <assign> -> ε
 30. <r-side> -> = <expr>
-31. <r-side> -> = functionId ( <param> )
+31. <r-side> -> = functionId ( <call-param> )
 32. <r-side> -> ε
-33. <var> -> $varId
-34. <epilog> -> ?>EOF
-35. <epilog> -> EOF
+33. <call-param> -> <var> <call-params>
+34. <call-param> -> <literal> <call-params>
+35. <call-param> -> ε
+36. <call-params> -> , <var> <call-params>
+37. <call-params> -> , <literal> <call-params>
+38. <call-params> -> ε
+39. <var> -> $varId
+3. <epilog> -> ?>EOF
+3. <epilog> -> EOF

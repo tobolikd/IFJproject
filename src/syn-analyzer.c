@@ -18,6 +18,88 @@ enum ifjErrCode errorCode;
 // list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
 
+// <call-params> -> , <var> <call-params> || , <literal> <call-params> || eps
+void callParams(TokenList *list, int *index)
+{
+    if (list->TokenArray[*index]->type == t_rPar) // -> eps
+    {
+        return;
+    }
+
+    if (list->TokenArray[*index]->type == t_comma) // -> , [comma]
+    {
+        (*index)++;
+        /* <literal> */
+        if (list->TokenArray[*index]->type == t_int)
+        {
+            (*index)++;
+            callParams(list, index);
+        }
+        else if (list->TokenArray[*index]->type == t_float)
+        {
+            (*index)++;
+            callParams(list, index);
+        }
+        else if (list->TokenArray[*index]->type == t_string)
+        {
+            (*index)++;
+            callParams(list, index);
+        }
+        /* <var> */
+        else if (list->TokenArray[*index]->type == t_varId)
+        {
+            (*index)++;
+            callParams(list, index);
+        }
+        else
+        {
+            errorCode = SYNTAX_ERR;
+            return;
+        }
+    }
+    else
+    {
+        errorCode = SYNTAX_ERR;
+        return;
+    }
+}
+
+// <call-params> -> <var> <call-params> || <literal> <call-params> || eps
+void callParam(TokenList *list, int *index)
+{
+    if (list->TokenArray[*index]->type == t_rPar) // -> eps
+    {
+        return;
+    }
+    /* <literal> */
+    else if (list->TokenArray[*index]->type == t_int)
+    {
+        (*index)++;
+        callParams(list, index);
+    }
+    else if (list->TokenArray[*index]->type == t_float)
+    {
+        (*index)++;
+        callParams(list, index);
+    }
+    else if (list->TokenArray[*index]->type == t_string)
+    {
+        (*index)++;
+        callParams(list, index);
+    }
+    /* <var> */
+    else if (list->TokenArray[*index]->type == t_varId)
+    {
+        (*index)++;
+        callParams(list, index);
+    }
+    else
+    {
+        errorCode = SYNTAX_ERR;
+        return;
+    }
+}
+
 // <params> -> , <type> <var> <params> || eps
 void params(TokenList *list, int *index)
 {
@@ -39,11 +121,13 @@ void params(TokenList *list, int *index)
         else
         {
             errorCode = SYNTAX_ERR;
+            return;
         }
     }
     else
     {
         errorCode = SYNTAX_ERR;
+        return;
     }
 }
 
@@ -64,6 +148,7 @@ void param(TokenList *list, int *index)
     else
     {
         errorCode = SYNTAX_ERR;
+        return;
     }
 }
 
@@ -314,7 +399,7 @@ void statement(TokenList *list, int *index)
                     if (list->TokenArray[*index]->type == t_lPar)
                     {
                         (*index)++;
-                        param(list, index);
+                        callParam(list, index);
                         if (list->TokenArray[*index]->type == t_rPar)
                         {
                             (*index)++;
@@ -352,7 +437,7 @@ void statement(TokenList *list, int *index)
             if (list->TokenArray[*index]->type == t_lPar)
             {
                 (*index)++;
-                param(list, index);
+                callParam(list, index);
                 if (list->TokenArray[*index]->type == t_rPar)
                 {
                     (*index)++;
