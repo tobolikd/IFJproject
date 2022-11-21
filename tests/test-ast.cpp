@@ -66,15 +66,17 @@ TEST_F(testAst, initVar) {
 }
 
 TEST_F(testAst, fncCall) {
-    ht_item_t tmp;
+    ht_table_t *symtable = ht_init();
     char fncName[] = "sample_function";
-    tmp.identifier = fncName;
+    ht_insert(symtable, fncName, void_t, true);
 
     AST_function_call_data *data = (AST_function_call_data *) malloc(sizeof(AST_function_call_data));
-    fnc_call_data_init(data, &tmp);
+    fnc_call_data_init(symtable, data, fncName);
+
+    EXPECT_EQ(data->functionID, fncName);
 
     EXPECT_EQ(0, strcmp(fncName, data->function->identifier));
-    EXPECT_TRUE(&tmp == data->function);
+    EXPECT_TRUE(ht_search(symtable, fncName) == data->function);
     EXPECT_TRUE(NULL == data->params);
 
     int param1 = 123;
@@ -109,5 +111,7 @@ TEST_F(testAst, fncCall) {
 
     EXPECT_EQ(AST_FUNCTION_CALL, testedItem->type);
     EXPECT_TRUE(data == testedItem->data->functionCallData);
+
+    ht_delete_all(symtable);
 }
 
