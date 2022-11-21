@@ -198,11 +198,6 @@ TEST_P(testLexAnalyzerCorrect, tokenArray)
 
     while (tokenNum < 5)
     {
-        if (expectedType[tokenNum] == t_EOF)
-        {
-            EXPECT_EQ(tokenNum, returnedList->length);
-            break;
-        }
         if (tokenNum >= returnedList->length)
         {
             FAIL() << "TOKEN LIST IS SHORTER THAN EXPECTED" << listInfo() << endl;
