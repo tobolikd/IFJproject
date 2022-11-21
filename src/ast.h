@@ -23,6 +23,7 @@
  *      floatValue - float constant
  *      blank - if the return statement returns value or not
  *      functionCallData - structure with fnc call attribs
+ *          |- functionID - id of called function - only for debug
  *          |- function - pointer to fnc in symtable
  *          |- params - list of parametres
  *              |- type - data type of parameter
@@ -118,11 +119,14 @@ typedef struct ast_fnc_param
 
 /* function call data
  *
+ * functionID - function name - only for debug info
+ *              pointer is NOT valid after destructing
  * function - pointer to symtable
  * params - list of parametres
  */
 typedef struct
 {
+    char *functionID;
     ht_item_t *function;
     AST_fnc_param *params;
 } AST_function_call_data;
@@ -175,7 +179,7 @@ void ast_item_destr(AST_item *deleted);
  *  data - pointer to data to be initialized
  *  function - pointer to symtable
  */
-void fnc_call_data_init(AST_function_call_data *data, ht_item_t *function);
+void fnc_call_data_init(ht_table_t *fncSymtable, AST_function_call_data *data, char *functionId);
 
 /* fnc_call_data_add_param
  *  - adds parameter to function call data acording to param type
