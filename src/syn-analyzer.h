@@ -12,6 +12,8 @@
 #include "error-codes.h"
 #include "symtable.h"
 
+void callParams(TokenList *list, int *index);
+void callParam(TokenList *list, int *index);
 void params(TokenList *list, int *index);
 void param(TokenList *list, int *index);
 void type(TokenList *list, int *index);
