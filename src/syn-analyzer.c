@@ -290,27 +290,77 @@ void statement(TokenList *list, int *index)
         }
         else if (list->TokenArray[*index]->type == t_varId) // <assign> -> <var> <r-side>
         {
-            debug_log("\nINDEX: %s\n",TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
+            debug_log("\nINDEX: %s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
             (*index)++;
-            debug_log("\nINDEX: %s\n",TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
+            debug_log("\nINDEX: %s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
             if (list->TokenArray[*index]->type == t_semicolon) // <r-side> -> eps
             {
                 return;
             }
             else if (list->TokenArray[*index]->type == t_assign) // <r-side> -> = <expr>
             {
-                // (*index)++;
+                (*index)++;
+                if (list->TokenArray[*index]->type == t_semicolon) // <assign> -> <var> =; => ERROR
+                {
+                    errorCode = SYNTAX_ERR;
+                    return;
+                }
+                if (list->TokenArray[*index]->type == t_functionId) // <assign> -> <var> = functionId ( <param> ) / Function Call
+                {
+                    (*index)++;
+                    if (list->TokenArray[*index]->type == t_lPar)
+                    {
+                        (*index)++;
+                        param(list, index);
+                        if (list->TokenArray[*index]->type == t_rPar)
+                        {
+                            (*index)++;
+                            if (list->TokenArray[*index]->type == t_semicolon) // end Function Call with ; [semicolon]
+                            {
+                                return;
+                            }
+                        }
+                    }
+                    errorCode = SYNTAX_ERR;
+                    return;
+                }
+                while (list->TokenArray[*index]->type != t_semicolon) // temporary solution, before precedent Analyser is done
+                {
+                    (*index)++;
+                }
                 // precendAnalyser();
-                if (list->TokenArray[*index]->type == t_semicolon) // <r-side> -> eps
+                if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
                 {
                     return;
                 }
+                // FIX: $a = 5; se momentálně nevyhodnotí jako chyba, protože tu není žádný else,
+                // předpokládám, že se o tohle postará precendAnalyser
+                // zbytek programu je pak posunutý
             }
             else
             {
                 errorCode = SYNTAX_ERR;
                 return;
             }
+        }
+        else if (list->TokenArray[*index]->type == t_functionId) // <assign> -> functionId ( <param> ) / Function Call
+        {
+            (*index)++;
+            if (list->TokenArray[*index]->type == t_lPar)
+            {
+                (*index)++;
+                param(list, index);
+                if (list->TokenArray[*index]->type == t_rPar)
+                {
+                    (*index)++;
+                    if (list->TokenArray[*index]->type == t_semicolon) // end Function Call with ; [semicolon]
+                    {
+                        return;
+                    }
+                }
+            }
+            errorCode = SYNTAX_ERR;
+            return;
         }
         else // <assign> -> <expr> || <stat> -> eps
         {
