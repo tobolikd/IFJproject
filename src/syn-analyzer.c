@@ -245,6 +245,7 @@ void statement(TokenList *list, int *index)
             errorCode = SYNTAX_ERR;
             return;
         }
+        return;
     case t_while: // while ( <expr> ) { <st-list> }
         (*index)++;
         if (list->TokenArray[*index]->type == t_lPar)
@@ -271,6 +272,7 @@ void statement(TokenList *list, int *index)
             errorCode = SYNTAX_ERR;
             return;
         }
+        return;
     case t_return: // return <expr> ;
         (*index)++;
         // precendAnalyser();
@@ -283,6 +285,7 @@ void statement(TokenList *list, int *index)
             errorCode = SYNTAX_ERR;
             return;
         }
+        return;
     default:
         if (list->TokenArray[*index]->type == t_semicolon) // <assign> -> eps
         {
