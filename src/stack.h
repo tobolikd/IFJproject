@@ -3,6 +3,7 @@
 
 #include "ast.h"
 #include "lex-analyzer.h"
+#include "preced-analyzer.h"
 
 #include <stdbool.h>
 
@@ -54,5 +55,6 @@
 
 STACK_DECLARATION(AST_item *, ast)
 STACK_DECLARATION(Token *, token)
+STACK_DECLARATION(PrecedItem *, precedence)
 
 #endif // IFJ_STACK_H

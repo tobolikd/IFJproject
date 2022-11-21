@@ -5,6 +5,13 @@
 #include "syn-analyzer.h"
 #include "error-codes.h"
 #include "symtable.h"
+#include "stack.h"
+#include "stack.c"
+
+#include <stdbool.h>
+
+#define NUMBER_OF_RULES 14
+#define RULE_SIZE 3
 
 const char preced_table[18][18] = 
 {
@@ -27,8 +34,9 @@ const char preced_table[18][18] =
         {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', 'x'}  // $
 };
 
+
 typedef enum {
-    OPERATOR_NOT,
+    UNINITIALISED,
     OPERATOR_MULTIPLY,
     OPERATOR_DIVIDE,
     OPERATOR_PLUS,
@@ -47,9 +55,16 @@ typedef enum {
     EXPRESSION
 }Element;
 
+typedef struct item_t
+{
+    Element element;
+    Token *token;
+    bool reduction;
+}PrecedItem;
+
 //RULES
 
-unsigned const RULES[14][3] = {
+unsigned const RULES[NUMBER_OF_RULES][RULE_SIZE] = {
     {EXPRESSION},                                   // E -> E
     {DATA},                                         // E -> i
     {EXPRESSION, OPERATOR_PLUS, EXPRESSION},        // E -> E+E
@@ -67,12 +82,27 @@ unsigned const RULES[14][3] = {
 };//possibly more
 
 
+
 /// @brief Analyses syntax in expression. Creates AST.
 /// @param List Input tokens.
 /// @param index Array index.
 /// @return NULL if syntax error.
 /// @return Pointer to AST.
 bool parseExpression(TokenList *List, int *index);
+
+PrecedItem *stack_precedence_top_terminal(stack_precedence_t *stack);
+
+PrecedItem *callReductionRule(stack_precedence_t *stack, PrecedItem **itemArr, unsigned ruleNum);
+
+bool reduce(stack_precedence_t *stack);
+
+char getIndex(Token *input);
+
+PrecedItem *precedItemCtor(Token *token, Element type);
+
+void precedItemDtor(PrecedItem *item);
+
+bool parseExpression(TokenList *list, int * index);
 
 
 #endif // IFJ_SYN_ANALYZER_H
