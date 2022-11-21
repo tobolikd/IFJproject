@@ -1,5 +1,5 @@
 #ifndef LEX_ANALYZER_H
-#define LEX_ANALYZER_H
+#define LEX_ANALYZER_H 1
 
 #include <stdio.h>
 #include <string.h>

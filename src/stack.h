@@ -1,5 +1,5 @@
 #ifndef IFJ_STACK_H
-#define IFJ_STACK_H
+#define IFJ_STACK_H 1
 
 #include "ast.h"
 #include "lex-analyzer.h"

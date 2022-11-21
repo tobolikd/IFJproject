@@ -23,7 +23,7 @@ class testCheckReturnValue : public testBase {};
 
 TEST_P(testCheckReturnValue, expectedValue)
 {
-    EXPECT_EQ(expectedValue,precedAnalyzer(testList,1));
+    EXPECT_EQ(expectedValue,parseExpression(testList,&index)) << "Processing input: |" << get<1>(GetParam()) << "| ..." << endl;
 }
 
 INSTANTIATE_TEST_SUITE_P(CONST_CORRECT, testCheckReturnValue,
@@ -38,8 +38,8 @@ INSTANTIATE_TEST_SUITE_P(CONST_CORRECT, testCheckReturnValue,
         make_tuple(true, "(-2)"),
         make_tuple(true, "2*2"),
         make_tuple(true, "2*2+2"),
-        make_tuple(true, "2*2+2-2\\2"),
-        make_tuple(true, "(2)+(2)*(2)\\(2)"),
+        make_tuple(true, "2*2+2-2/2"),
+        make_tuple(true, "(2)+(2)*(2)/(2)"),
         make_tuple(true, "-2+(-2)"),
         make_tuple(true, "-2*(-2)"),
         make_tuple(true, "-(+2)-(+2)")
@@ -48,28 +48,65 @@ INSTANTIATE_TEST_SUITE_P(CONST_CORRECT, testCheckReturnValue,
 
 INSTANTIATE_TEST_SUITE_P(CONST_INCORRECT, testCheckReturnValue,
     testing::Values(
+        make_tuple(true, "2"),
+        make_tuple(true, "2+2"),
+        make_tuple(true, "2+2+2"),
+        make_tuple(true, "(2+2)"),
+        make_tuple(true, "(2+2)+2"),
+        make_tuple(true, "(2)+2"),
+        make_tuple(true, "-2+2"),
+        make_tuple(true, "(-2)"),
+        make_tuple(true, "2*2"),
+        make_tuple(true, "2*2+2"),
+        make_tuple(true, "2*2+2-2/2"),
+        make_tuple(true, "(2)+(2)*(2)/(2)"),
+        make_tuple(true, "-2+(-2)"),
+        make_tuple(true, "-2*(-2)"),
+        make_tuple(true, "-(+2)-(+2)")
+    )
+);
+
+INSTANTIATE_TEST_SUITE_P(VARIABLES_CORRECT, testCheckReturnValue,
+    testing::Values(
+        make_tuple(true, "$a"),
+        make_tuple(true, "$a+$a"),
+        make_tuple(true, "$a+$a+$a"),
+        make_tuple(true, "($a+$a)"),
+        make_tuple(true, "($a+$a)+$a"),
+        make_tuple(true, "($a)+$a"),
+        make_tuple(true, "-$a+$a"),
+        make_tuple(true, "(-$a)"),
+        make_tuple(true, "$a*$a"),
+        make_tuple(true, "$a*$a+$a"),
+        make_tuple(true, "$a*$a+$a-$a/$a"),
+        make_tuple(true, "($a)+($a)*($a)/($a)"),
+        make_tuple(true, "-$a+(-$a)"),
+        make_tuple(true, "-$a*(-$a)"),
+        make_tuple(true, "-(+$a)-(+$a)")
+    )
+);
+
+INSTANTIATE_TEST_SUITE_P(VARIABLES_INCORRECT, testCheckReturnValue,
+    testing::Values(
         make_tuple(false, "()"),
-        make_tuple(false, "2++"),
-        make_tuple(false, "2++2"),
-        make_tuple(false, "(2+2)2"),
-        make_tuple(false, "2(2-2)"),
-        make_tuple(false, "(2+2)*2*"),
-        make_tuple(false, "2(+)2"),
-        make_tuple(false, "(-2))"),
-        make_tuple(false, "(2*2"),
-        make_tuple(false, "2+-2"),
-        make_tuple(false, "2*+2"),
-        make_tuple(false, "2\\"),
-        make_tuple(false, "{2+2}"),
-        make_tuple(false, "[2*(-2)]"),
-        make_tuple(false, "(+2)(-2)")
+        make_tuple(false, "$a++"),
+        make_tuple(false, "$a++$a"),
+        make_tuple(false, "($a+$a)$a"),
+        make_tuple(false, "$a($a-$a)"),
+        make_tuple(false, "($a+$a)*$a*"),
+        make_tuple(false, "$a(+)$a"),
+        make_tuple(false, "(-$a))"),
+        make_tuple(false, "($a*$a"),
+        make_tuple(false, "$a+-$a"),
+        make_tuple(false, "$a*+$a"),
+        make_tuple(false, "$a/"),
+        make_tuple(false, "**$a"),
+        make_tuple(false, "$a**(-$a"),
+        make_tuple(false, "(+$a)(-$a)")
     )
 );
 
 
-/* VARIABLES_CORRECT */
-
-/* VARIABLES_INCORRECT */
 
 /* LOGICAL_OPERATORS_CORRECT */
 
