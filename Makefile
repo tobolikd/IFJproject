@@ -6,9 +6,9 @@ SOURCES += syn-analyzer.c
 SOURCES += preced-analyzer.c
 SOURCES += code-gen.c
 SOURCES += ast.c
-SOURCES += stack.c
 SOURCES += symtable.c
 SOURCES += devel.c
+SOURCES += stack.c
 SOURCES += main.c
 
 TARGETS = $(addprefix $(SOURCE_DIR), $(SOURCES))
