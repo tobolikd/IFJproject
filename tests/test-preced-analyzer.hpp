@@ -12,6 +12,9 @@ extern "C"
 #include <iostream>
 #include <gtest/gtest.h>
 
+#include <cstdlib>
+
+
 using std::tuple;
 using std::to_string;
 using std::get;
@@ -30,9 +33,11 @@ class testBase : public::testing::TestWithParam<tuple<bool,string>>
         TokenList *testList;
         bool expectedValue;
         string dataIn;
+        int index;
 
         void SetUp() override
         {
+            index = 0;
 
             expectedValue = get<0>(GetParam());
             

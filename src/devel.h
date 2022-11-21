@@ -1,5 +1,5 @@
 #ifndef IFJ_DEVEL_H
-#define IFJ_DEVEL_H
+#define IFJ_DEVEL_H 1
 
 #include <stdio.h>
 

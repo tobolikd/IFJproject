@@ -20,6 +20,7 @@ int main () {
 #if (DEBUG == 1)
     printTokenList(list);
 #endif
+
     synAnalyser(list);  // start syn analyzer
 
     // free memory
