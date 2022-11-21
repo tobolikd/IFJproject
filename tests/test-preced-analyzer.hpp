@@ -47,7 +47,7 @@ class testBase : public::testing::TestWithParam<tuple<bool,string>>
             ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - failed to allocate file." << endl;
 
             testList = lexAnalyser(tmpFile);
-            ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - scanner failed to read input data." << endl;
+            ASSERT_FALSE(testList == NULL) << "INTERNAL TEST ERROR - scanner failed to read input data." << endl;
         }
 
         void TearDown() override
