@@ -5,6 +5,7 @@ project(IFJ-tests)
 set(PROJECT_FILES
     src/lex-analyzer.c
     src/syn-analyzer.c
+    src/sem-analyzer.c
     src/symtable.c
     src/ast.c
     src/stack.c

@@ -7,7 +7,8 @@ enum ifjErrCode {
     SUCCESS = 0, // no error
     LEXICAL_ERR = 1, // incorrect lexeme structure
     SYNTAX_ERR = 2, // incorrect syntax
-    SEMANTIC_FUNCTION_DEFINITION_ERR = 3, // undefined function,
+    SEMANTIC_FUNCTION_DEFINITION_ERR = 3, // undefined function, function redefintion
+    SEMANTIC_PARAMETER_ERR = 4,
     SEMANTIC_RUN_PARAMETER_ERR = 4, // incorrect type/count in function call
                                     // or incorrect return value type
     SEMANTIC_VARIABLE_ERR = 5, // usage of undefined variable
@@ -82,5 +83,26 @@ extern enum ifjErrCode errorCode;
     default:                                                    \
         printf("UNKNOWN ERROR. ADD TO LIST? \n");               \
     }
+
+#define ERR_FNC_NOT_DECLARED(ID)                                    \
+do {errorCode = SEMANTIC_FUNCTION_DEFINITION_ERR;                   \
+    debug_print("ERROR: calling undefined function: %s\n", ID);     \
+} while (0)
+
+#define ERR_FNC_PARAM_TYPE(FNC)                                                     \
+do {errorCode = SEMANTIC_PARAMETER_ERR;                                   \
+    debug_print("ERROR in function call: %s\n\tincompatible function call parameter type\n", FNC);  \
+} while (0)
+
+#define ERR_FNC_PARAM_COUNT(FNC)                                                \
+do {errorCode = SEMANTIC_PARAMETER_ERR;                                         \
+    debug_print("ERROR in function call: %s\n\twrong parameter count\n", FNC);  \
+} while (0)
+
+
+#define ERR_INTERNAL(FUNCTION, MSG, ... ) do { errorCode = INTERNAL_ERR;        \
+            debug_print("ERROR(internal):\n\tin function: %s\n\t", FUNCTION);    \
+            debug_print(MSG, __VA_ARGS__);                                      \
+            } while (0)
 
 #endif // IFJ_ERROR_CODES_H

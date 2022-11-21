@@ -33,6 +33,7 @@
                                                                                 \
         stack->top = deleted->next;                                             \
         DESTRUCTOR(deleted->data);                                              \
+        free(deleted);                                                          \
     }                                                                           \
                                                                                 \
     TYPE stack_##NAME##_top(stack_##NAME##_t *stack) {                          \
@@ -40,8 +41,9 @@
     }                                                                           \
                                                                                 \
     bool stack_##NAME##_empty(stack_##NAME##_t *stack) {                        \
-      return stack->top == NULL;                                                \
+        return stack->top == NULL;                                              \
     }
 
 STACK_DEFINITION(AST_item *, ast, ast_item_destr)
 STACK_DEFINITION(Token *, token, tokenDtor)
+STACK_DEFINITION(char *, string, free)

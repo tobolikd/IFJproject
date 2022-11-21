@@ -3,6 +3,7 @@ SOURCE_DIR=./src/
 
 SOURCES += lex-analyzer.c
 SOURCES += syn-analyzer.c
+SOURCES += sem-analyzer.c
 SOURCES += code-gen.c
 SOURCES += ast.c
 SOURCES += stack.c
