@@ -278,7 +278,6 @@ bool parseExpression(TokenList *list, int *index)
 
     while (1)
     {
-        // printf("%d, %s\n",*index,list->TokenArray[*index]->data);
 
         topItem = stack_precedence_top_terminal(&stack);
         if (topItem == NULL)
