@@ -1,7 +1,8 @@
 # ignore all 
 # dont save binary files
 /*
-src/lex-anal 
+src/lex-anal
+src/mymain.c
 
 # except
 !src
@@ -13,4 +14,3 @@ src/lex-anal
 !CMakeLists.txt
 !notes.md
 !grammar.md
-!input.php
