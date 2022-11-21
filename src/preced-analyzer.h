@@ -42,7 +42,7 @@ typedef enum {
     OPERATOR_NE,
     LEFT_BRACKET,
     RIGHT_BRACKET,
-    INPUT,
+    DATA,
     CLOSING_TAG,
     EXPRESSION
 }Element;
@@ -51,7 +51,7 @@ typedef enum {
 
 unsigned const RULES[14][3] = {
     {EXPRESSION},                                   // E -> E
-    {INPUT},                                        // E -> i
+    {DATA},                                         // E -> i
     {EXPRESSION, OPERATOR_PLUS, EXPRESSION},        // E -> E+E
     {EXPRESSION, OPERATOR_MINUS, EXPRESSION},       // E -> E-E
     {EXPRESSION, OPERATOR_MULTIPLY, EXPRESSION},    // E -> E*E    
@@ -72,7 +72,7 @@ unsigned const RULES[14][3] = {
 /// @param index Array index.
 /// @return NULL if syntax error.
 /// @return Pointer to AST.
-bool precedAnalyzer(TokenList *List, int index);
+bool parseExpression(TokenList *List, int *index);
 
 
 #endif // IFJ_SYN_ANALYZER_H
