@@ -91,7 +91,7 @@ TEST_F(testAst, fncCall) {
     fnc_call_data_add_param(data, AST_P_FLOAT, &param2);
     tmpParam = tmpParam->next;
     EXPECT_EQ(tmpParam->type, AST_P_FLOAT);
-    EXPECT_FLOAT_EQ(1.2345, tmpParam->data->floatValue);
+    EXPECT_DOUBLE_EQ(1.2345, tmpParam->data->floatValue);
 
     fnc_call_data_add_param(data, AST_P_STRING, &param3);
     tmpParam = tmpParam->next;
@@ -104,10 +104,18 @@ TEST_F(testAst, fncCall) {
     EXPECT_EQ(tmpParam->type, AST_P_VAR);
     EXPECT_TRUE(&param4 == tmpParam->data->variable);
 
+    fnc_call_data_add_param(data, AST_P_NULL, NULL);
+    tmpParam = tmpParam->next;
+    EXPECT_EQ(tmpParam->type, AST_P_NULL);
+    EXPECT_TRUE(NULL == tmpParam->data);
+
+
     EXPECT_TRUE(NULL == tmpParam->next);
 
     testedItem = ast_item_const(AST_FUNCTION_CALL, data);
 
     EXPECT_EQ(AST_FUNCTION_CALL, testedItem->type);
     EXPECT_TRUE(data == testedItem->data->functionCallData);
+
+    ht_delete_all(symtable);
 }
