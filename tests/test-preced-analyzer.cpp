@@ -48,21 +48,21 @@ INSTANTIATE_TEST_SUITE_P(CONST_CORRECT, testCheckReturnValue,
 
 INSTANTIATE_TEST_SUITE_P(CONST_INCORRECT, testCheckReturnValue,
     testing::Values(
-        make_tuple(true, "2"),
-        make_tuple(true, "2+2"),
-        make_tuple(true, "2+2+2"),
-        make_tuple(true, "(2+2)"),
-        make_tuple(true, "(2+2)+2"),
-        make_tuple(true, "(2)+2"),
-        make_tuple(true, "-2+2"),
-        make_tuple(true, "(-2)"),
-        make_tuple(true, "2*2"),
-        make_tuple(true, "(((2*2)))+2"),
-        make_tuple(true, "(((2)*2)+2)-2/2"),
-        make_tuple(true, "(2)+(2)*(2)/(2)"),
-        make_tuple(true, "-2+(-2)"),
-        make_tuple(true, "-2*(-2)"),
-        make_tuple(true, "-(+2)-(+2)")
+        make_tuple(false, "()"),
+        make_tuple(false, "$a++"),
+        make_tuple(false, ")$a"),
+        make_tuple(false, "($a+$a)$a"),
+        make_tuple(false, "$a($a-$a)"),
+        make_tuple(false, "($a+$a)*$a*"),
+        make_tuple(false, "$a(+)$a"),
+        make_tuple(false, "(-$a))"),
+        make_tuple(false, "($a*$a"),
+        make_tuple(false, "$a+-$a"),
+        make_tuple(false, "$a*($a"),
+        make_tuple(false, "$a/"),
+        make_tuple(false, "**$a"),
+        make_tuple(false, "$a**(-$a"),
+        make_tuple(false, "(+$a)(-$a)")
     )
 );
 
