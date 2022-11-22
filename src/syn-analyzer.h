@@ -12,16 +12,14 @@
 #include "error-codes.h"
 #include "symtable.h"
 
-void callParams(TokenList *list, int *index);
-void callParam(TokenList *list, int *index);
-void params(TokenList *list, int *index);
-void param(TokenList *list, int *index);
-void type(TokenList *list, int *index);
-void functionType(TokenList *list, int *index);
-void statList(TokenList *list, int *index);
-void functionDeclare(TokenList *list, int *index);
-void statement(TokenList *list, int *index);
-void seqStats(TokenList *list, int *index);
+bool params(TokenList *list, int *index);
+bool param(TokenList *list, int *index);
+bool typeCheck(TokenList *list, int *index);
+bool functionType(TokenList *list, int *index);
+bool functionDeclare(TokenList *list, int *index);
+bool statList(TokenList *list, int *index);
+bool statement(TokenList *list, int *index);
+bool seqStats(TokenList *list, int *index);
 void checkSyntax(TokenList *list, int *index);
 void synAnalyser(TokenList *list);
 

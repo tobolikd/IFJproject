@@ -18,212 +18,155 @@ enum ifjErrCode errorCode;
 // list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
 
-// <call-params> -> , <var> <call-params> || , <literal> <call-params> || eps
-void callParams(TokenList *list, int *index)
-{
-    if (list->TokenArray[*index]->type == t_rPar) // -> eps
-    {
-        return;
-    }
-
-    if (list->TokenArray[*index]->type == t_comma) // -> , [comma]
-    {
-        (*index)++;
-        /* <literal> */
-        if (list->TokenArray[*index]->type == t_int)
-        {
-            (*index)++;
-            callParams(list, index);
-        }
-        else if (list->TokenArray[*index]->type == t_float)
-        {
-            (*index)++;
-            callParams(list, index);
-        }
-        else if (list->TokenArray[*index]->type == t_string)
-        {
-            (*index)++;
-            callParams(list, index);
-        }
-        /* <var> */
-        else if (list->TokenArray[*index]->type == t_varId)
-        {
-            (*index)++;
-            callParams(list, index);
-        }
-        else
-        {
-            errorCode = SYNTAX_ERR;
-            return;
-        }
-    }
-    else
-    {
-        errorCode = SYNTAX_ERR;
-        return;
-    }
-}
-
-// <call-params> -> <var> <call-params> || <literal> <call-params> || eps
-void callParam(TokenList *list, int *index)
-{
-    if (list->TokenArray[*index]->type == t_rPar) // -> eps
-    {
-        return;
-    }
-    /* <literal> */
-    else if (list->TokenArray[*index]->type == t_int)
-    {
-        (*index)++;
-        callParams(list, index);
-    }
-    else if (list->TokenArray[*index]->type == t_float)
-    {
-        (*index)++;
-        callParams(list, index);
-    }
-    else if (list->TokenArray[*index]->type == t_string)
-    {
-        (*index)++;
-        callParams(list, index);
-    }
-    /* <var> */
-    else if (list->TokenArray[*index]->type == t_varId)
-    {
-        (*index)++;
-        callParams(list, index);
-    }
-    else
-    {
-        errorCode = SYNTAX_ERR;
-        return;
-    }
-}
-
 // <params> -> , <type> <var> <params> || eps
-void params(TokenList *list, int *index)
+bool params(TokenList *list, int *index)
 {
     if (list->TokenArray[*index]->type == t_rPar) // -> eps
     {
-        return;
+        debug_log("FNC-DECL FUNCTION PARAMS rPAR %i \n", *index);
+        return true;
     }
 
     if (list->TokenArray[*index]->type == t_comma) // -> , [comma]
     {
         (*index)++;
-        type(list, index);
+        if (typeCheck(list, index) == false) // call type check
+        {
+            return false;
+        }
+        debug_log("FNC-DECL FUNCTION PARAMS TYPE CHECK CALL %i \n", *index);
         (*index)++;
         if (list->TokenArray[*index]->type == t_varId)
         {
             (*index)++;
-            params(list, index);
+            debug_log("FNC-DECL FUNCTION PARAMS TYPE CHECK CALL NEXT %i \n", *index);
+            if (params(list, index) == false) // -> <params>
+            {
+                return false;
+            }
         }
         else
         {
             errorCode = SYNTAX_ERR;
-            return;
+            return false;
         }
     }
     else
     {
         errorCode = SYNTAX_ERR;
-        return;
+        return false;
     }
+    return true;
 }
 
 // <param> -> <type> <var> <params> || eps
-void param(TokenList *list, int *index)
+bool param(TokenList *list, int *index)
 {
     if (list->TokenArray[*index]->type == t_rPar) // -> eps
     {
-        return;
+        debug_log("FNC-DECL FUNCTION PARAM rPAR %i \n", *index);
+        return true;
     }
-    type(list, index);
+    if (typeCheck(list, index) == false) // call type check
+    {
+        return false;
+    }
+    debug_log("FNC-DECL FUNCTION PARAM TYPE CHECK CALL %i \n", *index);
     (*index)++;
     if (list->TokenArray[*index]->type == t_varId)
     {
         (*index)++;
-        params(list, index);
+        debug_log("FNC-DECL FUNCTION PARAM TYPE CHECK CALL NEXT %i ", *index);
+        if (params(list, index) == false) // -> <params>
+        {
+            return false;
+        }
     }
     else
     {
         errorCode = SYNTAX_ERR;
-        return;
+        return false;
     }
+    return true;
 }
 
 // <type> -> int || string || float || ?int || ?string || ?float
-void type(TokenList *list, int *index)
+bool typeCheck(TokenList *list, int *index)
 {
     switch (list->TokenArray[*index]->type)
     {
     case t_nullType:
-        // debug_log("in NULL TYPE\n");
+        debug_log("in NULL TYPE\n");
         if (!strcmp(list->TokenArray[*index]->data, "int"))
         {
-            return;
+            return true;
         }
         else if (!strcmp(list->TokenArray[*index]->data, "float"))
         {
-            return;
+            return true;
         }
         else if (!strcmp(list->TokenArray[*index]->data, "string"))
         {
-            return;
+            return true;
         }
         else
         {
             errorCode = SYNTAX_ERR;
-            return;
+            return false;
         }
     case t_type:
-        // debug_log("in TYPE\n");
+        debug_log("in TYPE\n");
         if (!strcmp(list->TokenArray[*index]->data, "int"))
         {
-            return;
+            return true;
         }
         else if (!strcmp(list->TokenArray[*index]->data, "float"))
         {
-            return;
+            return true;
         }
         else if (!strcmp(list->TokenArray[*index]->data, "string"))
         {
-            return;
+            return true;
         }
         else
         {
             errorCode = SYNTAX_ERR;
-            return;
+            return false;
         }
     default:
         errorCode = SYNTAX_ERR;
-        return;
+        return false;
     }
 }
 
 // <fnc-type> -> void || int || string || float || ?int || ?string || ?float
-void functionType(TokenList *list, int *index)
+bool functionType(TokenList *list, int *index)
 {
     if (!strcmp(list->TokenArray[*index]->data, "void"))
     {
         // debug_log("in void\n");
-        if (list->TokenArray[*index]->type == t_type)
+        if (list->TokenArray[*index]->type == t_type) // verify that void is correct Lexeme type
         {
-            return;
+            return true;
         }
         errorCode = SYNTAX_ERR;
+        return false;
     }
     else if (list->TokenArray[*index]->type == t_type || list->TokenArray[*index]->type == t_nullType)
     {
         // debug_log("in FNC TYPE\n");
-        type(list, index);
-        return;
+        if (typeCheck(list, index) == false) // call type check
+        {
+            return false;
+        }
+        return true;
     }
     errorCode = SYNTAX_ERR;
+    return false;
 }
 
 // <fnc-decl> -> function functionId ( <param> ) : <fnc-type> { <st-list> }
-void functionDeclare(TokenList *list, int *index)
+bool functionDeclare(TokenList *list, int *index)
 {
     debug_log("FNC-DECL %i ", *index);
     if (list->TokenArray[*index]->type == t_function)
@@ -236,54 +179,74 @@ void functionDeclare(TokenList *list, int *index)
             if (list->TokenArray[*index]->type == t_lPar)
             {
                 (*index)++;
-                param(list, index);
+                debug_log("FNC-DECL FUNCTION PARAM %i \n", *index);
+                if (param(list, index) == false)
+                {
+                    return false;
+                }
+                debug_log("FNC-DECL FUNCTION POST PARAM %i ", *index);
                 if (list->TokenArray[*index]->type == t_rPar)
                 {
                     (*index)++;
                     if (list->TokenArray[*index]->type == t_colon)
                     {
                         (*index)++;
-                        functionType(list, index);
+                        debug_log("FNC-DECL FUNCTION TYPE %i ", *index);
+                        if (functionType(list, index) == false)
+                        {
+                            return false;
+                        }
                         (*index)++;
                         if (list->TokenArray[*index]->type == t_lCurl)
                         {
                             (*index)++;
                             if (list->TokenArray[*index]->type != t_rCurl)
                             {
-                                statList(list, index);
+                                debug_log("FNC-DECL FUNCTION STAT LIST %i ", *index);
+                                if (statList(list, index) == false)
+                                {
+                                    return false;
+                                }
                             }
                             if (list->TokenArray[*index]->type == t_rCurl)
                             {
-                                return;
+                                debug_log("FNC-DECL FUNCTION END %i ", *index);
+                                return true;
                             }
                         }
                     }
                 }
             }
         }
-        errorCode = SYNTAX_ERR; // is this correct?
-        return;
+        errorCode = SYNTAX_ERR;
+        return false;
     }
-    return;
+    return true; // -> eps
 }
 
 // <st-list> -> <stat> <st-list> || eps
-void statList(TokenList *list, int *index)
+bool statList(TokenList *list, int *index)
 {
-    statement(list, index);
-    (*index)++;
-    if (list->TokenArray[*index]->type == t_rCurl)
+    if (statement(list, index) == false)
     {
-        return;
+        return false;
     }
-    statList(list, index);
+    (*index)++;
+    // if (list->TokenArray[*index]->type == t_rCurl) WHAT IS THIS?
+    // {
+    //     return true;
+    // }
+    if (statList(list, index) == false)
+    {
+        return false;
+    }
     debug_log("ST-LIST %i ", *index);
     debug_log("%s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
-    return;
+    return true;
 }
 
 // <stat> -> if || while || assign || return || eps
-void statement(TokenList *list, int *index)
+bool statement(TokenList *list, int *index)
 {
     debug_log("STAT %i ", *index);
     switch (list->TokenArray[*index]->type)
@@ -303,7 +266,10 @@ void statement(TokenList *list, int *index)
                     (*index)++;
                     if (list->TokenArray[*index]->type != t_rCurl)
                     {
-                        statList(list, index);
+                        if (statList(list, index) == false)
+                        {
+                            return false;
+                        }
                     }
                     if (list->TokenArray[*index]->type == t_rCurl)
                     {
@@ -316,11 +282,14 @@ void statement(TokenList *list, int *index)
                                 (*index)++;
                                 if (list->TokenArray[*index]->type != t_rCurl)
                                 {
-                                    statList(list, index);
+                                    if (statList(list, index) == false)
+                                    {
+                                        return false;
+                                    }
                                 }
                                 if (list->TokenArray[*index]->type == t_rCurl)
                                 {
-                                    return;
+                                    return true;
                                 }
                             }
                         }
@@ -328,9 +297,9 @@ void statement(TokenList *list, int *index)
                 }
             }
             errorCode = SYNTAX_ERR;
-            return;
+            return false;
         }
-        return;
+        break;
     case t_while: // while ( <expr> ) { <st-list> }
         (*index)++;
         if (list->TokenArray[*index]->type == t_lPar)
@@ -346,35 +315,39 @@ void statement(TokenList *list, int *index)
                     (*index)++;
                     if (list->TokenArray[*index]->type != t_rCurl)
                     {
-                        statList(list, index);
+                        if (statList(list, index) == false)
+                        {
+                            return false;
+                        }
                     }
                     if (list->TokenArray[*index]->type == t_rCurl)
                     {
-                        return;
+                        return true;
                     }
                 }
             }
             errorCode = SYNTAX_ERR;
-            return;
+            return false;
         }
-        return;
+        break;
     case t_return: // return <expr> ;
         (*index)++;
         // precendAnalyser();
         if (list->TokenArray[*index]->type == t_semicolon)
         {
-            return;
+            //errorCode = SUCCESS;
+            return true;
         }
         else
         {
             errorCode = SYNTAX_ERR;
-            return;
+            return false;
         }
-        return;
+        break;
     default:
         if (list->TokenArray[*index]->type == t_semicolon) // <assign> -> eps
         {
-            return;
+            return true;
         }
         else if (list->TokenArray[*index]->type == t_varId) // <assign> -> <var> <r-side>
         {
@@ -383,7 +356,7 @@ void statement(TokenList *list, int *index)
             debug_log("\nINDEX: %s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
             if (list->TokenArray[*index]->type == t_semicolon) // <r-side> -> eps
             {
-                return;
+                return true;
             }
             else if (list->TokenArray[*index]->type == t_assign) // <r-side> -> = <expr>
             {
@@ -391,26 +364,7 @@ void statement(TokenList *list, int *index)
                 if (list->TokenArray[*index]->type == t_semicolon) // <assign> -> <var> =; => ERROR
                 {
                     errorCode = SYNTAX_ERR;
-                    return;
-                }
-                if (list->TokenArray[*index]->type == t_functionId) // <assign> -> <var> = functionId ( <param> ) / Function Call
-                {
-                    (*index)++;
-                    if (list->TokenArray[*index]->type == t_lPar)
-                    {
-                        (*index)++;
-                        callParam(list, index);
-                        if (list->TokenArray[*index]->type == t_rPar)
-                        {
-                            (*index)++;
-                            if (list->TokenArray[*index]->type == t_semicolon) // end Function Call with ; [semicolon]
-                            {
-                                return;
-                            }
-                        }
-                    }
-                    errorCode = SYNTAX_ERR;
-                    return;
+                    return false;
                 }
                 while (list->TokenArray[*index]->type != t_semicolon) // temporary solution, before precedent Analyser is done
                 {
@@ -419,7 +373,7 @@ void statement(TokenList *list, int *index)
                 // precendAnalyser();
                 if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
                 {
-                    return;
+                    return true;
                 }
                 // FIX: $a = 5; se momentálně nevyhodnotí jako chyba, protože tu není žádný else,
                 // předpokládám, že se o tohle postará precendAnalyser
@@ -428,55 +382,52 @@ void statement(TokenList *list, int *index)
             else
             {
                 errorCode = SYNTAX_ERR;
-                return;
+                return false;
             }
-        }
-        else if (list->TokenArray[*index]->type == t_functionId) // <assign> -> functionId ( <param> ) / Function Call
-        {
-            (*index)++;
-            if (list->TokenArray[*index]->type == t_lPar)
-            {
-                (*index)++;
-                callParam(list, index);
-                if (list->TokenArray[*index]->type == t_rPar)
-                {
-                    (*index)++;
-                    if (list->TokenArray[*index]->type == t_semicolon) // end Function Call with ; [semicolon]
-                    {
-                        return;
-                    }
-                }
-            }
-            errorCode = SYNTAX_ERR;
-            return;
         }
         else // <assign> -> <expr> || <stat> -> eps
         {
-            /* TODO - EPS STAT */
+            /* TODO - EPS STAT
+            Teoreticky se to dá vyřešit, že se budu ptát, jestli tady nejsou nějaký klíčový tokeny a podle toho postupovat,
+            třeba t_function mi to shodí return, protože se bude jednat o function declare */
 
             // (*index)++;
             // precendAnalyser();
         }
-        return;
+        break;
     }
-    return;
+    return true;
 }
 
 // <seq-stats> -> <stat> <fnc-decl> <seq-stats> || eps
-void seqStats(TokenList *list, int *index)
+bool seqStats(TokenList *list, int *index)
 {
     // debug_log("SEQ-STAT %i ", *index);
-    statement(list, index);
-    functionDeclare(list, index);
-    (*index)++;
-    debug_log("\nLIST LENGHT: %d\n", list->length);
-    if ((*index) == list->length)
+    bool end;
+    end = statement(list, index);
+    if ((*index) == list->length || end == false)
     {
         debug_log("End of program\n");
-        return;
+        return true;
     }
-    seqStats(list, index);
-    return;
+    end = functionDeclare(list, index);
+    if ((*index) == list->length || end == false)
+    {
+        debug_log("End of program\n");
+        return true;
+    }
+    (*index)++;
+    debug_log("\nLIST LENGHT: %d\n", list->length);
+    if ((*index) == list->length || end == false)
+    {
+        debug_log("End of program\n");
+        return true;
+    }
+    if (seqStats(list, index) == false)
+    {
+        return false;
+    }
+    return true;
 }
 
 // <prog> -> <prolog> <seq-stats> <epilog>
