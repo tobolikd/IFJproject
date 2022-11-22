@@ -54,5 +54,5 @@
 
 STACK_DECLARATION(AST_item *, ast)
 STACK_DECLARATION(Token *, token)
-
+STACK_DECLARATION(char *, string)
 #endif // IFJ_STACK_H

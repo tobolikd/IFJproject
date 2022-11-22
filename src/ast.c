@@ -146,8 +146,9 @@ AST_item *ast_item_const(AST_type type, void *data) {
     return new;
 }
 
-void fnc_call_data_init(AST_function_call_data *data, ht_item_t *function) {
-    data->function = function;
+void fnc_call_data_init(ht_table_t *fncSymtable, AST_function_call_data *data, char *functionId) {
+    data->functionID = functionId;
+    data->function = ht_search(fncSymtable, functionId);
     data->params = NULL;
 }
 

@@ -13,5 +13,10 @@
  */
 void printAstItem(AST_item *item);
 
+/* printAstFnc
+ *
+ * prints function call context
+ */
+void printAstFnc(AST_function_call_data *data);
 
 #endif // IFJ_DEVEL_H
