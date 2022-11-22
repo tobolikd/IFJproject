@@ -3,18 +3,7 @@
 
 #include "symtable.h"
 #include "lex-analyzer.h"
-
-#define FOREACH_EXPR_TYPE(TYPE)\
-    TYPE(FunDeclare)\
-    TYPE(Assign)\
-    TYPE(Operation)\
-    TYPE(VarDeclare)\
-
-
-typedef enum
-{
-    FOREACH_EXPR_TYPE(GENERATE_ENUM)
-} ExprType;
+#include "ast.h"
 
 extern const char *EXPR_TYPE_STRING[];
 
@@ -26,6 +15,6 @@ extern const char *EXPR_TYPE_STRING[];
  *
  * @return true of false according to check result
  */
-bool semCheck(ExprType type, TokenList *tokenArray, int startToken, int endToken);
+bool checkFncCall(AST_function_call_data *data);
 
 #endif // IFJ_SEM_ANALYZER_H
