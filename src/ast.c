@@ -111,8 +111,8 @@ AST_item *ast_item_const(AST_type type, void *data) {
             break; // data - char *stringValue
         case AST_FLOAT:
             ALLOCATE_AST_DATA;
-            new->data->floatValue = *((float *) data);
-            break;  // data - float floatValue
+            new->data->floatValue = *((double *) data);
+            break;  // data - double floatValue
         case AST_NULL:
             new->data = NULL;
             break;
@@ -184,7 +184,7 @@ void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, 
             break;
 
         case AST_P_FLOAT:
-            new->data->floatValue = *((float*)param);
+            new->data->floatValue = *((double*)param);
             break;
 
         case AST_P_STRING:
