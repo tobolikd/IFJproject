@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum ifjErrCode errorCode;
 
 // list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum

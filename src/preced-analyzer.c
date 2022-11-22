@@ -1,6 +1,5 @@
 #include "lex-analyzer.h"
 #include "syn-analyzer.h"
-#include "error-codes.h"
 #include "symtable.h"
 #include "preced-analyzer.h"
 #include "stack.h"
@@ -149,7 +148,7 @@ bool reduce(stack_precedence_t *stack)
         itemArr[index] = item->data;  // RULE IS <--- DIRECTION (backwards) 
         if (item->next == NULL)
         {
-            debug_log("PA: Expression overreached.\n");
+            debug_print("PA: Expression overreached.\n");
             return false;
         }
         //next
@@ -173,7 +172,7 @@ bool reduce(stack_precedence_t *stack)
             {
                 //reduce
                 // callReductionRule(stack,itemArr,j);
-                for (int k = 0; k < index; k++) //pop all used elements
+                for (unsigned k = 0; k < index; k++) //pop all used elements
                     stack_precedence_pop(stack); 
 
                 stack_precedence_push(stack,precedItemCtor(NULL,EXPRESSION));   //push reduced
@@ -241,8 +240,7 @@ Element getIndex(Token *input)
         case t_rPar:
             return RIGHT_BRACKET;
         default:
-            /* SYNTAX ERROR */
-            return UNINITIALISED;
+            return DOLLAR;//closing tak of expression 
     }    
 }
 
@@ -282,7 +280,7 @@ bool parseExpression(TokenList *list, int *index)
         topItem = stack_precedence_top_terminal(&stack);
         if (topItem == NULL)
         { /* ERROR - there no terminal */
-            debug_log("PA: No terminal on stack.\n");
+            debug_print("PA: No terminal on stack.\n");
             freeStack(&stack);
             return false;
         }
@@ -290,20 +288,13 @@ bool parseExpression(TokenList *list, int *index)
         curInputToken = list->TokenArray[(*index)]; //read token from array
 
         curInputIndex = getIndex(curInputToken);
-        if (curInputIndex == 0)
-        { /* ERROR */
-            if (topItem->element == DOLLAR) //nothing left but non terminal
-            {
-                freeStack(&stack);
-                return true;
-            }
-            if (reduce(&stack)) //if reducable
-                continue;
-            debug_log("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
+        if (curInputIndex == UNINITIALISED)
+        {
+            debug_print("PA: Failed getting index. Line: %d.\n",curInputToken->lineNum);
             freeStack(&stack);
             return false;
-        }    
-    
+        }
+        
         switch (preced_table[topItem->element][curInputIndex]) //search preced table
         {
         case '=':
@@ -316,18 +307,30 @@ bool parseExpression(TokenList *list, int *index)
             stack_precedence_push(&stack,precedItemCtor(curInputToken,curInputIndex));
             *index +=1; //get another token
             break;
+
         case '>':
             if(!reduce(&stack))
             {
-                debug_log("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
+
+                debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
                 freeStack(&stack);
                 return false;
             }
-            break; //input token stays, // look at another top item
-        
+            break; //input token stays the same, // look at another top terminal
+
+        case 'x': // $ __ $ //no terminal left but $
+            if(!reduce(&stack))
+            {
+                debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
+                freeStack(&stack);
+                return false;
+            }
+            freeStack(&stack);
+            return true;
+
         default:
             /* SYNTAX ERROR */
-            debug_log("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
+            debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
             freeStack(&stack);
             return false;
             break;
