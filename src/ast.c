@@ -146,10 +146,15 @@ AST_item *ast_item_const(AST_type type, void *data) {
     return new;
 }
 
-void fnc_call_data_init(ht_table_t *fncSymtable, AST_function_call_data *data, char *functionId) {
-    data->functionID = functionId;
-    data->function = ht_search(fncSymtable, functionId);
-    data->params = NULL;
+AST_function_call_data *fnc_call_data_const(ht_table_t *fncSymtable, char *functionId) {
+    AST_function_call_data *new = (AST_function_call_data *) malloc(sizeof(AST_function_call_data));
+    CHECK_MALLOC_PTR(new);
+
+    new->functionID = functionId;
+    new->function = ht_search(fncSymtable, functionId);
+    new->params = NULL;
+
+    return new;
 }
 
 void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, void *param) {

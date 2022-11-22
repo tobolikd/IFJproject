@@ -174,16 +174,15 @@ AST_item *ast_item_const(AST_type type, void *data);
  */
 void ast_item_destr(AST_item *deleted);
 
-/* fnc_call_data_init
- *  - initialize function call data structure
- *  data - pointer to data to be initialized
+/* fnc_call_data_const
+ *  - allocate and initialize function call data structure
+ *  fncSymtable - pointer to
  *  function - pointer to symtable
  */
-void fnc_call_data_init(ht_table_t *fncSymtable, AST_function_call_data *data, char *functionId);
+AST_function_call_data *fnc_call_data_const(ht_table_t *fncSymtable, char *functionId);
 
 /* fnc_call_data_add_param
  *  - adds parameter to function call data acording to param type
- *  data - pointer to data where param will be added
  *  type - type of parameter {AST_P_NULL, AST_P_INT, AST_P_STRING, AST_P_FLOAT, AST_P_VAR}
  *  param - pointer to the parameter {NULL, int *, char *, double *, ht_item_t *}
  */

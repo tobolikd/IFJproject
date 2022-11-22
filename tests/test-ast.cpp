@@ -70,8 +70,7 @@ TEST_F(testAst, fncCall) {
     char fncName[] = "sample_function";
     ht_insert(symtable, fncName, void_t, true);
 
-    AST_function_call_data *data = (AST_function_call_data *) malloc(sizeof(AST_function_call_data));
-    fnc_call_data_init(symtable, data, fncName);
+    AST_function_call_data *data = fnc_call_data_const(symtable, fncName);
 
     EXPECT_EQ(data->functionID, fncName);
 
@@ -104,6 +103,12 @@ TEST_F(testAst, fncCall) {
     tmpParam = tmpParam->next;
     EXPECT_EQ(tmpParam->type, AST_P_VAR);
     EXPECT_TRUE(&param4 == tmpParam->data->variable);
+
+    fnc_call_data_add_param(data, AST_P_NULL, NULL);
+    tmpParam = tmpParam->next;
+    EXPECT_EQ(tmpParam->type, AST_P_NULL);
+    EXPECT_TRUE(NULL == tmpParam->data);
+
 
     EXPECT_TRUE(NULL == tmpParam->next);
 
