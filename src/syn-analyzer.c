@@ -18,6 +18,90 @@ enum ifjErrCode errorCode;
 // list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
 
+// <call-params> -> , <var> <call-params> || , <literal> <call-params> || eps
+bool callParams(TokenList *list, int *index)
+{
+    if (list->TokenArray[*index]->type == t_rPar) // -> eps
+    {
+        return true;
+    }
+
+    if (list->TokenArray[*index]->type == t_comma) // -> , [comma]
+    {
+        (*index)++;
+        /* <literal> */
+        if (list->TokenArray[*index]->type == t_int)
+        {
+            (*index)++;
+            callParams(list, index);
+        }
+        else if (list->TokenArray[*index]->type == t_float)
+        {
+            (*index)++;
+            callParams(list, index);
+        }
+        else if (list->TokenArray[*index]->type == t_string)
+        {
+            (*index)++;
+            callParams(list, index);
+        }
+        /* <var> */
+        else if (list->TokenArray[*index]->type == t_varId)
+        {
+            (*index)++;
+            callParams(list, index);
+        }
+        else
+        {
+            errorCode = SYNTAX_ERR;
+            return false;
+        }
+    }
+    else
+    {
+        errorCode = SYNTAX_ERR;
+        return false;
+    }
+    return true;
+}
+
+// <call-param> -> <var> <call-params> || <literal> <call-params> || eps
+bool callParam(TokenList *list, int *index)
+{
+    if (list->TokenArray[*index]->type == t_rPar) // -> eps
+    {
+        return true;
+    }
+    /* <literal> */
+    else if (list->TokenArray[*index]->type == t_int)
+    {
+        (*index)++;
+        callParams(list, index);
+    }
+    else if (list->TokenArray[*index]->type == t_float)
+    {
+        (*index)++;
+        callParams(list, index);
+    }
+    else if (list->TokenArray[*index]->type == t_string)
+    {
+        (*index)++;
+        callParams(list, index);
+    }
+    /* <var> */
+    else if (list->TokenArray[*index]->type == t_varId)
+    {
+        (*index)++;
+        callParams(list, index);
+    }
+    else
+    {
+        errorCode = SYNTAX_ERR;
+        return false;
+    }
+    return true;
+}
+
 // <params> -> , <type> <var> <params> || eps
 bool params(TokenList *list, int *index)
 {
@@ -232,10 +316,10 @@ bool statList(TokenList *list, int *index)
         return false;
     }
     (*index)++;
-    // if (list->TokenArray[*index]->type == t_rCurl) WHAT IS THIS?
-    // {
-    //     return true;
-    // }
+    if (list->TokenArray[*index]->type == t_rCurl) // end of statement with st-list or function declare - DON'T REMOVE!
+    {
+        return true;
+    }
     if (statList(list, index) == false)
     {
         return false;
@@ -335,7 +419,7 @@ bool statement(TokenList *list, int *index)
         // precendAnalyser();
         if (list->TokenArray[*index]->type == t_semicolon)
         {
-            //errorCode = SUCCESS;
+            // errorCode = SUCCESS;
             return true;
         }
         else
@@ -405,20 +489,20 @@ bool seqStats(TokenList *list, int *index)
     // debug_log("SEQ-STAT %i ", *index);
     bool end;
     end = statement(list, index);
-    if ((*index) == list->length || end == false)
+    if ((*index) == list->length || end == false || list->TokenArray[*index]->type == t_EOF)
     {
         debug_log("End of program\n");
         return true;
     }
     end = functionDeclare(list, index);
-    if ((*index) == list->length || end == false)
+    if ((*index) == list->length || end == false || list->TokenArray[*index]->type == t_EOF)
     {
         debug_log("End of program\n");
         return true;
     }
     (*index)++;
     debug_log("\nLIST LENGHT: %d\n", list->length);
-    if ((*index) == list->length || end == false)
+    if ((*index) == list->length || end == false || list->TokenArray[*index]->type == t_EOF)
     {
         debug_log("End of program\n");
         return true;
@@ -431,22 +515,28 @@ bool seqStats(TokenList *list, int *index)
 }
 
 // <prog> -> <prolog> <seq-stats> <epilog>
-void checkSyntax(TokenList *list, int *index)
+bool checkSyntax(TokenList *list, int *index)
 {
     debug_log("PROGRAM %i\n", *index);
-    seqStats(list, index);
-    return;
+    if (seqStats(list, index) == false)
+    {
+        return false;
+    }
+    return true;
 }
 
-void synAnalyser(TokenList *list)
+bool synAnalyser(TokenList *list)
 {
     int index = 0;
-    if (!list->TokenArray[0])
+    if (!list->TokenArray[0]) // what does this do?
     {
         errorCode = SYNTAX_ERR;
-        return;
+        return false;
     }
     /* START OF RECURSIVE DESCENT */
-    checkSyntax(list, &index);
-    return;
+    if (checkSyntax(list, &index) == false)
+    {
+        return false;
+    }
+    return true;
 }
