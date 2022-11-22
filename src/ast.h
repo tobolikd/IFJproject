@@ -69,7 +69,7 @@ typedef enum
     // constants
     AST_INT = 40,    // data - int intValue
     AST_STRING, // data - char *stringValue
-    AST_FLOAT,  // data - float floatValue
+    AST_FLOAT,  // data - double floatValue
     AST_NULL,
 
     // fnc declaration
@@ -107,7 +107,7 @@ typedef union ast_param_data
     ht_item_t *variable;
     int intValue;
     char *stringValue;
-    float floatValue;
+    double floatValue;
 } AST_param_data;
 
 typedef struct ast_fnc_param
@@ -140,7 +140,7 @@ typedef union
     ht_item_t *variable;    // for AST_VAR
     int intValue;           // AST_INT
     char *stringValue;      // AST_STRING
-    float floatValue;       // AST_FLOAT
+    double floatValue;       // AST_FLOAT
     ht_item_t *function;    // AST_DECLARE
     AST_function_call_data *functionCallData;   // AST_FUNCTION_CALL
     bool blank;             // AST_RETURN
@@ -185,7 +185,7 @@ void fnc_call_data_init(ht_table_t *fncSymtable, AST_function_call_data *data, c
  *  - adds parameter to function call data acording to param type
  *  data - pointer to data where param will be added
  *  type - type of parameter {AST_P_NULL, AST_P_INT, AST_P_STRING, AST_P_FLOAT, AST_P_VAR}
- *  param - pointer to the parameter {NULL, int *, char *, float *, ht_item_t *}
+ *  param - pointer to the parameter {NULL, int *, char *, double *, ht_item_t *}
  */
 void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, void *param);
 

@@ -80,7 +80,7 @@ TEST_F(testAst, fncCall) {
     EXPECT_TRUE(NULL == data->params);
 
     int param1 = 123;
-    float param2 = 1.2345;
+    double param2 = 1.2345;
     char param3[] = "sample string";
     ht_item_t param4;
 
@@ -92,7 +92,7 @@ TEST_F(testAst, fncCall) {
     fnc_call_data_add_param(data, AST_P_FLOAT, &param2);
     tmpParam = tmpParam->next;
     EXPECT_EQ(tmpParam->type, AST_P_FLOAT);
-    EXPECT_FLOAT_EQ(1.2345, tmpParam->data->floatValue);
+    EXPECT_DOUBLE_EQ(1.2345, tmpParam->data->floatValue);
 
     fnc_call_data_add_param(data, AST_P_STRING, &param3);
     tmpParam = tmpParam->next;
