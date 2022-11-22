@@ -111,4 +111,3 @@ TEST_F(testAst, fncCall) {
     EXPECT_EQ(AST_FUNCTION_CALL, testedItem->type);
     EXPECT_TRUE(data == testedItem->data->functionCallData);
 }
-
