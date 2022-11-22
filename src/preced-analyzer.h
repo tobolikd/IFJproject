@@ -39,5 +39,4 @@ typedef struct
 }PrecedItem;
 
 
-
 #endif // IFJ_SYN_ANALYZER_H
