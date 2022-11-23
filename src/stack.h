@@ -3,6 +3,7 @@
 
 #include "ast.h"
 #include "lex-analyzer.h"
+#include "code-gen-data.h"
 
 #include <stdbool.h>
 
@@ -55,4 +56,5 @@
 STACK_DECLARATION(AST_item *, ast)
 STACK_DECLARATION(Token *, token)
 STACK_DECLARATION(char *, string)
+STACK_DECLARATION(code_block *, code_block)
 #endif // IFJ_STACK_H

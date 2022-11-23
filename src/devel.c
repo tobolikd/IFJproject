@@ -1,6 +1,7 @@
 #include "devel.h"
 #include "error-codes.h"
 #include "ast.h"
+#include "code-gen-data.h"
 
 #define AST_TYPE(TYPE) debug_log("\t|- type: |%s|\n", TYPE)
 #define AST_DATA(DATA) debug_log("\t|- data: %s\n", DATA)
@@ -157,5 +158,23 @@ void printAstItem(AST_item *item) {
         default:
             AST_TYPE("Unknown type!");
             break;
+    }
+}
+
+void printAstStack(stack_ast_t *stack) {
+    stack_ast_item_t *tmp = stack->top;
+    while (tmp != NULL) {
+        printAstItem(tmp->data);
+        tmp = tmp->next;
+    }
+}
+
+void printCodeBlockStack(stack_code_block_t *stack) {
+    printf("\n\nCODE BLOCK STACK:\n");
+    stack_code_block_item_t *tmp = stack->top;
+    while (tmp != NULL) {
+        printf(" - type: %d\n", tmp->data->type);
+        printf("  \\labelNum: %d\n", tmp->data->labelNum);
+        tmp = tmp->next;
     }
 }

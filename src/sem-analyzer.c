@@ -71,7 +71,7 @@ bool checkFncCall(AST_function_call_data *data) {
         }
 
         if (requiredParam->type == void_t) {
-            ERR_INTERNAL("checkFncCall", "void parameter type in declared function\n\tfunction: %s\n\tparam: %s", data->functionID, requiredParam->varId);
+            ERR_INTERNAL(checkFncCall, "void parameter type in declared function\n\tfunction: %s\n\tparam: %s", data->functionID, requiredParam->varId);
 #if DEBUG == 1
                 printAstFnc(data);
 #endif

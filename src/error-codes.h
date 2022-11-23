@@ -2,6 +2,7 @@
 #define IFJ_ERROR_CODES_H
 
 #include <stdio.h>
+#include "devel.h"
 
 enum ifjErrCode {
     SUCCESS = 0, // no error
@@ -100,9 +101,15 @@ do {errorCode = SEMANTIC_PARAMETER_ERR;                                         
 } while (0)
 
 
-#define ERR_INTERNAL(FUNCTION, MSG, ... ) do { errorCode = INTERNAL_ERR;        \
-            debug_print("ERROR(internal):\n\tin function: %s\n\t", FUNCTION);    \
-            debug_print(MSG, __VA_ARGS__);                                      \
+#define ERR_INTERNAL(FUNCTION, ... ) do { errorCode = INTERNAL_ERR;        \
+            debug_print("ERROR(internal):\n\tin function: %s\n\t", #FUNCTION);    \
+            debug_print(__VA_ARGS__);                                      \
             } while (0)
+
+#define ERR_AST_NOT_EMPTY(AST)                                    \
+do {errorCode = INTERNAL_ERR;                   \
+    debug_print("ERROR(internal): in function codeGenerator - ast stack not empty");     \
+    printAstStack(AST);\
+} while (0)
 
 #endif // IFJ_ERROR_CODES_H
