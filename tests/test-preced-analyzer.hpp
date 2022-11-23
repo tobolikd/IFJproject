@@ -58,6 +58,49 @@ class testBase : public::testing::TestWithParam<tuple<bool,string>>
         }
 };
 
+class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
+{
+    protected:
+        FILE *tmpFile;
+        TokenList *testList;
+        bool expectedValue;
+        string dataIn;
+        int index;
+        ht_table_t *testTableVar;
+        ht_table_t *testTableFnc;
+
+        void SetUp() override
+        {
+            testTableVar = ht_init();
+            testTableFnc = ht_init();
+            
+            ht_insert(testTableVar,"a",int_t,false);
+            ht_insert(testTableVar,"b",int_t,false);
+
+            index = 0;
+
+            expectedValue = get<0>(GetParam());
+            
+            dataIn = "<?php declare(strict_types=1);" + get<1>(GetParam());
+
+            tmpFile = prepTmpFile(dataIn.data());
+            ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - failed to allocate file." << endl;
+
+            testList = lexAnalyser(tmpFile);
+            ASSERT_FALSE(testList == NULL) << "INTERNAL TEST ERROR - scanner failed to read input data." << endl;
+        }
+
+        void TearDown() override
+        {
+            ht_delete_all(testTableFnc);
+            ht_delete_all(testTableVar);
+            if (tmpFile != NULL)
+                fclose(tmpFile);
+            listDtor(testList);
+        }
+};
+
+
 
 
 #endif // IFJ_TEST_PRECED_ANALYZER_H

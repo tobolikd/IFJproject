@@ -10,7 +10,7 @@ src/mymain.c
 !doc
 !Makefile
 !README.md
-!.gitignore
-!CMakeLists.txt
+# !.gitignore
+# !CMakeLists.txt
 !notes.md
 !grammar.md

@@ -49,3 +49,4 @@ STACK_DEFINITION(AST_item *, ast, ast_item_destr)
 STACK_DEFINITION(Token *, token, tokenDtor)
 STACK_DEFINITION(char *, string, free)
 STACK_DEFINITION(PrecedItem *, precedence, free)
+
