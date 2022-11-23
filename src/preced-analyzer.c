@@ -5,6 +5,9 @@
 #include "stack.h"
 #include <stdlib.h>
 
+/* GLOBAL */
+ht_table_t *testTableFnc;
+
 //PRECEDENCE TABLE
 const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in enum, 
                                                     //enum contains one extra element UNINITIALISED
@@ -49,29 +52,6 @@ unsigned const RULES[NUMBER_OF_RULES][RULE_SIZE] = {
     {RIGHT_BRACKET, EXPRESSION, LEFT_BRACKET}       //14 E -> (E) 
 };//possibly more
 
-//HEADER
-
-/// @brief Analyses syntax in expression. Creates AST.
-/// @param List Input tokens.
-/// @param index Array index.
-/// @return NULL if syntax error.
-/// @return Pointer to AST.
-bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_ast_t *stackAST);
-
-PrecedItem *stack_precedence_top_terminal(stack_precedence_t *stack);
-
-void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int ruleNum);
-
-bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST);
-
-Element getIndex(Token *input);
-
-PrecedItem *precedItemCtor(Token *token, Element type);
-
-void precedItemDtor(PrecedItem *item);
-
-
-
 
 //FUNCTIONS
 
@@ -87,7 +67,7 @@ PrecedItem *stack_precedence_top_terminal(stack_precedence_t *stack)
     return cur->data;
 }
 
-void Ei(stack_precedence_t *stack, stack_ast_t *stackAST)
+void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
  {
     //setup stack_precedence_t
     PrecedItem *item = stack_precedence_top(stack);
@@ -97,10 +77,10 @@ void Ei(stack_precedence_t *stack, stack_ast_t *stackAST)
     switch (item->token->type)
     {
     case t_varId:
-        stack_ast_push(stackAST,ast_item_const(AST_VAR,NULL));
+        stack_ast_push(stackAST,ast_item_const(AST_VAR,ht_search(testTableFnc,stack_precedence_top(stack)->token->data)));
         break;
-    case t_functionId:
-        stack_ast_push(stackAST,ast_item_const(AST_FUNCTION_CALL,NULL));
+    case t_functionId://dealt with earlier
+        debug_log("PA: E -> i rule something went wrong.\n");
         break;
     case t_int:
     {
@@ -138,6 +118,14 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
 {
     //handle semantic action for E -> -E
     AST_item *item = stack_ast_top(stackAST);
+/* TODO ISERTED ITEM */
+    //delme
+    if (item == NULL)
+    {
+        opE(stack);
+        return;
+    }
+    
     switch (item->type)
     {
     case AST_FLOAT:
@@ -174,12 +162,12 @@ void EopE(stack_precedence_t *stack, stack_ast_t *stackAST, AST_type op)
 }
 
 
-void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int ruleNum)
+void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int ruleNum, ht_table_t *symtable)
 {
     switch (ruleNum)
     {
     case 0://E -> i
-        Ei(stack,stackAST);
+        Ei(stack,stackAST,symtable);
         break;
     case 1://E -> -E
         minusE(stack,stackAST);
@@ -245,7 +233,7 @@ void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int rul
 /// @brief 
 /// @param stack 
 /// @return TRUE IS CORRECT 
-bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST)
+bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
 {
     unsigned curRule[RULE_SIZE] = {UNINITIALISED, UNINITIALISED, UNINITIALISED};
     unsigned index = 0;
@@ -281,14 +269,14 @@ bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST)
             {
                 debug_log("Found rule number: %d \n", i);
                 //reduce
-                callReductionRule(stack, stackAST, i);
+                callReductionRule(stack, stackAST, i, symtable);
                 return true;
             }
         }
     return false;
 }
 
-Element getIndex(Token *input)
+Element getIndex(Token *input, ht_table_t* symtable)
 {
     if (input == NULL)
         return UNINITIALISED;
@@ -330,6 +318,11 @@ Element getIndex(Token *input)
             return UNINITIALISED;
 
         case t_varId:
+            if (ht_search(symtable,input->data) == NULL) //not in symtable
+            {
+                THROW_ERROR(SEMANTIC_VARIABLE_ERR,input->lineNum);
+                return UNINITIALISED;
+            }
             //check in symtable
             // if(ht_search(symTable,input->data) == NULL)
             //     THROW_ERROR(5,input->lineNum);
@@ -381,10 +374,108 @@ bool freeStack(stack_precedence_t *stack, stack_ast_t *stack2, bool returnValue)
     return returnValue;
 }
 
+bool cmpTHType(TokenType token, var_type_t type)
+{
+    if (token == t_int && type == int_t)
+        return true;
+    if (token == t_string && type == string_t)
+        return true;
+    if (token == t_float && type == float_t)
+        return true;
+    if (token == t_null && type == void_t)
+        return true;
+    return false;
+}
+
+AST_param_type HtoAType(var_type_t type)
+{
+    if (type == int_t)
+        return AST_P_INT;
+    if (type == float_t)
+        return AST_P_FLOAT;
+    if (type == string_t)
+        return AST_P_STRING;
+/* TODO CHECK nulltype*/
+    if (type == void_t)
+        return AST_P_NULL;
+    return AST_P_NULL;
+
+}
+
+bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, stack_ast_t *stackAST)
+{
+    //functionId ( <param> ) / Function Call
+    // #1 check declaration 
+    ht_item_t *function = ht_search(testTableFnc,list->TokenArray[*index]->data);
+    if (function == NULL) //function is not declared
+    {
+        THROW_ERROR(SEMANTIC_FUNCTION_DEFINITION_ERR,list->TokenArray[*index]->lineNum);
+        return false;
+    }
+    // #2 (
+    (*index)++;
+    if (list->TokenArray[*index]->type != t_lPar)
+    {
+        THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
+        return false;
+    }
+    // #3  matching data type to declaration
+    // #3a create AST FUNCTION CALL ITEM
+    AST_function_call_data *data = fnc_call_data_const(testTableFnc,function->identifier);
+    param_info_t curParam = function->data.fnc_data.params[0]; //first parameter
+
+    for (unsigned i = 0; i < function->data.fnc_data.paramCount; i++) //check parameter type compared to declaration
+    {
+
+        (*index)++;
+/* TODO IF VARIABLE */
+        if (list->TokenArray[*index]->type == t_varId)
+        {
+               
+        }
+        //
+        if (cmpTHType(list->TokenArray[*index]->type,curParam.type)) //compare expected type
+        {
+            if (i < (function->data.fnc_data.paramCount)+1) //if there are more parameter
+            {
+                // fnc_call_data_add_param(data,HtoAType(curParam.type),);
+                (*index)++;
+                if (list->TokenArray[*index]->type != t_colon) //there must be colon
+                {
+                    continue;
+                }//                             |
+                //if false, it fals through to  V 
+            }
+            else //this is the last param
+                continue;
+        }
+        fnc_call_data_destr(data);
+        THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
+        return false;
+    }
+/* TODO PUSH TO AST */
+    // #4 )          
+    if (list->TokenArray[*index]->type != t_rPar)
+    {
+        THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
+        return false;
+    }
+    (*index)++;//move cursor
+
+    // #5 push expression to stack
+    if (stack_precedence_top(stack)->element != DOLLAR)
+        stack_precedence_top(stack)->reduction = false;
+        
+/* TODO PUSH PROPER FUNCTION INFO */
+    stack_precedence_push(stack,precedItemCtor(NULL,EXPRESSION));//push expression
+    return true;//success
+}
+
+
 //for now returns boolean
 bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_ast_t *stackAST)
 {
-    // INIT STACK
+    // INIT 
     stack_precedence_t stack;
     stack_precedence_init(&stack);
     stack_precedence_push(&stack,precedItemCtor(NULL,DOLLAR)); //push starting tokent
@@ -394,49 +485,38 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_as
     Element curInputIndex;
     Token * curInputToken;
 
-    while (1)
+    while (1) //PARSE UNTIL END OF EXPRESSION
     {
+        // #1 get top terminal
         topItem = stack_precedence_top_terminal(&stack);
         if (topItem == NULL)
         { /* ERROR - there in no terminal */
-            debug_print("PA: No terminal on stack.\n");
+            debug_log("PA: Internal error. No terminal on stack.\n");
             return freeStack(&stack, stackAST, false);
         }
-        
-        curInputToken = list->TokenArray[(*index)]; //read token from array
+        // #2 read token from array
+        curInputToken = list->TokenArray[(*index)]; 
 
-        curInputIndex = getIndex(curInputToken);
-        if (curInputIndex == UNINITIALISED)
+        // #3 get input index to compare in preced table
+        curInputIndex = getIndex(curInputToken, symtable); //get index to locate action in preced_table
+        if (curInputIndex == UNINITIALISED)//option not found
         {
             debug_print("PA: Failed getting index. Line: %d.\n",curInputToken->lineNum);
             return freeStack(&stack, stackAST, false);
         }
         
-        if (curInputToken->type == t_functionId) //parse function call
-        { //functionId ( <param> ) / Function Call
-            (*index)++;
-            if (list->TokenArray[*index]->type == t_lPar)
-            {
-                (*index)++;
-                if (callParam(list, index) == false) 
-                    return freeStack(&stack, stackAST, false);
-                
-                if (list->TokenArray[*index]->type == t_rPar)
-                {
-                    (*index)++;
-                    if (list->TokenArray[*index]->type == t_semicolon) // end Function Call with ; [semicolon]
-                    {
-                        return true;
-                    }
-                }
-            }
+        // #4 if function call do it seperately
+        //    can only be reduced to expression and pushed to AST stack
+        if (curInputToken->type == t_functionId) //function call
+        {
+            if (parseFunctionCall(list,index,&stack,stackAST) == true)//parse function call
+                continue;//success
             THROW_ERROR(SYNTAX_ERR,curInputToken->lineNum);
-            return freeStack(&stack, stackAST, false);
-        }
-        
-        
+            return freeStack(&stack, stackAST, false);//parsing failed
+        }        
         // debug_log("Working on #%d element: %d\n",(*index),curInputIndex);
         
+        // #5 make action based on element combination
         switch (preced_table[topItem->element][curInputIndex]) //search preced table
         {
         case '=':
@@ -451,9 +531,9 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_as
             break;
 
         case '>':
-            if(!reduce(&stack, stackAST))
+            if(!reduce(&stack, stackAST, symtable))
             {
-
+                THROW_ERROR(SYNTAX_ERR,curInputToken->lineNum);
                 debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
                 return freeStack(&stack, stackAST, false);
             }
@@ -464,6 +544,7 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_as
 
         default:
             /* SYNTAX ERROR */
+            THROW_ERROR(SYNTAX_ERR,curInputToken->lineNum);
             debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
             return freeStack(&stack, stackAST, false);
         }

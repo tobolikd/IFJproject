@@ -5,7 +5,6 @@
  */
 
 #include "lex-analyzer.h"
-#include "syn-analyzer.h"
 #include "preced-analyzer.h"
 #include "symtable.h"
 #include "error-codes.h"
@@ -87,6 +86,7 @@ bool callParam(TokenList *list, int *index)
     /* <literal> */
     else if (list->TokenArray[*index]->type == t_int) // int - e.g. 5
     {
+        
         (*index)++;
         if (callParams(list, index) == false)
         {

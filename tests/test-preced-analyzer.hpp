@@ -60,8 +60,6 @@ class testBase : public::testing::TestWithParam<tuple<bool,string>>
         }
 };
 
-/* GLOBAL */
-ht_table_t *testTableFnc;
 
 class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
 {
