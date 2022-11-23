@@ -38,7 +38,7 @@
     }                                                                           \
                                                                                 \
     TYPE stack_##NAME##_top(stack_##NAME##_t *stack) {                          \
-    return stack->top == NULL?NULL:stack->top->data;                            \
+        return stack->top == NULL?NULL:stack->top->data;                        \
     }                                                                           \
                                                                                 \
     bool stack_##NAME##_empty(stack_##NAME##_t *stack) {                        \
