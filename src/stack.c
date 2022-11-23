@@ -37,6 +37,7 @@
     }                                                                           \
                                                                                 \
     TYPE stack_##NAME##_top(stack_##NAME##_t *stack) {                          \
+        if (stack->top == NULL) { return NULL; }                                \
         return stack->top->data;                                                \
     }                                                                           \
                                                                                 \
