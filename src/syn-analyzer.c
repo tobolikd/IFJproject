@@ -6,6 +6,7 @@
 
 #include "lex-analyzer.h"
 #include "syn-analyzer.h"
+#include "preced-analyzer.h"
 #include "symtable.h"
 #include "error-codes.h"
 

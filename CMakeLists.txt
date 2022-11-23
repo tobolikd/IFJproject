@@ -15,11 +15,11 @@ set(PROJECT_FILES
 )
 
 set(UNIT_TESTS
-    tests/test-ast.cpp
-    tests/test-lex-analyzer.cpp
-    tests/test-syn-analyzer.cpp
+    # tests/test-ast.cpp
+    # tests/test-lex-analyzer.cpp
+    # tests/test-syn-analyzer.cpp
     tests/test-preced-analyzer.cpp
-    tests/test-code-gen.cpp
+    # tests/test-code-gen.cpp
 )
 
 

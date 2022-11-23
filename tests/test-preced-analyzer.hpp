@@ -3,6 +3,8 @@
 
 extern "C"
 {
+    #include "../src/symtable.h"
+    #include "../src/stack.h"
     #include "../src/lex-analyzer.h"
     #include "../src/preced-analyzer.h"
     #include "test-lex-analyzer.hpp" //prepTmpFile
@@ -58,6 +60,9 @@ class testBase : public::testing::TestWithParam<tuple<bool,string>>
         }
 };
 
+/* GLOBAL */
+ht_table_t *testTableFnc;
+
 class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
 {
     protected:
@@ -67,21 +72,32 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
         string dataIn;
         int index;
         ht_table_t *testTableVar;
-        ht_table_t *testTableFnc;
+        stack_ast_t testStack;
 
         void SetUp() override
         {
-            testTableVar = ht_init();
+            stack_ast_init(&testStack);//init stack
+            ASSERT_FALSE(&testStack == NULL) << "INTERNAL TEST ERROR - stack init error." << endl;
+
+            testTableVar = ht_init();//init symtables
+            ASSERT_FALSE(testTableVar == NULL) << "INTERNAL TEST ERROR - symtable init error." << endl;
             testTableFnc = ht_init();
-            
-            ht_insert(testTableVar,"a",int_t,false);
+            ASSERT_FALSE(testTableFnc == NULL) << "INTERNAL TEST ERROR - symtable init error." << endl;
+
+            ht_insert(testTableVar,"a",int_t,false);//insert to symtables
+            ASSERT_FALSE(ht_search(testTableVar,"a") == NULL);
             ht_insert(testTableVar,"b",int_t,false);
+            ASSERT_FALSE(ht_search(testTableVar,"b") == NULL);
+
+            ht_param_append(ht_insert(testTableFnc,"foo",int_t,true),"param",float_t);
+            ASSERT_FALSE(ht_search(testTableFnc,"foo") == NULL);
+            ASSERT_FALSE(ht_search(testTableFnc,"foo")->data.fnc_data.params == NULL);
 
             index = 0;
 
-            expectedValue = get<0>(GetParam());
+            expectedValue = get<0>(GetParam());//true/false
             
-            dataIn = "<?php declare(strict_types=1);" + get<1>(GetParam());
+            dataIn = "<?php declare(strict_types=1);" + get<1>(GetParam());//input expression
 
             tmpFile = prepTmpFile(dataIn.data());
             ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - failed to allocate file." << endl;
@@ -92,6 +108,9 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
 
         void TearDown() override
         {
+            while (!stack_ast_empty(&testStack)) //pop all
+                stack_ast_pop(&testStack);
+            
             ht_delete_all(testTableFnc);
             ht_delete_all(testTableVar);
             if (tmpFile != NULL)

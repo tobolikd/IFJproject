@@ -56,7 +56,7 @@ unsigned const RULES[NUMBER_OF_RULES][RULE_SIZE] = {
 /// @param index Array index.
 /// @return NULL if syntax error.
 /// @return Pointer to AST.
-bool parseExpression(TokenList *List, int *index, ht_table_t *symtable);
+bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_ast_t *stackAST);
 
 PrecedItem *stack_precedence_top_terminal(stack_precedence_t *stack);
 
@@ -70,7 +70,6 @@ PrecedItem *precedItemCtor(Token *token, Element type);
 
 void precedItemDtor(PrecedItem *item);
 
-bool parseExpression(TokenList *list, int *index, ht_table_t *symtable);
 
 
 
@@ -366,24 +365,24 @@ PrecedItem *precedItemCtor(Token *token, Element type)
     return newItem;
 }
 
-void freeStack(stack_precedence_t *stack, stack_ast_t *stack2)
+bool freeStack(stack_precedence_t *stack, stack_ast_t *stack2, bool returnValue)
 {    
     while (!stack_precedence_empty(stack))
         stack_precedence_pop(stack);
 
-
-
-    while (!stack_ast_empty(stack2))
+    if (returnValue == false) //dispose the whole ast stack
     {
-        debug_log("DELETING: stack ast type: %d\n",stack_ast_top(stack2)->type);
-        stack_ast_pop(stack2);
+        while (!stack_ast_empty(stack2))
+        {
+            debug_log("DELETING: stack ast type: %d\n",stack_ast_top(stack2)->type);
+            stack_ast_pop(stack2);
+        }
     }
-
-
+    return returnValue;
 }
 
 //for now returns boolean
-bool parseExpression(TokenList *list, int *index, ht_table_t *symtable)
+bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_ast_t *stackAST)
 {
     // INIT STACK
     stack_precedence_t stack;
@@ -391,9 +390,6 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable)
     stack_precedence_push(&stack,precedItemCtor(NULL,DOLLAR)); //push starting tokent
     stack.top->data->reduction = true; //set to close
     
-    stack_ast_t stackAST;
-    stack_ast_init (&stackAST);
-
     PrecedItem *topItem;
     Element curInputIndex;
     Token * curInputToken;
@@ -402,10 +398,9 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable)
     {
         topItem = stack_precedence_top_terminal(&stack);
         if (topItem == NULL)
-        { /* ERROR - there no terminal */
+        { /* ERROR - there in no terminal */
             debug_print("PA: No terminal on stack.\n");
-            freeStack(&stack, &stackAST);
-            return false;
+            return freeStack(&stack, stackAST, false);
         }
         
         curInputToken = list->TokenArray[(*index)]; //read token from array
@@ -414,48 +409,65 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable)
         if (curInputIndex == UNINITIALISED)
         {
             debug_print("PA: Failed getting index. Line: %d.\n",curInputToken->lineNum);
-            freeStack(&stack, &stackAST);
-            return false;
+            return freeStack(&stack, stackAST, false);
         }
+        
+        if (curInputToken->type == t_functionId) //parse function call
+        { //functionId ( <param> ) / Function Call
+            (*index)++;
+            if (list->TokenArray[*index]->type == t_lPar)
+            {
+                (*index)++;
+                if (callParam(list, index) == false) 
+                    return freeStack(&stack, stackAST, false);
+                
+                if (list->TokenArray[*index]->type == t_rPar)
+                {
+                    (*index)++;
+                    if (list->TokenArray[*index]->type == t_semicolon) // end Function Call with ; [semicolon]
+                    {
+                        return true;
+                    }
+                }
+            }
+            THROW_ERROR(SYNTAX_ERR,curInputToken->lineNum);
+            return freeStack(&stack, stackAST, false);
+        }
+        
+        
         // debug_log("Working on #%d element: %d\n",(*index),curInputIndex);
         
         switch (preced_table[topItem->element][curInputIndex]) //search preced table
         {
         case '=':
             stack_precedence_push(&stack,precedItemCtor(curInputToken,curInputIndex));
-            *index +=1; //get another token
+            (*index)++; //get another token
             break;
 
         case '<':
             topItem->reduction = true;
             stack_precedence_push(&stack,precedItemCtor(curInputToken,curInputIndex));
-            *index +=1; //get another token
+            (*index)++; //get another token
             break;
 
         case '>':
-            if(!reduce(&stack, &stackAST))
+            if(!reduce(&stack, stackAST))
             {
 
                 debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
-                freeStack(&stack, &stackAST);
-                return false;
+                return freeStack(&stack, stackAST, false);
             }
             break; //input token stays the same, // look at another top terminal
 
         case 'x': // $ __ $ //no terminal left but $
-            freeStack(&stack, &stackAST);
-            return true;
+            return freeStack(&stack, stackAST, true);
 
         default:
             /* SYNTAX ERROR */
             debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
-            freeStack(&stack, &stackAST);
-            return false;
-            break;
+            return freeStack(&stack, stackAST, false);
         }
     }
-    
-    freeStack(&stack, &stackAST);
-    return true;
+    return freeStack(&stack, stackAST, true);
 }
 
