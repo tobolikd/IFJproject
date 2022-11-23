@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 
-#include "error-codes.h"
 #include "ast.h"
+#include "stack.h"
 
 /* printAstItem
  *
@@ -18,5 +18,9 @@ void printAstItem(AST_item *item);
  * prints function call context
  */
 void printAstFnc(AST_function_call_data *data);
+
+void printAstStack(stack_ast_t *stack);
+
+void printCodeBlockStack(stack_code_block_t *stack);
 
 #endif // IFJ_DEVEL_H
