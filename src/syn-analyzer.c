@@ -30,26 +30,38 @@ bool callParams(TokenList *list, int *index)
     {
         (*index)++;
         /* <literal> */
-        if (list->TokenArray[*index]->type == t_int)
+        if (list->TokenArray[*index]->type == t_int) // int - e.g. 5
         {
             (*index)++;
-            callParams(list, index);
+            if (callParams(list, index) == false)
+            {
+                return false;
+            }
         }
-        else if (list->TokenArray[*index]->type == t_float)
+        else if (list->TokenArray[*index]->type == t_float) // float - e.g. 0.5
         {
             (*index)++;
-            callParams(list, index);
+            if (callParams(list, index) == false)
+            {
+                return false;
+            }
         }
-        else if (list->TokenArray[*index]->type == t_string)
+        else if (list->TokenArray[*index]->type == t_string) // string - e.g. hello world!
         {
             (*index)++;
-            callParams(list, index);
+            if (callParams(list, index) == false)
+            {
+                return false;
+            }
         }
         /* <var> */
-        else if (list->TokenArray[*index]->type == t_varId)
+        else if (list->TokenArray[*index]->type == t_varId) // variable - e.g. $id
         {
             (*index)++;
-            callParams(list, index);
+            if (callParams(list, index) == false)
+            {
+                return false;
+            }
         }
         else
         {
@@ -73,26 +85,38 @@ bool callParam(TokenList *list, int *index)
         return true;
     }
     /* <literal> */
-    else if (list->TokenArray[*index]->type == t_int)
+    else if (list->TokenArray[*index]->type == t_int) // int - e.g. 5
     {
         (*index)++;
-        callParams(list, index);
+        if (callParams(list, index) == false)
+        {
+            return false;
+        }
     }
-    else if (list->TokenArray[*index]->type == t_float)
+    else if (list->TokenArray[*index]->type == t_float) // float - e.g. 0.5
     {
         (*index)++;
-        callParams(list, index);
+        if (callParams(list, index) == false)
+        {
+            return false;
+        }
     }
-    else if (list->TokenArray[*index]->type == t_string)
+    else if (list->TokenArray[*index]->type == t_string) // string - e.g. hello world!
     {
         (*index)++;
-        callParams(list, index);
+        if (callParams(list, index) == false)
+        {
+            return false;
+        }
     }
     /* <var> */
-    else if (list->TokenArray[*index]->type == t_varId)
+    else if (list->TokenArray[*index]->type == t_varId) // variable - e.g. $id
     {
         (*index)++;
-        callParams(list, index);
+        if (callParams(list, index) == false)
+        {
+            return false;
+        }
     }
     else
     {
