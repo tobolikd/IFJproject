@@ -16,7 +16,8 @@ extern int HT_SIZE;
     float_t,
     null_int_t,
     null_string_t,
-    null_float_t
+    null_float_t,
+    error_t
 } var_type_t;
 
 typedef struct param_info_t
