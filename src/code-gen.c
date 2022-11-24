@@ -46,9 +46,8 @@ code_block *codeBlockConst(code_block_type type, codeGenCtx *ctx) {
 #define PUSH_ELSE() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_ELSE, ctx))
 #define PUSH_WHILE() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_WHILE, ctx))
 
-#define BLOCK_STACK_TOP_TYPE stack_code_block_top(&ctx->blockStack)->type
-
 void codeGenerator(stack_ast_t *ast) {
+    if (stack_ast_empty(ast)) return;
     // generate built in functions
     genBuiltIns();
 
@@ -64,14 +63,23 @@ void codeGenerator(stack_ast_t *ast) {
     ctx->currentFncDeclaration = NULL;
     stack_code_block_init(&ctx->blockStack);
 
+    AST_item *tmp = NULL; // prevent looping on error in the code gen
     while (!stack_ast_empty(ast)) {
         if (errorCode != SUCCESS)
             break;
 
-        switch (stack_ast_top(ast)->type) {
+        // check if the item generated properly (is poped) to prevent looping
+        if (stack_ast_top(ast) == tmp) {
+            ERR_INTERNAL(codeGenerator, "top of AST stack is same as last generated item");
+            break;
+        }
+
+        tmp = stack_ast_top(ast);
+
+        switch (tmp->type) {
             case AST_IF:
                 PUSH_IF();
-                POP_AND_CALL(genIF);
+                POP_AND_CALL(genIf);
                 break;
 
             case AST_WHILE:
@@ -166,7 +174,7 @@ void codeGenerator(stack_ast_t *ast) {
         }
     }
 
-    // if there ade items on either stack some error occured during code generation
+    // if there are items on either stack some error occured during code generation
     // print debug info
     if (!stack_ast_empty(ast)) {
         ERR_AST_NOT_EMPTY(ast);
@@ -200,7 +208,7 @@ void genFncCall(CODE_GEN_PARAMS) {
 
 }
 
-void genIF(CODE_GEN_PARAMS) {
+void genIf(CODE_GEN_PARAMS) {
 
 }
 
@@ -223,6 +231,5 @@ void genReturn(CODE_GEN_PARAMS) {
 void genBuiltIns() {
 
 }
-
 
 
