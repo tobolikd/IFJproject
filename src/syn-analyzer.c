@@ -204,7 +204,7 @@ bool typeCheck(TokenList *list, int *index)
     switch (list->TokenArray[*index]->type)
     {
     case t_nullType:
-        debug_log("in NULL TYPE\n");
+        //debug_log("in NULL TYPE\n");
         if (!strcmp(list->TokenArray[*index]->data, "int"))
         {
             return true;
@@ -223,7 +223,7 @@ bool typeCheck(TokenList *list, int *index)
             return false;
         }
     case t_type:
-        debug_log("in TYPE\n");
+        //debug_log("in TYPE\n");
         if (!strcmp(list->TokenArray[*index]->data, "int"))
         {
             return true;
