@@ -27,7 +27,7 @@ PrecedItem *precedItemCtor(Token *token, Element type);
 
 bool freeStack(stack_precedence_t *stack, stack_ast_t *stack2, bool returnValue);
 
-bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, stack_ast_t *stackAST);
+bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable);
 
 bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_ast_t *stackAST);
 

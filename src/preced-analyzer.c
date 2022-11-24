@@ -146,7 +146,7 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
         stack_ast_push(stackAST,ast_item_const(AST_MULTIPLY,NULL)); //push operation multiply
         break;
     }
-    default://will most likely never happen
+    default://should never happen
         THROW_ERROR(SEMANTIC_OTHER_ERR,stack->top->data->token->lineNum);
         break;
     }
@@ -318,20 +318,23 @@ Element getIndex(Token *input, ht_table_t* symtable)
             return UNINITIALISED;
 
         case t_varId:
+            //check if var was declared before
             if (ht_search(symtable,input->data) == NULL) //not in symtable
             {
                 THROW_ERROR(SEMANTIC_VARIABLE_ERR,input->lineNum);
                 return UNINITIALISED;
             }
-            //check in symtable
-            // if(ht_search(symTable,input->data) == NULL)
-            //     THROW_ERROR(5,input->lineNum);
+            ht_search(symtable,input->data)->referenceCounter++; //variable referenced
             return DATA;//_VAR
 
         case t_functionId:
-            //check in fnc symtable
-            //recursive syntax check
-            return DATA;
+            //check if fnc was declared anywhere in the programme
+            if (ht_search(testTableFnc,input->data) == NULL) //not in symtable
+            {
+                THROW_ERROR(SEMANTIC_FUNCTION_DEFINITION_ERR,input->lineNum);
+                return UNINITIALISED;
+            }
+            return DATA;//_FNC
 
         case t_int:
             return DATA;//_INT
@@ -402,7 +405,7 @@ AST_param_type HtoAType(var_type_t type)
 
 }
 
-bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, stack_ast_t *stackAST)
+bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
 {
     //functionId ( <param> ) / Function Call
     // #1 check declaration 
@@ -426,34 +429,72 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
 
     for (unsigned i = 0; i < function->data.fnc_data.paramCount; i++) //check parameter type compared to declaration
     {
-
         (*index)++;
-/* TODO IF VARIABLE */
+        //PARAM AS VARIABLE
         if (list->TokenArray[*index]->type == t_varId)
         {
-               
-        }
-        //
-        if (cmpTHType(list->TokenArray[*index]->type,curParam.type)) //compare expected type
-        {
-            if (i < (function->data.fnc_data.paramCount)+1) //if there are more parameter
+            if (ht_search(symtable,list->TokenArray[*index]->data) == NULL) //not in symtable
             {
-                // fnc_call_data_add_param(data,HtoAType(curParam.type),);
-                (*index)++;
-                if (list->TokenArray[*index]->type != t_colon) //there must be colon
-                {
-                    continue;
-                }//                             |
-                //if false, it fals through to  V 
+                fnc_call_data_destr(data);
+                THROW_ERROR(SEMANTIC_VARIABLE_ERR,list->TokenArray[*index]->lineNum);
+                return false;
             }
-            else //this is the last param
-                continue;
+            ht_search(symtable,list->TokenArray[*index]->data)->referenceCounter++; //variable referenced
+            
+            // #3a add parameter to AST FUNCTION CALL ITEM
+            fnc_call_data_add_param(data, AST_P_VAR, ht_search(symtable,list->TokenArray[*index]->data));
         }
+        //PARAM AS <LITERAL>
+        //compare data type with <literals>
+        else 
+        {
+            if (cmpTHType(list->TokenArray[*index]->type,curParam.type) == true)  
+            {
+                // #3a add parameter to AST FUNCTION CALL ITEM
+                switch (curParam.type)
+                {
+                case int_t:
+                    {
+                        int intData = atoi(list->TokenArray[*index]->data);
+                        fnc_call_data_add_param(data, HtoAType(curParam.type), &intData);
+                    }
+                    break;
+                case float_t:
+                    {
+                        float floatData = atof(list->TokenArray[*index]->data);
+                        fnc_call_data_add_param(data, HtoAType(curParam.type), &floatData);
+                    }
+                    break;
+                case string_t:
+                    fnc_call_data_add_param(data, HtoAType(curParam.type), list->TokenArray[*index]->data);
+                    break;        
+                default:
+                    debug_log("PA: Internal function parsing error Switch - param type issue.\n");
+                    break;
+            }
+            }
+            else
+            {
+                //does not match 
+                fnc_call_data_destr(data);
+                THROW_ERROR(SEMANTIC_RUN_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
+                return false;
+            }
+        }
+        //check if there should be more parameters
+        if (i < (function->data.fnc_data.paramCount)+1) 
+        {
+            (*index)++;
+            if (list->TokenArray[*index]->type != t_colon) //there must be colon
+                continue;//                 |
+            //if false, it fals through to  V 
+        }
+        else //this is the last param
+            continue;
+
         fnc_call_data_destr(data);
-        THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
-        return false;
+        THROW_ERROR(SEMANTIC_RUN_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
     }
-/* TODO PUSH TO AST */
     // #4 )          
     if (list->TokenArray[*index]->type != t_rPar)
     {
@@ -512,7 +553,7 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_as
         //    can only be reduced to expression and pushed to AST stack
         if (curInputToken->type == t_functionId) //function call
         {
-            if (parseFunctionCall(list,index,&stack,stackAST) == true)//parse function call
+            if (parseFunctionCall(list,index,&stack,stackAST,symtable) == true)//parse function call
                 continue;//success
             THROW_ERROR(SYNTAX_ERR,curInputToken->lineNum);
             return freeStack(&stack, stackAST, false);//parsing failed
