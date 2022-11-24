@@ -8,7 +8,6 @@
 
 /* GLOBAL */
 // ht_table_t *fncTable; // testing
-extern ht_table_t *fncTable;
 
 //PRECEDENCE TABLE
 const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in enum, 
