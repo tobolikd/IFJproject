@@ -1,5 +1,5 @@
 #ifndef IFJ_CODE_GEN_H
-#define IFJ_CODE_GEN_H
+#define IFJ_CODE_GEN_H 1
 
 #include "ast.h"
 #include "stack.h"

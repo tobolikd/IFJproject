@@ -1,5 +1,5 @@
 #ifndef IFJ_ERROR_CODES_H
-#define IFJ_ERROR_CODES_H
+#define IFJ_ERROR_CODES_H 1
 
 #include <stdio.h>
 #include "devel.h"

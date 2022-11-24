@@ -1,5 +1,5 @@
 #ifndef IFJ_SEM_ANALYZER_H
-#define IFJ_SEM_ANALYZER_H
+#define IFJ_SEM_ANALYZER_H 1
 
 #include "symtable.h"
 #include "lex-analyzer.h"

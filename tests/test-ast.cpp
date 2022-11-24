@@ -119,4 +119,3 @@ TEST_F(testAst, fncCall) {
 
     ht_delete_all(symtable);
 }
-

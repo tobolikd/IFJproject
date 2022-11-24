@@ -1,9 +1,10 @@
 #ifndef IFJ_STACK_H
-#define IFJ_STACK_H
+#define IFJ_STACK_H 1
 
 #include "ast.h"
 #include "lex-analyzer.h"
 #include "code-gen-data.h"
+#include "preced-analyzer-data.h"
 
 #include <stdbool.h>
 
@@ -57,4 +58,6 @@ STACK_DECLARATION(AST_item *, ast)
 STACK_DECLARATION(Token *, token)
 STACK_DECLARATION(char *, string)
 STACK_DECLARATION(code_block *, code_block)
+STACK_DECLARATION(PrecedItem *, precedence)
+
 #endif // IFJ_STACK_H

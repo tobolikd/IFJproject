@@ -1,5 +1,5 @@
 #ifndef IFJ_SYM_TABLE_H
-#define IFJ_SYM_TABLE_H
+#define IFJ_SYM_TABLE_H 1
 
 #include <stdbool.h>
 
