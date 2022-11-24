@@ -5,8 +5,6 @@
 #include "lex-analyzer.h"
 #include "ast.h"
 
-extern const char *EXPR_TYPE_STRING[];
-
 /* @brief check semantics of the given expression
  *
  * @param type type of evaluated expression

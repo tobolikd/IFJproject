@@ -1,8 +1,8 @@
-#include "lex-analyzer.h"
 #include "symtable.h"
+#include "preced-analyzer-data.h"
 #include "preced-analyzer.h"
 #include "ast.h"
-#include "stack.h"
+#include "error-codes.h"
 #include <stdlib.h>
 
 /* GLOBAL */
@@ -68,7 +68,7 @@ PrecedItem *stack_precedence_top_terminal(stack_precedence_t *stack)
 }
 
 void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
- {
+{
     //setup stack_precedence_t
     PrecedItem *item = stack_precedence_top(stack);
     item->element = EXPRESSION;
@@ -468,6 +468,9 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
         
 /* TODO PUSH PROPER FUNCTION INFO */
     stack_precedence_push(stack,precedItemCtor(NULL,EXPRESSION));//push expression
+
+    //delme
+        fnc_call_data_destr(data);
     return true;//success
 }
 

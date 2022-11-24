@@ -5,7 +5,7 @@
  */
 
 #include "lex-analyzer.h"
-#include "preced-analyzer.h"
+#include "syn-analyzer.h"
 #include "symtable.h"
 #include "error-codes.h"
 
@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+enum ifjErrCode errorCode;
 
 // list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
@@ -86,7 +87,6 @@ bool callParam(TokenList *list, int *index)
     /* <literal> */
     else if (list->TokenArray[*index]->type == t_int) // int - e.g. 5
     {
-        
         (*index)++;
         if (callParams(list, index) == false)
         {

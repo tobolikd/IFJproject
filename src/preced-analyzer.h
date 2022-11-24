@@ -2,41 +2,35 @@
 #define IFJ_PRECED_ANALYZER_H 1
 
 #include "lex-analyzer.h"
-#include "syn-analyzer.h"
-#include "error-codes.h"
-#include "symtable.h"
+
+#include "stack.h"
 
 #include <stdbool.h>
 
-#define NUMBER_OF_RULES 15
-#define RULE_SIZE 3
+PrecedItem *stack_precedence_top_terminal(stack_precedence_t *stack);
 
-typedef enum {
-    UNINITIALISED,
-    OPERATOR_MULTIPLY,
-    OPERATOR_DIVIDE,
-    OPERATOR_PLUS,
-    OPERATOR_MINUS,
-    OPERATOR_CONCAT,
-    OPERATOR_GT,
-    OPERATOR_LT,
-    OPERATOR_GE,
-    OPERATOR_LE,
-    OPERATOR_E,
-    OPERATOR_NE,
-    LEFT_BRACKET,
-    RIGHT_BRACKET,
-    DATA,
-    DOLLAR,
-    EXPRESSION
-}Element;
+void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable);
 
-typedef struct 
-{
-    Element element;
-    Token *token;
-    bool reduction;
-}PrecedItem;
+void opE(stack_precedence_t *stack);
+
+void minusE(stack_precedence_t *stack, stack_ast_t *stackAST);
+
+void EopE(stack_precedence_t *stack, stack_ast_t *stackAST, AST_type op);
+
+void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int ruleNum, ht_table_t *symtable);
+
+bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable);
+
+Element getIndex(Token *input, ht_table_t* symtable);
+
+PrecedItem *precedItemCtor(Token *token, Element type);
+
+bool freeStack(stack_precedence_t *stack, stack_ast_t *stack2, bool returnValue);
+
+bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, stack_ast_t *stackAST);
+
+bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_ast_t *stackAST);
+
 
 
 #endif // IFJ_SYN_ANALYZER_H

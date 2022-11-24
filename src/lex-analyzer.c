@@ -5,7 +5,6 @@
 #include "lex-analyzer.h"
 #include "error-codes.h"
 
-
 // init STATE_STRING
 const char *STATE_STRING[] =
 {

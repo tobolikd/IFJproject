@@ -6,7 +6,7 @@ extern "C"
     #include "../src/symtable.h"
     #include "../src/stack.h"
     #include "../src/lex-analyzer.h"
-    #include "../src/preced-analyzer.h"
+    #include "../src/preced-analyzer-data.h"
     #include "test-lex-analyzer.hpp" //prepTmpFile
 }
 

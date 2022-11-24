@@ -2,8 +2,6 @@
 #define IFJ_SYM_TABLE_H 1
 
 #include <stdbool.h>
-#include "lex-analyzer.h"
-#include "syn-analyzer.h"
 
 #define MAX_HT_SIZE 251 // highest prime number < 256
 
@@ -51,17 +49,17 @@ typedef union
 typedef struct ht_item {
   bool isfnc;                   // switch between diferent data
   char *identifier;             // name of the item
-  symbol_data data;             // relevant data to item    
+  symbol_data data;             // relevant data to item
   unsigned referenceCounter;    // how many times was item referenced
-  struct ht_item *next;     
+  struct ht_item *next;
 } ht_item_t;
 
 typedef struct ht_table_t {
-    unsigned size;        
-    ht_item_t *items[MAX_HT_SIZE];         
+    unsigned size;
+    ht_item_t *items[MAX_HT_SIZE];
 } ht_table_t;
 
-/// @brief Returns hash for entered key value. 
+/// @brief Returns hash for entered key value.
 int get_hash(char *key);
 
 /// @brief Appends new parameter to an existig item.
@@ -98,7 +96,7 @@ ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool
 /// @brief Deletes item and frees all its data.
 void ht_item_dtor(ht_item_t *item);
 
-/// @brief Deletes item with coresponding key. 
+/// @brief Deletes item with coresponding key.
 void ht_delete(ht_table_t *table, char *key);
 
 /// @brief Deletes whole hash table.
