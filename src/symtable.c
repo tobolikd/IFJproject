@@ -158,6 +158,8 @@ void ht_delete(ht_table_t *table, char *key) {
 }
 
 void ht_delete_all(ht_table_t *table) {
+  if(table == NULL)
+    return;
   ht_item_t *cur = table->items[0];
   ht_item_t *tmp;
   for (int i = 0; i < HT_SIZE; i++)

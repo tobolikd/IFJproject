@@ -5,6 +5,8 @@
 #include "lex-analyzer.h"
 #include "ast.h"
 
+extern ht_table_t *fncTable;
+
 /* @brief check semantics of the given expression
  *
  * @param type type of evaluated expression

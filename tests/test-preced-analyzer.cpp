@@ -3,6 +3,8 @@
 extern "C"
 {
     #include "../src/preced-analyzer.c"
+    #include "../src/sem-analyzer.c"
+    
 }
 
 #include <string>
@@ -10,6 +12,7 @@ extern "C"
 #include <time.h>
 #include <iostream>
 
+#include "../src/preced-analyzer.h"
 #include "test-preced-analyzer.hpp"
 
 using std::make_tuple;

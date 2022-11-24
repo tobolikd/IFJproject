@@ -59,7 +59,7 @@ var_type_t typeforFnDec(TokenList *list, int *index) {
                 return null_string_t;
             } else {
                 errorCode = SYNTAX_ERR;
-                return error_t;
+                return error;
             }
         case t_type:
             // debug_log("in TYPE\n");
@@ -71,11 +71,11 @@ var_type_t typeforFnDec(TokenList *list, int *index) {
                 return string_t;
             } else {
                 errorCode = SYNTAX_ERR;
-                return error_t;
+                return error;
             }
         default:
             errorCode = SYNTAX_ERR;
-            return error_t;
+            return error;
     }
 }
 
@@ -89,7 +89,7 @@ var_type_t functionTypeForFunDec(TokenList *list, int *index)
             return void_t;
         }
         errorCode = SYNTAX_ERR;
-        return error_t;
+        return error;
     }
     else if (list->TokenArray[*index]->type == t_type || list->TokenArray[*index]->type == t_nullType)
     {
@@ -97,7 +97,7 @@ var_type_t functionTypeForFunDec(TokenList *list, int *index)
         return typeforFnDec(list, index);
     }
     errorCode = SYNTAX_ERR;
-    return error_t;
+    return error;
 }
 
 ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
@@ -120,14 +120,14 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
 
                 if(errorCode == SYNTAX_ERR){ return NULL;}
 
-                char *tmpParamType = list->TokenArray[index]->data;
-                debug_log("paramtype : %s\n", tmpParamType);
+                var_type_t tmpParamType = typeforFnDec(list,&index);
+                
                 (index)++;
 
                 if (list->TokenArray[index]->type != t_varId) { errorCode = SYNTAX_ERR;return NULL;}
 
-                ht_param_append(tmp, list->TokenArray[index]->data, *tmpParamType);
-                debug_log("param %s \n", tmp->data.fnc_data.params->varId);
+                ht_param_append(tmp, list->TokenArray[index]->data, tmpParamType);
+                debug_log("param %s \n", tmp->fnc_data.params->varId);
                 (index)++;
 
                 if(list->TokenArray[index]->type != t_rPar) {
@@ -137,13 +137,13 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
 
                             if (!typeCheck(list, &index)) { return NULL; } //setting errcode in the function already
 
-                            tmpParamType = list->TokenArray[index]->data;
+                            tmpParamType = typeforFnDec(list,&index);
                             (index)++;
 
                             if (list->TokenArray[index]->type != t_varId) {errorCode = SYNTAX_ERR;return NULL;}
 
-                            ht_param_append(tmp, list->TokenArray[index]->data, *tmpParamType);
-                            //debug_log("another param %s\n", tmp->data.fnc_data.params->next->varId);
+                            ht_param_append(tmp, list->TokenArray[index]->data, tmpParamType);
+                            //debug_log("another param %s\n", tmp->fnc_data.params->next->varId);
                             (index)++;
 
                             if (list->TokenArray[index]->type != t_rPar && list->TokenArray[index]->type != t_comma) {errorCode = SYNTAX_ERR; return NULL;}
@@ -163,8 +163,8 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
 
                     if(errorCode == SYNTAX_ERR){return NULL;}
 
-                    tmp->data.fnc_data.returnType = functionTypeForFunDec(list, &index);
-                    debug_log("return type %i\n", tmp->data.fnc_data.returnType);
+                    tmp->fnc_data.returnType = functionTypeForFunDec(list, &index);
+                    debug_log("return type %i\n", tmp->fnc_data.returnType);
                     (index)++;
                 }
             }
