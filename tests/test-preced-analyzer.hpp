@@ -42,7 +42,7 @@ class testBase : public::testing::TestWithParam<tuple<bool,string>>
             index = 0;
 
             expectedValue = get<0>(GetParam());
-            
+
             dataIn = "<?php declare(strict_types=1);" + get<1>(GetParam());
 
             tmpFile = prepTmpFile(dataIn.data());
@@ -82,19 +82,24 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
             testTableFnc = ht_init();
             ASSERT_FALSE(testTableFnc == NULL) << "INTERNAL TEST ERROR - symtable init error." << endl;
 
-            ht_insert(testTableVar,"a",int_t,false);//insert to symtables
-            ASSERT_FALSE(ht_search(testTableVar,"a") == NULL);
-            ht_insert(testTableVar,"b",int_t,false);
-            ASSERT_FALSE(ht_search(testTableVar,"b") == NULL);
+            char a[] = "a";
+            char b[] = "b";
+            char foo[] = "foo";
+            char param[] = "param";
 
-            ht_param_append(ht_insert(testTableFnc,"foo",int_t,true),"param",float_t);
-            ASSERT_FALSE(ht_search(testTableFnc,"foo") == NULL);
-            ASSERT_FALSE(ht_search(testTableFnc,"foo")->data.fnc_data.params == NULL);
+            ht_insert(testTableVar,a,int_t,false);//insert to symtables
+            ASSERT_FALSE(ht_search(testTableVar,a) == NULL);
+            ht_insert(testTableVar,b,int_t,false);
+            ASSERT_FALSE(ht_search(testTableVar,b) == NULL);
+
+            ht_param_append(ht_insert(testTableFnc,foo,int_t,true),param,float_t);
+            ASSERT_FALSE(ht_search(testTableFnc,foo) == NULL);
+            ASSERT_FALSE(ht_search(testTableFnc,foo)->data.fnc_data.params == NULL);
 
             index = 0;
 
             expectedValue = get<0>(GetParam());//true/false
-            
+
             dataIn = "<?php declare(strict_types=1);" + get<1>(GetParam());//input expression
 
             tmpFile = prepTmpFile(dataIn.data());
@@ -108,7 +113,7 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
         {
             while (!stack_ast_empty(&testStack)) //pop all
                 stack_ast_pop(&testStack);
-            
+
             ht_delete_all(testTableFnc);
             ht_delete_all(testTableVar);
             if (tmpFile != NULL)
@@ -116,8 +121,6 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
             listDtor(testList);
         }
 };
-
-
 
 
 #endif // IFJ_TEST_PRECED_ANALYZER_H
