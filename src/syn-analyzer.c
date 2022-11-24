@@ -10,16 +10,18 @@
 #include "error-codes.h"
 #include "ast.h"
 #include "stack.h"
+#include "preced-analyzer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 enum ifjErrCode errorCode;
+ht_table_t *GlobalTable;
+stack_ast_t stackSyn;
 
 // list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
-
 
 // <params> -> , <type> <var> <params> || eps
 bool params(TokenList *list, int *index)
@@ -168,12 +170,12 @@ bool functionDeclare(TokenList *list, int *index, ht_table_t *table)
     debug_log("FNC-DECL %i ", *index);
     if (list->TokenArray[*index]->type == t_function)
     {
-        ht_table_t *fntable = ht_init();    // create new symtable for Local Frame
+        // ht_table_t *fntable = ht_init();    // create new symtable for Local Frame
         debug_log("FNC-DECL FUNCTION FUNCTION %i ", *index);
         (*index)++;
         if (list->TokenArray[*index]->type == t_functionId)
         {
-            ht_search(table, list->TokenArray[*index]->type);
+            // ht_search(table, list->TokenArray[*index]->type); // USE WITH GLOBAL VAR FROM ADA'S FIRST
             (*index)++;
             if (list->TokenArray[*index]->type == t_lPar)
             {
@@ -250,9 +252,12 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         (*index)++;
         if (list->TokenArray[*index]->type == t_lPar)
         {
-            // (*index)++;
-            // precendAnalyser();
             (*index)++;
+            if (parseExpression(list, index, table, &stackSyn) == false)
+            {
+                return false;
+            }
+            //(*index)++;
             if (list->TokenArray[*index]->type == t_rPar)
             {
                 (*index)++;
@@ -299,9 +304,12 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         (*index)++;
         if (list->TokenArray[*index]->type == t_lPar)
         {
-            // (*index)++;
-            // precendAnalyser();
             (*index)++;
+            if (parseExpression(list, index, table, &stackSyn) == false)
+            {
+                return false;
+            }
+            //(*index)++;
             if (list->TokenArray[*index]->type == t_rPar)
             {
                 (*index)++;
@@ -327,7 +335,14 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         break;
     case t_return: // return <expr> ;
         (*index)++;
-        // precendAnalyser();
+        // if (list->TokenArray[*index]->type == t_semicolon)
+        // {
+        //     return true;
+        // }
+        if (parseExpression(list, index, table, &stackSyn) == false)
+        {
+            return false;
+        }
         if (list->TokenArray[*index]->type == t_semicolon)
         {
             return true;
@@ -345,13 +360,15 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         }
         else if (list->TokenArray[*index]->type == t_varId) // <assign> -> <var> <r-side>
         {
-            // OLD line++ ht_item_t *item = ht_insert(table, list->TokenArray[*index]->data, void_t, false);
             // BETTER? stack_ast_push(stack, ht_insert(table, list->TokenArray[*index]->data, void_t, false));
-            debug_log("\nINDEX: %s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
             (*index)++;
-            debug_log("\nINDEX: %s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
             if (list->TokenArray[*index]->type == t_semicolon) // <r-side> -> eps
             {
+                if (ht_search(table, list->TokenArray[(*index) - 1]->data) == NULL) // SEMANTIC CONTROL if variable was declerated
+                {
+                    THROW_ERROR(SEMANTIC_VARIABLE_ERR, list->TokenArray[*index]->lineNum);
+                    return false;
+                }
                 return true;
             }
             else if (list->TokenArray[*index]->type == t_assign) // <r-side> -> = <expr>
@@ -362,11 +379,15 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
                     THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
                     return false;
                 }
-                while (list->TokenArray[*index]->type != t_semicolon) // temporary solution, before precedent Analyser is done
+                ht_item_t *item = ht_insert(table, list->TokenArray[(*index) - 2]->data, void_t, false); // insert variable to symtable
+                // while (list->TokenArray[*index]->type != t_semicolon)                                    // temporary solution, before precedent Analyser is done
+                // {
+                //     (*index)++;
+                // }
+                if (parseExpression(list, index, table, &stackSyn) == false)
                 {
-                    (*index)++;
+                    return false;
                 }
-                // precendAnalyser();
                 if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
                 {
                     return true;
@@ -387,8 +408,11 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
             Teoreticky se to dá vyřešit, že se budu ptát, jestli tady nejsou nějaký klíčový tokeny a podle toho postupovat,
             třeba t_function mi to shodí return, protože se bude jednat o function declare */
 
-            // (*index)++;
-            // precendAnalyser();
+            (*index)++;
+            if (parseExpression(list, index, table, &stackSyn) == false)
+            {
+                return false;
+            }
         }
         break;
     }
@@ -441,8 +465,9 @@ bool synAnalyser(TokenList *list)
 {
     int index = 0;
     ht_table_t *table = ht_init();
+    GlobalTable = ht_init();
     // stack_ast_t stackSyn;
-    // stack_ast_init(&stackSyn);
+    stack_ast_init(&stackSyn);
     // if (!list->TokenArray[0]) // what does this do?
     // {
     //     errorCode = LEXICAL_ERR;
@@ -451,8 +476,17 @@ bool synAnalyser(TokenList *list)
     /* START OF RECURSIVE DESCENT */
     if (checkSyntax(list, &index, table) == false)
     {
-        return false;
         ht_delete_all(table);
+        while (!stack_ast_empty(&stackSyn))
+        {
+            stack_ast_pop(&stackSyn);
+        }
+        return false;
+    }
+    ht_delete_all(table);
+    while (!stack_ast_empty(&stackSyn))
+    {
+        stack_ast_pop(&stackSyn);
     }
     return true;
 }
