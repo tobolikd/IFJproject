@@ -26,11 +26,6 @@ typedef struct param_info_t
     struct param_info_t *next;
 } param_info_t;
 
-typedef struct
-{
-    char *varId;
-    var_type_t type;
-} var_info_t;
 
 typedef struct
 {
@@ -39,17 +34,12 @@ typedef struct
     var_type_t returnType;
 } fnc_info_t;
 
-typedef union
-{
-  var_info_t var_data;
-  fnc_info_t fnc_data;
-} symbol_data;
 
 /// @brief general item in hash table
 typedef struct ht_item {
-  bool isfnc;                   // switch between diferent data
+  bool isfnc;                   // item is function -> fncInfo is relevant
   char *identifier;             // name of the item
-  symbol_data data;             // relevant data to item
+  fnc_info_t fnc_data;          // relevant data to item
   unsigned referenceCounter;    // how many times was item referenced
   struct ht_item *next;
 } ht_item_t;

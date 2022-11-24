@@ -425,9 +425,9 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
     // #3  matching data type to declaration
     // #3a create AST FUNCTION CALL ITEM
     AST_function_call_data *data = fnc_call_data_const(testTableFnc,function->identifier);
-    param_info_t curParam = function->data.fnc_data.params[0]; //first parameter
+    param_info_t curParam = function->fnc_data.params[0]; //first parameter
 
-    for (unsigned i = 0; i < function->data.fnc_data.paramCount; i++) //check parameter type compared to declaration
+    for (unsigned i = 0; i < function->fnc_data.paramCount; i++) //check parameter type compared to declaration
     {
         (*index)++;
         //PARAM AS VARIABLE
@@ -482,7 +482,7 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
             }
         }
         //check if there should be more parameters
-        if (i < (function->data.fnc_data.paramCount)+1) 
+        if (i < (function->fnc_data.paramCount)+1) 
         {
             (*index)++;
             if (list->TokenArray[*index]->type != t_colon) //there must be colon

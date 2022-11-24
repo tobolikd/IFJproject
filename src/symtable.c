@@ -28,15 +28,15 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
   new->type = type;
   new->next = NULL;
   
-  if (appendTo->data.fnc_data.paramCount == 0) //first parameter
+  if (appendTo->fnc_data.paramCount == 0) //first parameter
   {
-    appendTo->data.fnc_data.params = new;
-    appendTo->data.fnc_data.paramCount = 1;
+    appendTo->fnc_data.params = new;
+    appendTo->fnc_data.paramCount = 1;
   }
   else //append param
   {
-    param_info_t *cur = appendTo->data.fnc_data.params;
-    appendTo->data.fnc_data.paramCount++;
+    param_info_t *cur = appendTo->fnc_data.params;
+    appendTo->fnc_data.paramCount++;
     while(cur->next != NULL)          // append as last.
       cur = cur->next; 
     cur->next = new;
@@ -56,16 +56,10 @@ ht_item_t *ht_item_ctor(char* identifier, var_type_t type, bool isFunction)
 
   new->isfnc = isFunction;
   new->next = NULL;
-  if (isFunction) 
-  {
-    new->data.fnc_data.returnType = type;
-    new->data.fnc_data.paramCount = 0;
-    new->data.fnc_data.params = NULL;
-  }
-  else
-  {
-    new->data.var_data.type = type;
-  }
+  //for variables these data are irelevant
+  new->fnc_data.returnType = type;
+  new->fnc_data.paramCount = 0;
+  new->fnc_data.params = NULL;
   return new;
 }
 
@@ -105,7 +99,6 @@ ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool
       return NULL; 
     }
     item->referenceCounter++; // increase reference
-    item->data.var_data.type = type; // update data
   }
   else //item does not exists in the symtable
   {
@@ -123,9 +116,9 @@ void ht_item_dtor(ht_item_t *item)
 {
   if (item->isfnc)
   {
-    param_info_t *cur = item->data.fnc_data.params;
+    param_info_t *cur = item->fnc_data.params;
     param_info_t *tmp = cur;
-    while (cur != NULL) // destroy entire list
+    while (cur != NULL) // destroy entire list of parameters
     {
       free(cur->varId);
       free(cur);

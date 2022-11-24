@@ -59,7 +59,7 @@ bool checkFncCall(AST_function_call_data *data) {
         return true; // built in function with unlimited params
                      // all ast types are allowed
 
-    param_info_t *requiredParam = data->function->data.fnc_data.params;
+    param_info_t *requiredParam = data->function->fnc_data.params;
     AST_fnc_param *tmpParam = data->params;
     while (tmpParam != NULL) {
         if (requiredParam != NULL) { // no more required params
