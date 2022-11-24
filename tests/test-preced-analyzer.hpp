@@ -79,8 +79,8 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
 
             testTableVar = ht_init();//init symtables
             ASSERT_FALSE(testTableVar == NULL) << "INTERNAL TEST ERROR - symtable init error." << endl;
-            testTableFnc = ht_init();
-            ASSERT_FALSE(testTableFnc == NULL) << "INTERNAL TEST ERROR - symtable init error." << endl;
+            fncTable = ht_init();
+            ASSERT_FALSE(fncTable == NULL) << "INTERNAL TEST ERROR - symtable init error." << endl;
 
             char a[] = "a";
             char b[] = "b";
@@ -92,9 +92,9 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
             ht_insert(testTableVar,b,int_t,false);
             ASSERT_FALSE(ht_search(testTableVar,b) == NULL);
 
-            ht_param_append(ht_insert(testTableFnc,foo,int_t,true),param,float_t);
-            ASSERT_FALSE(ht_search(testTableFnc,foo) == NULL);
-            ASSERT_FALSE(ht_search(testTableFnc,foo)->fnc_data.params == NULL);
+            ht_param_append(ht_insert(fncTable,foo,int_t,true),param,float_t);
+            ASSERT_FALSE(ht_search(fncTable,foo) == NULL);
+            ASSERT_FALSE(ht_search(fncTable,foo)->fnc_data.params == NULL);
 
             index = 0;
 
@@ -114,7 +114,7 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
             while (!stack_ast_empty(&testStack)) //pop all
                 stack_ast_pop(&testStack);
 
-            ht_delete_all(testTableFnc);
+            ht_delete_all(fncTable);
             ht_delete_all(testTableVar);
             if (tmpFile != NULL)
                 fclose(tmpFile);

@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 /* GLOBAL */
-ht_table_t *testTableFnc; // testing
+ht_table_t *fncTable; // testing
 
 //PRECEDENCE TABLE
 const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in enum, 
@@ -78,7 +78,7 @@ void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
     switch (item->token->type)
     {
     case t_varId:
-        stack_ast_push(stackAST,ast_item_const(AST_VAR,ht_search(testTableFnc,stack_precedence_top(stack)->token->data)));
+        stack_ast_push(stackAST,ast_item_const(AST_VAR,ht_search(fncTable,stack_precedence_top(stack)->token->data)));
         break;
     case t_functionId://dealt with earlier
         debug_log("PA: E -> i rule something went wrong.\n");
@@ -328,7 +328,7 @@ Element getIndex(Token *input, ht_table_t* symtable)
 
         case t_functionId:
             //check if fnc was declared anywhere in the programme
-            if (ht_search(testTableFnc,input->data) == NULL) //not in symtable
+            if (ht_search(fncTable,input->data) == NULL) //not in symtable
             {
                 THROW_ERROR(SEMANTIC_FUNCTION_DEFINITION_ERR,input->lineNum);
                 return UNINITIALISED;
@@ -408,7 +408,7 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
 {
     //functionId ( <param> ) / Function Call
     // #1 check declaration 
-    ht_item_t *function = ht_search(testTableFnc,list->TokenArray[*index]->data);
+    ht_item_t *function = ht_search(fncTable,list->TokenArray[*index]->data);
     if (function == NULL) //function is not declared
     {
         THROW_ERROR(SEMANTIC_FUNCTION_DEFINITION_ERR,list->TokenArray[*index]->lineNum);
@@ -423,7 +423,7 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
     }
     // #3  matching data type to declaration
     // #3a create AST FUNCTION CALL ITEM
-    AST_function_call_data *fncCallData = fnc_call_data_const(testTableFnc,function->identifier);
+    AST_function_call_data *fncCallData = fnc_call_data_const(fncTable,function->identifier);
     param_info_t curParam = function->fnc_data.params[0]; //first parameter
 
     for (unsigned i = 0; i < function->fnc_data.paramCount; i++) //check parameter type compared to declaration
