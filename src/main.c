@@ -29,8 +29,7 @@ int main () {
 #if (DEBUG == 1)
     //printTokenList(list);
 #endif
-    //synAnalyser(list);  // start syn analyzer
-
+    synAnalyser(list);  // start syn analyzer
     // free memory
     listDtor(list);
     fclose(fp);
