@@ -142,18 +142,22 @@ TEST_P(testCheckAST, expectedValue)
     EXPECT_EQ(expectedValue,parseExpression(testList,&index,testTableVar,&testStack)) << "Processing input: |" << get<1>(GetParam()) << "| ..." << endl;
 }
 
-INSTANTIATE_TEST_SUITE_P(FUNCTION_CALL_CORRECT, testCheckReturnValue,
+INSTANTIATE_TEST_SUITE_P(FUNCTION_CALL_CORRECT, testCheckAST,
     testing::Values(
         make_tuple(true, "foo(1.2)"),
         make_tuple(true, "$a * foo(1.2) < $a"),
         make_tuple(true, "$a/foo(1.2) <= -foo(1.2)+2"),
         make_tuple(true, "(foo(1.2)+foo(1.2))*foo(1.2) < foo(1.2)*(foo(1.2)*foo(1.2))"),
-        make_tuple(true, "$foo(1.2) . $foo(1.2) < 2"),
         make_tuple(true, "2 < foo(1.2) === 2"),
         make_tuple(true, "2 === $a > $b"),
         make_tuple(true, "(2+2<2) === foo(1.2)>foo(1.2)"),
         make_tuple(true, "(foo(1.2)+foo(1.2)<foo(1.2)) === 1 < $a"),
         make_tuple(true, "-foo(1.2)"),
+        make_tuple(true, "foo($a)"),
+        make_tuple(true, "foo($b)"),
+        make_tuple(true, "foo(1)"),
+        make_tuple(true, "foo(1.2) . foo($a) < 2"),
+        make_tuple(true, "$a + foo(\"ahoj\")"),
         make_tuple(true, "((+foo(1.2) === -foo(1.2))===(5===5))")
     )
 );
@@ -162,14 +166,16 @@ INSTANTIATE_TEST_SUITE_P(FUNCTION_CALL_INCORRECT, testCheckAST,
     testing::Values(
         make_tuple(false, "foo()"),
         make_tuple(false, "foo(1.2,)"),
+        make_tuple(false, "foo(1.2,1.2)"),
+        make_tuple(false, "foo($c)"),
         make_tuple(false, "$c"),
         make_tuple(false, "fnc(1.2) === 2"),
         make_tuple(false, "foo 1.2 < $a < $a"),
-        make_tuple(false, "$a + foo(\"ahoj\")"),
         make_tuple(false, "foo(x)"),
         make_tuple(false, "$a + $var"),
-        make_tuple(false, "foo($a)"),
         make_tuple(false, "doo(1.2)"),
+        make_tuple(false, "$foo(1.2) . $foo(1.2) < 2"),
+        make_tuple(false, "$foo(1.2) . $foo(1.2)"),
         make_tuple(false, "foo(1.2)<")
     )
 );

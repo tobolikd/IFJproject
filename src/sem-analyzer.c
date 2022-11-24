@@ -62,7 +62,7 @@ bool checkFncCall(AST_function_call_data *data) {
     param_info_t *requiredParam = data->function->fnc_data.params;
     AST_fnc_param *tmpParam = data->params;
     while (tmpParam != NULL) {
-        if (requiredParam != NULL) { // no more required params
+        if (requiredParam == NULL) { // no more required params
             ERR_FNC_PARAM_COUNT(data->functionID);
 #if DEBUG == 1
                 printAstFnc(data);

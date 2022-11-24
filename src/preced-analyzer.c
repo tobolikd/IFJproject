@@ -1,12 +1,13 @@
 #include "symtable.h"
 #include "preced-analyzer-data.h"
 #include "preced-analyzer.h"
+#include "sem-analyzer.h"
 #include "ast.h"
 #include "error-codes.h"
 #include <stdlib.h>
 
 /* GLOBAL */
-ht_table_t *testTableFnc;
+ht_table_t *testTableFnc; // testing
 
 //PRECEDENCE TABLE
 const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in enum, 
@@ -118,11 +119,9 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
 {
     //handle semantic action for E -> -E
     AST_item *item = stack_ast_top(stackAST);
-/* TODO ISERTED ITEM */
-    //delme
     if (item == NULL)
     {
-        opE(stack);
+        debug_log("PA: -E rule failed. Stack Empty.\n");
         return;
     }
     
@@ -424,7 +423,7 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
     }
     // #3  matching data type to declaration
     // #3a create AST FUNCTION CALL ITEM
-    AST_function_call_data *data = fnc_call_data_const(testTableFnc,function->identifier);
+    AST_function_call_data *fncCallData = fnc_call_data_const(testTableFnc,function->identifier);
     param_info_t curParam = function->fnc_data.params[0]; //first parameter
 
     for (unsigned i = 0; i < function->fnc_data.paramCount; i++) //check parameter type compared to declaration
@@ -435,50 +434,44 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
         {
             if (ht_search(symtable,list->TokenArray[*index]->data) == NULL) //not in symtable
             {
-                fnc_call_data_destr(data);
+                fnc_call_data_destr(fncCallData);
                 THROW_ERROR(SEMANTIC_VARIABLE_ERR,list->TokenArray[*index]->lineNum);
                 return false;
             }
             ht_search(symtable,list->TokenArray[*index]->data)->referenceCounter++; //variable referenced
             
             // #3a add parameter to AST FUNCTION CALL ITEM
-            fnc_call_data_add_param(data, AST_P_VAR, ht_search(symtable,list->TokenArray[*index]->data));
+            fnc_call_data_add_param(fncCallData, AST_P_VAR, ht_search(symtable,list->TokenArray[*index]->data));
         }
         //PARAM AS <LITERAL>
         //compare data type with <literals>
         else 
         {
-            if (cmpTHType(list->TokenArray[*index]->type,curParam.type) == true)  
+            // #3a add parameter to AST FUNCTION CALL ITEM
+            switch (list->TokenArray[*index]->type)
             {
-                // #3a add parameter to AST FUNCTION CALL ITEM
-                switch (curParam.type)
+            case t_int:
                 {
-                case int_t:
-                    {
-                        int intData = atoi(list->TokenArray[*index]->data);
-                        fnc_call_data_add_param(data, HtoAType(curParam.type), &intData);
-                    }
-                    break;
-                case float_t:
-                    {
-                        float floatData = atof(list->TokenArray[*index]->data);
-                        fnc_call_data_add_param(data, HtoAType(curParam.type), &floatData);
-                    }
-                    break;
-                case string_t:
-                    fnc_call_data_add_param(data, HtoAType(curParam.type), list->TokenArray[*index]->data);
+                    int intData = atoi(list->TokenArray[*index]->data);
+                    fnc_call_data_add_param(fncCallData, HtoAType(curParam.type), &intData);
+                }
+                break;
+            case t_float:
+                {
+                    double floatData = atof(list->TokenArray[*index]->data);
+                    fnc_call_data_add_param(fncCallData, HtoAType(curParam.type), &floatData);
+                }
+                break;
+            case t_string:
+                fnc_call_data_add_param(fncCallData, HtoAType(curParam.type), list->TokenArray[*index]->data);
+                break;        
                     break;        
-                default:
-                    debug_log("PA: Internal function parsing error Switch - param type issue.\n");
-                    break;
-            }
-            }
-            else
-            {
-                //does not match 
-                fnc_call_data_destr(data);
-                THROW_ERROR(SEMANTIC_RUN_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
-                return false;
+                break;   
+                    break;        
+                break;   
+            default:
+                //something else
+                break;
             }
         }
         //check if there should be more parameters
@@ -492,12 +485,13 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
         else //this is the last param
             continue;
 
-        fnc_call_data_destr(data);
-        THROW_ERROR(SEMANTIC_RUN_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
+        fnc_call_data_destr(fncCallData);
+        THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
     }
     // #4 )          
     if (list->TokenArray[*index]->type != t_rPar)
     {
+        fnc_call_data_destr(fncCallData);
         THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
         return false;
     }
@@ -506,12 +500,17 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
     // #5 push expression to stack
     if (stack_precedence_top(stack)->element != DOLLAR)
         stack_precedence_top(stack)->reduction = false;
-        
-/* TODO PUSH PROPER FUNCTION INFO */
     stack_precedence_push(stack,precedItemCtor(NULL,EXPRESSION));//push expression
 
-    //delme
-        fnc_call_data_destr(data);
+
+    // #6 push semantic action to ast
+    if (checkFncCall(fncCallData) == false)// check if sem correct
+    {
+        fnc_call_data_destr(fncCallData);
+        THROW_ERROR(SEMANTIC_RUN_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
+        return false;    
+    } 
+    stack_ast_push(stackAST,ast_item_const(AST_FUNCTION_CALL,fncCallData));
     return true;//success
 }
 

@@ -120,10 +120,10 @@ void ht_item_dtor(ht_item_t *item)
     param_info_t *tmp = cur;
     while (cur != NULL) // destroy entire list of parameters
     {
+      tmp = cur;
       free(cur->varId);
       free(cur);
       cur = tmp->next;
-      tmp = cur;
     }
   }
   free(item->identifier);

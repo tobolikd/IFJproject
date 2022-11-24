@@ -35,6 +35,7 @@ int checkProlog(FILE* fp, int *lineNum)
                                 if(!checkDeclare(fp,lineNum))
                                     return 0;
                         }
+    THROW_ERROR(SYNTAX_ERR,1);
     debug_print("%s : Mistake in prolog.\n",prolog);
     return 1;
 }
