@@ -95,7 +95,7 @@ bool typeCheck(TokenList *list, int *index)
     switch (list->TokenArray[*index]->type)
     {
     case t_nullType:
-        //debug_log("in NULL TYPE\n");
+        // debug_log("in NULL TYPE\n");
         if (!strcmp(list->TokenArray[*index]->data, "int"))
         {
             return true;
@@ -114,7 +114,7 @@ bool typeCheck(TokenList *list, int *index)
             return false;
         }
     case t_type:
-        //debug_log("in TYPE\n");
+        // debug_log("in TYPE\n");
         if (!strcmp(list->TokenArray[*index]->data, "int"))
         {
             return true;
@@ -405,7 +405,10 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
             /* TODO - EPS STAT
             Teoreticky se to dá vyřešit, že se budu ptát, jestli tady nejsou nějaký klíčový tokeny a podle toho postupovat,
             třeba t_function mi to shodí return, protože se bude jednat o function declare */
-
+            if (list->TokenArray[*index]->type == t_function)   //
+            {
+                return true;
+            }
             (*index)++;
             if (parseExpression(list, index, table, &stackSyn) == false)
             {
