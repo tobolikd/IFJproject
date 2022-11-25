@@ -1,0 +1,80 @@
+%Author: xtobol06
+
+%class
+\documentclass[a4paper, 12pt]{article}
+
+%encoding
+\usepackage[T1]{fontenc}           %font encoding
+\usepackage[utf8]{inputenc}         %script encoding
+
+\usepackage[bibencoding=UTF-8,style=iso-numeric]{biblatex}
+\addbibresource{sources.bib}
+
+%packages
+\usepackage[czech]{babel}           %language
+\usepackage[a4paper, text={17cm,24cm}, left=2cm, top=3 cm]{geometry}		%layout
+\usepackage{times}					%font
+\usepackage[ruled, czech, linesnumbered, longend, noline]{algorithm2e}		%algorithms
+\usepackage[unicode,hidelinks]{hyperref}	%links
+\usepackage{amsmath}
+\usepackage{tabularx}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{csquotes}
+
+\begin{document}
+
+    \begin{titlepage}
+		\centering
+
+        \includegraphics{src/fitlogo.pdf}
+
+        \vspace{\stretch{0.382}}
+
+        {\Huge Dokumentace k projektu z IFJ a IAL\\[0.4em]
+            \LARGE Tým xbielg00, varianta TRP}
+
+        \vspace{\stretch{0.618}}
+
+        \begin{table}[H]
+            \hfill
+            \begin{tabularx}{0.5\textwidth}{Xr}
+                \textbf{Gabriel Biel} & \textbf{xbielg00} \\
+                Adam Gabrys & xgabry01 \\
+                Jakub Mikyšek & xmikys03 \\
+                David Tobolík & xtobol06 \\
+            \end{tabularx}
+        \end{table}
+	\end{titlepage}
+
+    \tableofcontents
+    \newpage
+
+    \section{Rozdělení práce}
+        \begin{itemize}
+            \item Gabriel Biel (xbielg00)
+                \begin{itemize}
+                    \item
+                \end{itemize}
+            \item Adam Gabrys (xgabry01)
+                \begin{itemize}
+                    \item
+                \end{itemize}
+            \item Jakub Mikyšek (xmikys03)
+                \begin{itemize}
+                    \item
+                \end{itemize}
+            \item David Tobolík (xtobol06)
+                \begin{itemize}
+                    \item sémantické kontroly pro volání funkce, datové struktury pro ASS, zásobníky, struktura projektu, cmake a struktura testů, testy (lexikální analýza, AST, zásobníky), code review, makefile, dokumentace
+                \end{itemize}
+        \end{itemize}
+
+    \newpage
+	%bibliography
+	\renewcommand{\refname}{Zdroje}
+	\printbibliography
+\end{document}
+
