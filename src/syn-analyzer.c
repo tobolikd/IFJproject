@@ -257,7 +257,6 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
             {
                 return false;
             }
-            //(*index)++;
             if (list->TokenArray[*index]->type == t_rPar)
             {
                 (*index)++;
@@ -309,7 +308,6 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
             {
                 return false;
             }
-            //(*index)++;
             if (list->TokenArray[*index]->type == t_rPar)
             {
                 (*index)++;
@@ -335,7 +333,7 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         break;
     case t_return: // return <expr> ;
         (*index)++;
-        // if (list->TokenArray[*index]->type == t_semicolon)
+        // if (list->TokenArray[*index]->type == t_semicolon) PROČ JE ZAKOMENTOVÁNO?
         // {
         //     return true;
         // }
