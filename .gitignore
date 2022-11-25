@@ -1,4 +1,4 @@
-# ignore all 
+# ignore all
 # dont save binary files
 /*
 src/lex-anal
@@ -14,3 +14,6 @@ src/mymain.c
 !CMakeLists.txt
 !notes.md
 !grammar.md
+
+!is_it_ok.sh
+!odevzdani.sh
