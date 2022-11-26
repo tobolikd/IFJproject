@@ -238,7 +238,7 @@ bool statList(TokenList *list, int *index, ht_table_t *table)
         return false;
     }
     debug_log("ST-LIST %i ", *index);
-    debug_log("%s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
+    debug_log("Token type %s on line %d\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type], list->TokenArray[*index]->lineNum);
     return true;
 }
 
@@ -253,16 +253,16 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         (*index)++;
         if (list->TokenArray[*index]->type == t_lPar)
         {
-            debug_log("Current Token type: %s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
             (*index)++;
-            debug_log("Current Token type: %s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
-            if (parseExpression(list, index, table, &stackSyn) == false)
+            if (list->TokenArray[*index]->type != t_rPar)
             {
-                debug_log("\nPREC FALSE: %i \n", errorCode);
-                return false;
+                if (parseExpression(list, index, table, &stackSyn) == false)
+                {
+                    debug_log("\nPREC FALSE: %i \n", errorCode);
+                    return false;
+                }
             }
             debug_log("\nPREC TRUE: %i \n", errorCode);
-            debug_log("Current Token type: %s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
             if (list->TokenArray[*index]->type == t_rPar)
             {
                 (*index)++;
@@ -304,19 +304,21 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
                     }
                 }
             }
-            THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
-            return false;
         }
-        break;
+        THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+        return false;
     case t_while: // while ( <expr> ) { <st-list> }
         stack_ast_push(&stackSyn, ast_item_const(AST_WHILE, NULL));
         (*index)++;
         if (list->TokenArray[*index]->type == t_lPar)
         {
             (*index)++;
-            if (parseExpression(list, index, table, &stackSyn) == false)
+            if (list->TokenArray[*index]->type != t_rPar)
             {
-                return false;
+                if (parseExpression(list, index, table, &stackSyn) == false)
+                {
+                    return false;
+                }
             }
             if (list->TokenArray[*index]->type == t_rPar)
             {
@@ -338,18 +340,17 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
                     }
                 }
             }
-            THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
-            return false;
         }
-        break;
+        THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+        return false;
     case t_return: // return <expr> ;
         (*index)++;
         if (list->TokenArray[*index]->type == t_semicolon) // eps
         {
-            stack_ast_push(&stackSyn,ast_item_const(AST_RETURN, false));
+            //stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, false));
             return true;
         }
-        stack_ast_push(&stackSyn,ast_item_const(AST_RETURN, true));
+        //stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, true));
         if (parseExpression(list, index, table, &stackSyn) == false)
         {
             return false;
