@@ -253,14 +253,16 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         (*index)++;
         if (list->TokenArray[*index]->type == t_lPar)
         {
-            debug_log("%s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
+            debug_log("Current Token type: %s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
             (*index)++;
-            debug_log("%s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
+            debug_log("Current Token type: %s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
             if (parseExpression(list, index, table, &stackSyn) == false)
             {
+                debug_log("\nPREC FALSE: %i \n", errorCode);
                 return false;
             }
-            debug_log("%s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
+            debug_log("\nPREC TRUE: %i \n", errorCode);
+            debug_log("Current Token type: %s\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type]);
             if (list->TokenArray[*index]->type == t_rPar)
             {
                 (*index)++;
