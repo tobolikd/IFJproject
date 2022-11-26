@@ -5,7 +5,7 @@
 
 #include <stdbool.h>
 
-#define NUMBER_OF_RULES 15
+#define NUMBER_OF_RULES 16
 #define RULE_SIZE 3
 
 typedef enum {

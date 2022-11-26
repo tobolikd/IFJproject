@@ -50,7 +50,8 @@ unsigned const RULES[NUMBER_OF_RULES][RULE_SIZE] = {
     {EXPRESSION, OPERATOR_GE, EXPRESSION},          //11 E -> E>=E
     {EXPRESSION, OPERATOR_E, EXPRESSION},           //12 E -> E===E
     {EXPRESSION, OPERATOR_NE, EXPRESSION},          //13 E -> E!==E
-    {RIGHT_BRACKET, EXPRESSION, LEFT_BRACKET}       //14 E -> (E) 
+    {RIGHT_BRACKET, EXPRESSION, LEFT_BRACKET},      //14 E -> (E) 
+    {EXPRESSION, UNINITIALISED, UNINITIALISED}      //15 E -> E 
 };//possibly more
 
 
@@ -219,6 +220,9 @@ void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int rul
         stack_precedence_pop(stack);
         break;
     }
+    case 15:// E -> E 
+        break;
+
     default:
         debug_print("PA: Could not assign rule.\n");
         break;
@@ -272,6 +276,7 @@ bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtab
                 return true;
             }
         }
+    debug_log("Could not find rule.\n");
     return false;
 }
 
