@@ -586,9 +586,13 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_as
             return freeStack(&stack, stackAST, true);
 
         default:
-            /* SYNTAX ERROR */
-            THROW_ERROR(SYNTAX_ERR,curInputToken->lineNum);
-            debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
+            if(!reduce(&stack, stackAST, symtable))
+            {
+                /* SYNTAX ERROR */
+                THROW_ERROR(SYNTAX_ERR,curInputToken->lineNum);
+                debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
+                return freeStack(&stack, stackAST, false);
+            }
             return freeStack(&stack, stackAST, false);
         }
     }
