@@ -598,7 +598,7 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_as
                 debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
                 return freeStack(&stack, stackAST, false);
             }
-            return freeStack(&stack, stackAST, false);
+            return freeStack(&stack, stackAST, true);
         }
     }
     return freeStack(&stack, stackAST, true);
