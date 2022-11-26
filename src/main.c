@@ -14,13 +14,12 @@ int main () {
     fp = stdin;
 
     TokenList *list = lexAnalyser(fp); // get list of tokens
-    fncTable = InitializedHTableFnctionDecs(list);
-
     if(list == NULL) // there was an error in lexAnalyser
     {
         fclose(fp);
         return errorCode;
     }
+    fncTable = InitializedHTableFnctionDecs(list);
     if(fncTable == NULL){ //error in hashtable
         debug_log("\n %i \n", errorCode);
         listDtor(list);
