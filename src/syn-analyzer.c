@@ -377,7 +377,7 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
                     THROW_ERROR(SEMANTIC_VARIABLE_ERR, list->TokenArray[*index]->lineNum);
                     return false;
                 }
-                stack_ast_push(&stackSyn, ast_item_const(AST_VAR, ht_insert(table, list->TokenArray[(*index) - 1]->data, NULL, false)));
+                stack_ast_push(&stackSyn, ast_item_const(AST_VAR, ht_insert(table, list->TokenArray[(*index) - 1]->data, void_t, false)));
                 return true;
             }
             else if (list->TokenArray[*index]->type == t_assign) // <r-side> -> = <expr>
@@ -388,7 +388,7 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
                     THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
                     return false;
                 }
-                ht_item_t *varItem = ht_insert(table, list->TokenArray[(*index) - 2]->data, NULL, false); // insert variable to symtable
+                ht_item_t *varItem = ht_insert(table, list->TokenArray[(*index) - 2]->data, void_t, false); // insert variable to symtable
                 stack_ast_push(&stackSyn, ast_item_const(AST_ASSIGN, NULL));
                 stack_ast_push(&stackSyn, ast_item_const(AST_VAR, varItem));
                 if (parseExpression(list, index, table, &stackSyn) == false)
