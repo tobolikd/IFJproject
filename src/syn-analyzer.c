@@ -254,13 +254,15 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         if (list->TokenArray[*index]->type == t_lPar)
         {
             (*index)++;
-            if (list->TokenArray[*index]->type != t_rPar)
+            if (list->TokenArray[*index]->type == t_lPar || list->TokenArray[*index]->type == t_rPar)
             {
-                if (parseExpression(list, index, table, &stackSyn) == false)
-                {
-                    debug_log("\nPREC FALSE: %i \n", errorCode);
-                    return false;
-                }
+                THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+                return false;
+            }
+            if (parseExpression(list, index, table, &stackSyn) == false)
+            {
+                debug_log("\nPREC FALSE: %i \n", errorCode);
+                return false;
             }
             debug_log("\nPREC TRUE: %i \n", errorCode);
             if (list->TokenArray[*index]->type == t_rPar)
@@ -313,12 +315,14 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         if (list->TokenArray[*index]->type == t_lPar)
         {
             (*index)++;
-            if (list->TokenArray[*index]->type != t_rPar)
+            if (list->TokenArray[*index]->type == t_lPar || list->TokenArray[*index]->type == t_rPar)
             {
-                if (parseExpression(list, index, table, &stackSyn) == false)
-                {
-                    return false;
-                }
+                THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+                return false;
+            }
+            if (parseExpression(list, index, table, &stackSyn) == false)
+            {
+                return false;
             }
             if (list->TokenArray[*index]->type == t_rPar)
             {
@@ -347,10 +351,10 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         (*index)++;
         if (list->TokenArray[*index]->type == t_semicolon) // eps
         {
-            //stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, false));
+            // stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, false));
             return true;
         }
-        //stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, true));
+        // stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, true));
         if (parseExpression(list, index, table, &stackSyn) == false)
         {
             return false;
