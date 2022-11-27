@@ -44,12 +44,11 @@ TEST_F(testAst, initString) {
 
 TEST_F(testAst, initReturn) {
     bool a = true;
-    testedItem = ast_item_const(AST_RETURN, &a);
+    testedItem = ast_item_const(AST_RETURN_EXPR, &a);
 
     ASSERT_FALSE(testedItem == NULL) << "Constructor returned NULL" << endl;
-    EXPECT_EQ(testedItem->type, AST_RETURN);
-    ASSERT_FALSE(testedItem->data == NULL);
-    EXPECT_EQ(true, testedItem->data->blank);
+    EXPECT_EQ(testedItem->type, AST_RETURN_EXPR);
+    EXPECT_TRUE(testedItem->data == NULL);
 }
 
 TEST_F(testAst, initVar) {

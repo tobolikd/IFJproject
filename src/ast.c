@@ -126,10 +126,10 @@ AST_item *ast_item_const(AST_type type, void *data) {
             ALLOCATE_AST_DATA;
             new->data->functionCallData = (AST_function_call_data *) data;
             break;  // data - AST_function_call_data *functionCallData
-        case AST_RETURN:
-            ALLOCATE_AST_DATA;
-            new->data->blank = *((bool *) data);
-            break; // data - bool blank
+        case AST_RETURN_EXPR:
+        case AST_RETURN_VOID:
+            new->data = NULL;
+            break;
         case AST_IF:
         case AST_ELSE:
         case AST_WHILE:
