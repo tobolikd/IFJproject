@@ -186,3 +186,29 @@ INSTANTIATE_TEST_SUITE_P(FUNCTION_CALL_INCORRECT, testCheckAST,
         make_tuple(false, "foo(1.2)<")
     )
 );
+
+class DoubleValue : public CheckDoubleValue {};
+
+TEST_P(DoubleValue, expectedValue)
+{
+    parseExpression(testList,&index,testTableVar,&testStack);
+    EXPECT_DOUBLE_EQ(expectedValue,testStack.top->data->data->floatValue) << "Processing input: |" << get<1>(GetParam()) << "| ..." << endl;
+}
+
+INSTANTIATE_TEST_SUITE_P(CONST_CORRECT_ADVANCED, DoubleValue,
+    testing::Values(
+        make_tuple(20, "2e1"),
+        make_tuple(20, "2E1"),
+        make_tuple(0.2, "2e-1"),
+        make_tuple(0.2, "2E-1"),
+        make_tuple(20, "2e+1"),
+        make_tuple(20, "2E+1"),
+        make_tuple(20, "2.0e+1"),
+        make_tuple(0.2, "2.0e-1"),
+        make_tuple(2, "0.00002e5"),
+        make_tuple(-2, "-2.0e0"),
+        make_tuple(-2, "-0.00002e5"),
+        make_tuple(-21, "-2.1e1")
+    )
+);
+

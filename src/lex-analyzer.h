@@ -24,9 +24,9 @@
     STATE(Int)\
     STATE(Dot)\
     STATE(Double)\
-    STATE(EulNum)\
-    STATE(EulNumExtra)\
-    STATE(EulDouble)\
+    STATE(ExpNum)\
+    STATE(ExpNumExtra)\
+    STATE(ExpDouble)\
     STATE(String)\
     STATE(StringEnd)\
     STATE(Semicolon)\
@@ -48,7 +48,7 @@
     STATE(StrictEquality)\
     STATE(LesserEqualThanSign)\
     STATE(NotEqual)\
-    STATE(EuldDouble)\
+    STATE(ExpdDouble)\
     STATE(Comma)\
     STATE(Colons)\
     STATE(Backslash)\

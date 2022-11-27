@@ -627,7 +627,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if (curEdge == 'e' || curEdge == 'E')
             {
                 data = appendChar(data,curEdge);
-                curState = EulNum;
+                curState = ExpNum;
                 break;
             }
             ungetc(curEdge,fp);//catch the "force-out" edge
@@ -642,7 +642,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if (curEdge == 'e' || curEdge == 'E')
             {
                 data = appendChar(data,curEdge);
-                curState = EulNum;
+                curState = ExpNum;
                 break;
             }
             //if there is anything else...
@@ -656,17 +656,17 @@ Token* getToken(FILE* fp,int *lineNum)
             ungetc(curEdge,fp);//catch the "force-out" edge
             return tokenCtor(t_float, *lineNum, data);
 
-        case EulNum:
+        case ExpNum:
             if (isdigit(curEdge))
             {
                 data = appendChar(data,curEdge);
-                curState = EulDouble;
+                curState = ExpDouble;
                 break;
             }
             if (curEdge == '+' || curEdge == '-')
             {
                 data = appendChar(data,curEdge);
-                curState = EulNumExtra;
+                curState = ExpNumExtra;
                 break;
             }
             //cannot end with e as its last character
@@ -674,32 +674,32 @@ Token* getToken(FILE* fp,int *lineNum)
             free(data);
             return NULL;
 
-        case EulNumExtra:
+        case ExpNumExtra:
             if (isdigit(curEdge))
             {
                 data = appendChar(data,curEdge);
-                curState = EulDouble;
+                curState = ExpDouble;
                 break;
             }
-            debug_print("Number cannot end with operator sign.\n",);
+            debug_print("Number cannot end with operator sign.\n");
             THROW_ERROR(LEXICAL_ERR,*lineNum);
             free(data);
             return NULL; //return error
 
-        case EulDouble:
+        case ExpDouble:
             if (isdigit(curEdge))
             {
                 data = appendChar(data,curEdge);
                 break;
             }
-            //previous state == EulNum
+            //previous state == ExpNum
             if (data[strlen(data)-1] == 'e' || data[strlen(data)-1] == 'E' )
             {
                 debug_print("Line %d - %c Unpropper double number ending.\n", *lineNum,curEdge);
                 free(data);
                 return NULL;
             }
-            //previous state == EulNUmExtra
+            //previous state == ExpNUmExtra
             if (data[strlen(data)-1] == '+' || data[strlen(data)-1] == '-' )
             {
                 debug_print("Line %d - %c Unpropper double number ending.\n", *lineNum,curEdge);

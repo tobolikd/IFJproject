@@ -122,5 +122,52 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
         }
 };
 
+class CheckDoubleValue : public::testing::TestWithParam<tuple<double,string>>
+{
+    protected:
+        FILE *tmpFile;
+        TokenList *testList;
+        string dataIn;
+        double expectedValue;
+        int index;
+        ht_table_t *testTableVar;
+        stack_ast_t testStack;
+
+        void SetUp() override
+        {
+            stack_ast_init(&testStack);//init stack
+            ASSERT_FALSE(&testStack == NULL) << "INTERNAL TEST ERROR - stack init error." << endl;
+
+            testTableVar = ht_init();//init symtables
+            ASSERT_FALSE(testTableVar == NULL) << "INTERNAL TEST ERROR - symtable init error." << endl;
+            fncTable = ht_init();
+            ASSERT_FALSE(fncTable == NULL) << "INTERNAL TEST ERROR - symtable init error." << endl;
+
+            index = 0;
+
+            expectedValue = get<0>(GetParam());
+
+            dataIn = "<?php declare(strict_types=1);" + get<1>(GetParam());//input expression
+
+            tmpFile = prepTmpFile(dataIn.data());
+            ASSERT_FALSE(tmpFile == NULL) << "INTERNAL TEST ERROR - failed to allocate file." << endl;
+
+            testList = lexAnalyser(tmpFile);
+            ASSERT_FALSE(testList == NULL) << "INTERNAL TEST ERROR - scanner failed to read input data." << endl;
+        }
+
+        void TearDown() override
+        {
+            while (!stack_ast_empty(&testStack)) //pop all
+                stack_ast_pop(&testStack);
+
+            ht_delete_all(fncTable);
+            ht_delete_all(testTableVar);
+            if (tmpFile != NULL)
+                fclose(tmpFile);
+            listDtor(testList);
+        }
+};
+
 
 #endif // IFJ_TEST_PRECED_ANALYZER_H

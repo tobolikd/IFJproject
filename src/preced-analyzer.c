@@ -34,8 +34,8 @@ const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in 
 //                  READ BACKWARDS
 unsigned const RULES[NUMBER_OF_RULES][RULE_SIZE] = {
     {DATA, UNINITIALISED, UNINITIALISED},           // 0 E -> i
-    {EXPRESSION, OPERATOR_PLUS, UNINITIALISED},     // 1 E -> -E 
-    {EXPRESSION, OPERATOR_MINUS, UNINITIALISED},    // 2 E -> +E
+    {EXPRESSION, OPERATOR_PLUS, UNINITIALISED},     // 1 E -> +E 
+    {EXPRESSION, OPERATOR_MINUS, UNINITIALISED},    // 2 E -> -E
     {EXPRESSION, OPERATOR_PLUS, EXPRESSION},        // 3 E -> E+E
     {EXPRESSION, OPERATOR_MINUS, EXPRESSION},       // 4 E -> E-E
     {EXPRESSION, OPERATOR_MULTIPLY, EXPRESSION},    // 5 E -> E*E    
@@ -166,11 +166,11 @@ void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int rul
     case 0://E -> i
         Ei(stack,stackAST,symtable);
         break;
-    case 1://E -> -E
-        minusE(stack,stackAST);
-        break;
-    case 2://E -> +E
+    case 1://E -> +E
         opE(stack);
+        break;
+    case 2://E -> -E
+        minusE(stack,stackAST);
         break;
     case 3:// E -> E+E
         EopE(stack,stackAST,AST_ADD);
