@@ -23,25 +23,29 @@ enum ifjErrCode {
 // global variable for errCode storage
 extern enum ifjErrCode errorCode;
 
-/* print debug info using debug_print() macro
- * 0 - OFF
- * 1 - ON
- */
-#define DEBUG 1
+#define COMPILER_INFO 1
 
-// used for compiler messages (description of error)
-// WILL BE IN FINAL SOLUTION
-#define debug_print(...) do { if (DEBUG == 1) fprintf(stderr, __VA_ARGS__); } while (0)
+#if COMPILER_INFO == 1
+    // used for compiler messages (description of error)
+    // WILL BE IN FINAL SOLUTION
+    #define debug_print(...) fprintf(stderr, __VA_ARGS__)
+#else
+    #define debug_print(...)
+#endif
 
 /* print logs using debug_log() macro
  * 0 - OFF
  * 1 - ON
  */
-#define DEBUG_LOGS 1
+#define DEBUG 1
 
-// used for developmnent purposes
-// will NOT be printer in final solution
-#define debug_log(...) do { if (DEBUG_LOGS == 1) fprintf(stderr, __VA_ARGS__); } while (0)
+#if DEBUG == 1
+    // used for developmnent purposes
+    // will NOT be printer in final solution
+    #define debug_log(...) fprintf(stderr, __VA_ARGS__)
+#else
+    #define debug_log(...)
+#endif
 
 // check malloc success, on fail return
 #define CHECK_MALLOC(ptr) do { if (ptr == NULL) {errorCode = INTERNAL_ERR; return;} } while (0)
