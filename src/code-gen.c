@@ -213,6 +213,35 @@ void genFncCall(CODE_GEN_PARAMS) {
 
 void genIf(CODE_GEN_PARAMS) {
     switch (stack_ast_top(ast)->type) {
+		case AST_ADD:
+		case AST_SUBTRACT:
+		case AST_DIVIDE:
+		case AST_MULTIPLY:
+		case AST_CONCAT:
+            // expression
+            INST_PUSHS(CONST_BOOL(true));
+            INST_PUSHS(VAR_AUX(genExpr(ast, ctx))); // gen expression
+                                                    // push result to stack
+            INST_CALL(LABEL("resolve%%expr%%condition")); // call resolve
+                                                          // result is on stack
+            INST_JUMPIFNEQS(LABEL_ELSE()); // if result is false, jump to else
+            break;
+		case AST_EQUAL:
+
+		case AST_NOT_EQUAL:
+		case AST_GREATER:
+		case AST_GREATER_EQUAL:
+		case AST_LESS:
+		case AST_LESS_EQUAL:
+
+		case AST_VAR:
+		case AST_INT:
+		case AST_STRING:
+		case AST_FLOAT:
+            break;
+		case AST_NULL:
+            break;
+
 
         default:
             ERR_INTERNAL(genIf, "not recognized type on top of stack - %d", stack_ast_top(ast)->type);
