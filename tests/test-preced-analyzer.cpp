@@ -50,14 +50,15 @@ INSTANTIATE_TEST_SUITE_P(CONST_CORRECT, testCheckReturnValue,
 
 INSTANTIATE_TEST_SUITE_P(CONST_INCORRECT, testCheckReturnValue,
     testing::Values(
+        make_tuple(false, ""),
         make_tuple(false, "()"),
+        make_tuple(false, "2 2"),
         make_tuple(false, "2++"),
         make_tuple(false, ")2"),
         make_tuple(false, "(2+2)2"),
         make_tuple(false, "2(2-2)"),
         make_tuple(false, "(2+2)*2*"),
         make_tuple(false, "2(+)2"),
-        make_tuple(false, "(-2))"),
         make_tuple(false, "(2*2"),
         make_tuple(false, "2+-2"),
         make_tuple(false, "2*(2"),
@@ -71,6 +72,7 @@ INSTANTIATE_TEST_SUITE_P(CONST_INCORRECT, testCheckReturnValue,
 INSTANTIATE_TEST_SUITE_P(VARIABLES_CORRECT, testCheckReturnValue,
     testing::Values(
         make_tuple(true, "$a"),
+        make_tuple(true, "(-$a))"),
         make_tuple(true, "$a+$a"),
         make_tuple(true, "$a+$a+$a"),
         make_tuple(true, "($a+$a)"),
@@ -90,14 +92,13 @@ INSTANTIATE_TEST_SUITE_P(VARIABLES_CORRECT, testCheckReturnValue,
 
 INSTANTIATE_TEST_SUITE_P(VARIABLES_INCORRECT, testCheckReturnValue,
     testing::Values(
-        make_tuple(false, "()"),
+        make_tuple(false, "$a $a"),
         make_tuple(false, "$a++"),
         make_tuple(false, ")$a"),
         make_tuple(false, "($a+$a)$a"),
         make_tuple(false, "$a($a-$a)"),
         make_tuple(false, "($a+$a)*$a*"),
         make_tuple(false, "$a(+)$a"),
-        make_tuple(false, "(-$a))"),
         make_tuple(false, "($a*$a"),
         make_tuple(false, "$a+-$a"),
         make_tuple(false, "$a*($a"),
@@ -182,5 +183,3 @@ INSTANTIATE_TEST_SUITE_P(FUNCTION_CALL_INCORRECT, testCheckAST,
         make_tuple(false, "foo(1.2)<")
     )
 );
-
-/* TEST RETURNED AST NOD */

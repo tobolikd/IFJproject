@@ -6,9 +6,6 @@
 #include "error-codes.h"
 #include <stdlib.h>
 
-/* GLOBAL */
-// ht_table_t *fncTable; // testing
-
 //PRECEDENCE TABLE
 const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in enum, 
                                                     //enum contains one extra element UNINITIALISED
@@ -29,7 +26,7 @@ const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in 
         {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '<', ' '}, // (
         {'>', '>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>'}, // )
         {'>', '>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>'}, // i
-        {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', 'x'}  // $
+        {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', ' '}  // $
 };
 
 //RULES
@@ -351,7 +348,7 @@ Element getIndex(Token *input, ht_table_t* symtable)
         case t_rPar:
             return RIGHT_BRACKET;
         default:
-            return DOLLAR;//closing tak of expression 
+            return DOLLAR;//closing tag of expression 
     }    
 }
 
@@ -587,18 +584,22 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_as
             }
             break; //input token stays the same, // look at another top terminal
 
-        case 'x': // $ __ $ //no terminal left but $
-            return freeStack(&stack, stackAST, true);
-
         default:
-            if(!reduce(&stack, stackAST, symtable))
+            if(curInputIndex == RIGHT_BRACKET || curInputIndex == DOLLAR) //Valid end of expression is)
             {
-                /* SYNTAX ERROR */
-                THROW_ERROR(SYNTAX_ERR,curInputToken->lineNum);
-                debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
-                return freeStack(&stack, stackAST, false);
+                if(reduce(&stack, stackAST, symtable)) // if what is on stack is reducable -> reduce
+                {
+                    //check if stack is reduce only to 1 EXPRESSION and DOLLAR
+                    if (stack.top != NULL)
+                        if (stack.top->next != NULL)
+                            if (stack.top->next->data->element == DOLLAR && stack.top->data->element == EXPRESSION) //must end with 
+                                return freeStack(&stack, stackAST, true);
+                }
             }
-            return freeStack(&stack, stackAST, true);
+            /* SYNTAX ERROR */
+            THROW_ERROR(SYNTAX_ERR,curInputToken->lineNum);
+            debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
+            return freeStack(&stack, stackAST, false);
         }
     }
     return freeStack(&stack, stackAST, true);

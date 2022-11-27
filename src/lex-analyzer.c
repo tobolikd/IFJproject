@@ -23,6 +23,7 @@ int checkProlog(FILE* fp, int *lineNum)
     char *prolog = "<?php";
     if(prolog[0]==fgetc(fp) )
         if(prolog[1]==fgetc(fp))
+        {
             if(prolog[2]==fgetc(fp))
                 if(prolog[3]==fgetc(fp))
                     if(prolog[4]==fgetc(fp))
@@ -35,6 +36,10 @@ int checkProlog(FILE* fp, int *lineNum)
                                 if(!checkDeclare(fp,lineNum))
                                     return 0;
                         }
+            THROW_ERROR(LEXICAL_ERR,1);
+            debug_print("%s : Mistake in prolog.\n",prolog);
+            return 1;
+        }
     THROW_ERROR(SYNTAX_ERR,1);
     debug_print("%s : Mistake in prolog.\n",prolog);
     return 1;
@@ -49,11 +54,12 @@ int checkDeclare(FILE *fp,int *lineNum)
     TokenType cmpType[7] = {t_functionId,t_lPar,t_functionId,t_assign,t_int,t_rPar,t_semicolon};
 
     for (int i = 0; i < 7; i++) //get all tokens declare ( strict_types = 1 ) ; = 7 in total
-    {
+    {       
         tmpList = appendToken(tmpList,getToken(fp,lineNum)); //append next token to list of token
 
         if(tmpList->TokenArray[i] == NULL)//expected 7 tokens, not less
         {
+            THROW_ERROR(LEXICAL_ERR,1);
             free(tmpList);
             return 1;
         }
