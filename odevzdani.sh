@@ -21,3 +21,4 @@ cd ..
 mkdir odevzdani-test
 yes | ./is_it_ok.sh xbielg00.zip odevzdani-test
 
+rm -fr odevzdani odevzdani-test
