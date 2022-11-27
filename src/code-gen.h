@@ -169,24 +169,24 @@ void genBuiltIns();
 #define INST_DPRINT() printf("DPRINT\n")
 
 // generating symbols
-#define VAR_AUX(num) printf("<LF@aux%%%d>", num)
-#define VAR_CODE(frame, id) printf("<%s@%s>", frame, id)
-#define CONST_FLOAT(value) printf("<float@%a>", value)
-#define CONST_INT(value) printf("<int@%d>", value)
-#define CONST_BOOL(value) printf("<bool@%d>", value)
-#define CONST_NIL() printf("<nil@nil>")
-#define CONST_STRING(ptr) do { printf("<"); genString(ptr); printf(">"); } while
+#define VAR_AUX(num) printf("LF@aux%%%d", num)
+#define VAR_CODE(frame, id) printf("%s@%s", frame, id)
+#define CONST_FLOAT(value) printf("float@%a", value)
+#define CONST_INT(value) printf("int@%d", value)
+#define CONST_BOOL(value) printf("bool@%d", value)
+#define CONST_NIL() printf("nil@nil")
+#define CONST_STRING(ptr) genString(ptr)
 
-#define LABEL(label) printf("<%s>", label)
+#define LABEL(label) printf("%s", label)
 
 // generating condition labels
 
 // if else
-#define LABEL_ELSE() printf("<else%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
-#define LABEL_ENDELSE() printf("<end_else%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_ELSE() printf("else%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_ENDELSE() printf("end_else%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
 
 // while
-#define LABEL_WHILE_BEGIN() printf("<while_begin%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
-#define LABEL_WHILE_END() printf("<while_end%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_WHILE_BEGIN() printf("while_begin%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_WHILE_END() printf("while_end%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
 
 #endif // IFJ_CODE_GEN_H
