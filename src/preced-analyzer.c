@@ -1,15 +1,13 @@
 #include "symtable.h"
 #include "preced-analyzer-data.h"
 #include "preced-analyzer.h"
+#include "sem-analyzer.h"
 #include "ast.h"
 #include "error-codes.h"
 #include <stdlib.h>
 
-/* GLOBAL */
-ht_table_t *testTableFnc;
-
 //PRECEDENCE TABLE
-const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in enum, 
+const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in enum,
                                                     //enum contains one extra element UNINITIALISED
 {
 //      {'!', '*', '/','+', '-', '.', '<', '>','>=','<=','==','!=', '(', ')', 'i', '$'          #priority
@@ -18,17 +16,17 @@ const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in 
         {'>', '>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // /   #1
         {'<', '<', '<','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // +   #2
         {'<', '<', '<','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // -   #2
-        {'<', '<', '<','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // .   #2 
+        {'<', '<', '<','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // .   #2
         {'<', '<', '<','<', '<', '<', ' ', ' ', ' ', ' ', '>', '>', '<', '>', '<', '>'}, // >   #3
         {'<', '<', '<','<', '<', '<', ' ', ' ', ' ', ' ', '>', '>', '<', '>', '<', '>'}, // <   #3
         {'<', '<', '<','<', '<', '<', ' ', ' ', ' ', ' ', '>', '>', '<', '>', '<', '>'}, // >=  #3
         {'<', '<', '<','<', '<', '<', ' ', ' ', ' ', ' ', '>', '>', '<', '>', '<', '>'}, // <=  #3
         {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<', '>', '<', '>'}, // === #4
-        {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<', '>', '<', '>'}, // !== #4 
+        {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<', '>', '<', '>'}, // !== #4
         {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '<', ' '}, // (
         {'>', '>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>'}, // )
         {'>', '>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>'}, // i
-        {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', 'x'}  // $
+        {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', ' '}  // $
 };
 
 //RULES
@@ -36,11 +34,11 @@ const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in 
 //                  READ BACKWARDS
 unsigned const RULES[NUMBER_OF_RULES][RULE_SIZE] = {
     {DATA, UNINITIALISED, UNINITIALISED},           // 0 E -> i
-    {EXPRESSION, OPERATOR_PLUS, UNINITIALISED},     // 1 E -> -E 
-    {EXPRESSION, OPERATOR_MINUS, UNINITIALISED},    // 2 E -> +E
+    {EXPRESSION, OPERATOR_PLUS, UNINITIALISED},     // 1 E -> +E
+    {EXPRESSION, OPERATOR_MINUS, UNINITIALISED},    // 2 E -> -E
     {EXPRESSION, OPERATOR_PLUS, EXPRESSION},        // 3 E -> E+E
     {EXPRESSION, OPERATOR_MINUS, EXPRESSION},       // 4 E -> E-E
-    {EXPRESSION, OPERATOR_MULTIPLY, EXPRESSION},    // 5 E -> E*E    
+    {EXPRESSION, OPERATOR_MULTIPLY, EXPRESSION},    // 5 E -> E*E
     {EXPRESSION, OPERATOR_DIVIDE, EXPRESSION},      // 6 E -> E/E
     {EXPRESSION, OPERATOR_CONCAT, EXPRESSION},      // 7 E -> E.E
     {EXPRESSION, OPERATOR_LT, EXPRESSION},          // 8 E -> E<E
@@ -49,7 +47,8 @@ unsigned const RULES[NUMBER_OF_RULES][RULE_SIZE] = {
     {EXPRESSION, OPERATOR_GE, EXPRESSION},          //11 E -> E>=E
     {EXPRESSION, OPERATOR_E, EXPRESSION},           //12 E -> E===E
     {EXPRESSION, OPERATOR_NE, EXPRESSION},          //13 E -> E!==E
-    {RIGHT_BRACKET, EXPRESSION, LEFT_BRACKET}       //14 E -> (E) 
+    {RIGHT_BRACKET, EXPRESSION, LEFT_BRACKET},      //14 E -> (E)
+    {EXPRESSION, UNINITIALISED, UNINITIALISED}      //15 E -> E
 };//possibly more
 
 
@@ -63,7 +62,7 @@ PrecedItem *stack_precedence_top_terminal(stack_precedence_t *stack)
             cur = cur->next;
         else
             return NULL;
-        
+
     return cur->data;
 }
 
@@ -77,7 +76,7 @@ void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
     switch (item->token->type)
     {
     case t_varId:
-        stack_ast_push(stackAST,ast_item_const(AST_VAR,ht_search(testTableFnc,stack_precedence_top(stack)->token->data)));
+        stack_ast_push(stackAST,ast_item_const(AST_VAR,ht_search(fncTable,stack_precedence_top(stack)->token->data)));
         break;
     case t_functionId://dealt with earlier
         debug_log("PA: E -> i rule something went wrong.\n");
@@ -118,14 +117,12 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
 {
     //handle semantic action for E -> -E
     AST_item *item = stack_ast_top(stackAST);
-/* TODO ISERTED ITEM */
-    //delme
     if (item == NULL)
     {
-        opE(stack);
+        debug_log("PA: -E rule failed. Stack Empty.\n");
         return;
     }
-    
+
     switch (item->type)
     {
     case AST_FLOAT:
@@ -137,18 +134,14 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
     case AST_STRING:
         THROW_ERROR(SEMANTIC_RUN_TYPE_ERR,stack->top->data->token->lineNum);
         break;
-    case AST_VAR:
-    case AST_FUNCTION_CALL:
-    {
+    default:
+        {
         //push operation * (-1)
         int negative = -1;
         stack_ast_push(stackAST,ast_item_const(AST_INT,&negative));
         stack_ast_push(stackAST,ast_item_const(AST_MULTIPLY,NULL)); //push operation multiply
         break;
-    }
-    default://should never happen
-        THROW_ERROR(SEMANTIC_OTHER_ERR,stack->top->data->token->lineNum);
-        break;
+        }
     }
     //handle E -> -E
     opE(stack);
@@ -169,11 +162,11 @@ void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int rul
     case 0://E -> i
         Ei(stack,stackAST,symtable);
         break;
-    case 1://E -> -E
-        minusE(stack,stackAST);
-        break;
-    case 2://E -> +E
+    case 1://E -> +E
         opE(stack);
+        break;
+    case 2://E -> -E
+        minusE(stack,stackAST);
         break;
     case 3:// E -> E+E
         EopE(stack,stackAST,AST_ADD);
@@ -181,7 +174,7 @@ void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int rul
     case 4:// E -> E-E
         EopE(stack,stackAST,AST_SUBTRACT);
         break;
-    case 5:// E -> E*E 
+    case 5:// E -> E*E
         EopE(stack,stackAST,AST_MULTIPLY);
         break;
     case 6:// E -> E/E
@@ -208,7 +201,7 @@ void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int rul
     case 13:// E -> E!==E
         EopE(stack,stackAST,AST_NOT_EQUAL);
         break;
-    case 14:// E -> (E) 
+    case 14:// E -> (E)
     {
         // no semantic action just reduce stack
         stack_precedence_pop(stack);
@@ -220,36 +213,39 @@ void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int rul
         stack_precedence_pop(stack);
         break;
     }
+    case 15:// E -> E
+        break;
+
     default:
         debug_print("PA: Could not assign rule.\n");
         break;
     }
 
     stack_precedence_top(stack)->token = NULL;  // token is irelevant at this point
-                                                // data type may have changed 
+                                                // data type may have changed
     return;
 }
 
-/// @brief 
-/// @param stack 
-/// @return TRUE IS CORRECT 
+/// @brief
+/// @param stack
+/// @return TRUE IS CORRECT
 bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
 {
     unsigned curRule[RULE_SIZE] = {UNINITIALISED, UNINITIALISED, UNINITIALISED};
     unsigned index = 0;
-    
-    stack_precedence_item_t *item = stack->top; //top item of stack 
+
+    stack_precedence_item_t *item = stack->top; //top item of stack
 
     while (item->data->reduction == false && index <= RULE_SIZE) // Get all elemets until < sign
     {
-        curRule[index] = item->data->element; // RULE IS <--- DIRECTION (backwards) 
+        curRule[index] = item->data->element; // RULE IS <--- DIRECTION (backwards)
         if (item->next == NULL)
         {
             debug_print("PA: Expression overreached.\n");
             return false;
         }
         //next
-        item = item->next;        
+        item = item->next;
         index++;
     }
     if (index > RULE_SIZE)
@@ -257,7 +253,7 @@ bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtab
         return false;
 
     if (item->data->element != DOLLAR)
-        item->data->reduction = false; //dealt with ... 
+        item->data->reduction = false; //dealt with ...
 
     //Compare & call rule
     for (unsigned i = 0; i < NUMBER_OF_RULES ; i++)
@@ -273,6 +269,7 @@ bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtab
                 return true;
             }
         }
+    debug_log("Could not find rule.\n");
     return false;
 }
 
@@ -280,7 +277,7 @@ Element getIndex(Token *input, ht_table_t* symtable)
 {
     if (input == NULL)
         return UNINITIALISED;
-    
+
     switch (input->type)
     {
         case t_operator:
@@ -298,10 +295,10 @@ Element getIndex(Token *input, ht_table_t* symtable)
                 return OPERATOR_CONCAT;
             default:
             /* LEXICAL ERROR */
-                return UNINITIALISED; 
+                return UNINITIALISED;
             }
             break;
-        
+
         case t_comparator:
             if (!strcmp(input->data,"==="))
                 return OPERATOR_E;
@@ -329,7 +326,7 @@ Element getIndex(Token *input, ht_table_t* symtable)
 
         case t_functionId:
             //check if fnc was declared anywhere in the programme
-            if (ht_search(testTableFnc,input->data) == NULL) //not in symtable
+            if (ht_search(fncTable,input->data) == NULL) //not in symtable
             {
                 THROW_ERROR(SEMANTIC_FUNCTION_DEFINITION_ERR,input->lineNum);
                 return UNINITIALISED;
@@ -347,8 +344,8 @@ Element getIndex(Token *input, ht_table_t* symtable)
         case t_rPar:
             return RIGHT_BRACKET;
         default:
-            return DOLLAR;//closing tak of expression 
-    }    
+            return DOLLAR;//closing tag of expression
+    }
 }
 
 PrecedItem *precedItemCtor(Token *token, Element type)
@@ -362,7 +359,7 @@ PrecedItem *precedItemCtor(Token *token, Element type)
 }
 
 bool freeStack(stack_precedence_t *stack, stack_ast_t *stack2, bool returnValue)
-{    
+{
     while (!stack_precedence_empty(stack))
         stack_precedence_pop(stack);
 
@@ -408,8 +405,8 @@ AST_param_type HtoAType(var_type_t type)
 bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
 {
     //functionId ( <param> ) / Function Call
-    // #1 check declaration 
-    ht_item_t *function = ht_search(testTableFnc,list->TokenArray[*index]->data);
+    // #1 check declaration
+    ht_item_t *function = ht_search(fncTable,list->TokenArray[*index]->data);
     if (function == NULL) //function is not declared
     {
         THROW_ERROR(SEMANTIC_FUNCTION_DEFINITION_ERR,list->TokenArray[*index]->lineNum);
@@ -424,10 +421,10 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
     }
     // #3  matching data type to declaration
     // #3a create AST FUNCTION CALL ITEM
-    AST_function_call_data *data = fnc_call_data_const(testTableFnc,function->identifier);
-    param_info_t curParam = function->data.fnc_data.params[0]; //first parameter
+    AST_function_call_data *fncCallData = fnc_call_data_const(fncTable,function->identifier);
+    param_info_t curParam = function->fnc_data.params[0]; //first parameter
 
-    for (unsigned i = 0; i < function->data.fnc_data.paramCount; i++) //check parameter type compared to declaration
+    for (unsigned i = 0; i < function->fnc_data.paramCount; i++) //check parameter type compared to declaration
     {
         (*index)++;
         //PARAM AS VARIABLE
@@ -435,69 +432,61 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
         {
             if (ht_search(symtable,list->TokenArray[*index]->data) == NULL) //not in symtable
             {
-                fnc_call_data_destr(data);
+                fnc_call_data_destr(fncCallData);
                 THROW_ERROR(SEMANTIC_VARIABLE_ERR,list->TokenArray[*index]->lineNum);
                 return false;
             }
             ht_search(symtable,list->TokenArray[*index]->data)->referenceCounter++; //variable referenced
-            
+
             // #3a add parameter to AST FUNCTION CALL ITEM
-            fnc_call_data_add_param(data, AST_P_VAR, ht_search(symtable,list->TokenArray[*index]->data));
+            fnc_call_data_add_param(fncCallData, AST_P_VAR, ht_search(symtable,list->TokenArray[*index]->data));
         }
         //PARAM AS <LITERAL>
         //compare data type with <literals>
-        else 
+        else
         {
-            if (cmpTHType(list->TokenArray[*index]->type,curParam.type) == true)  
+            // #3a add parameter to AST FUNCTION CALL ITEM
+            switch (list->TokenArray[*index]->type)
             {
-                // #3a add parameter to AST FUNCTION CALL ITEM
-                switch (curParam.type)
+            case t_int:
                 {
-                case int_t:
-                    {
-                        int intData = atoi(list->TokenArray[*index]->data);
-                        fnc_call_data_add_param(data, HtoAType(curParam.type), &intData);
-                    }
-                    break;
-                case float_t:
-                    {
-                        float floatData = atof(list->TokenArray[*index]->data);
-                        fnc_call_data_add_param(data, HtoAType(curParam.type), &floatData);
-                    }
-                    break;
-                case string_t:
-                    fnc_call_data_add_param(data, HtoAType(curParam.type), list->TokenArray[*index]->data);
-                    break;        
-                default:
-                    debug_log("PA: Internal function parsing error Switch - param type issue.\n");
-                    break;
-            }
-            }
-            else
-            {
-                //does not match 
-                fnc_call_data_destr(data);
-                THROW_ERROR(SEMANTIC_RUN_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
-                return false;
+                    int intData = atoi(list->TokenArray[*index]->data);
+                    fnc_call_data_add_param(fncCallData, HtoAType(curParam.type), &intData);
+                }
+                break;
+            case t_float:
+                {
+                    double floatData = atof(list->TokenArray[*index]->data);
+                    fnc_call_data_add_param(fncCallData, HtoAType(curParam.type), &floatData);
+                }
+                break;
+            case t_string:
+                fnc_call_data_add_param(fncCallData, HtoAType(curParam.type), list->TokenArray[*index]->data);
+                break;
+
+            default:
+                debug_log("PA: Literal data type was not recognized. Line number: %d.",list->TokenArray[*index]->lineNum);
+                break;
             }
         }
         //check if there should be more parameters
-        if (i < (function->data.fnc_data.paramCount)+1) 
+        if (i < (function->fnc_data.paramCount)+1)
         {
             (*index)++;
             if (list->TokenArray[*index]->type != t_colon) //there must be colon
                 continue;//                 |
-            //if false, it fals through to  V 
+            //if false, it fals through to  V
         }
         else //this is the last param
             continue;
 
-        fnc_call_data_destr(data);
-        THROW_ERROR(SEMANTIC_RUN_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
+        fnc_call_data_destr(fncCallData);
+        THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
     }
-    // #4 )          
+    // #4 )
     if (list->TokenArray[*index]->type != t_rPar)
     {
+        fnc_call_data_destr(fncCallData);
         THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
         return false;
     }
@@ -506,12 +495,17 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
     // #5 push expression to stack
     if (stack_precedence_top(stack)->element != DOLLAR)
         stack_precedence_top(stack)->reduction = false;
-        
-/* TODO PUSH PROPER FUNCTION INFO */
     stack_precedence_push(stack,precedItemCtor(NULL,EXPRESSION));//push expression
 
-    //delme
-        fnc_call_data_destr(data);
+
+    // #6 push semantic action to ast
+    if (checkFncCall(fncCallData) == false)// check if sem correct
+    {
+        fnc_call_data_destr(fncCallData);
+        THROW_ERROR(SEMANTIC_RUN_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
+        return false;
+    }
+    stack_ast_push(stackAST,ast_item_const(AST_FUNCTION_CALL,fncCallData));
     return true;//success
 }
 
@@ -519,12 +513,12 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
 //for now returns boolean
 bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_ast_t *stackAST)
 {
-    // INIT 
+    // INIT
     stack_precedence_t stack;
     stack_precedence_init(&stack);
     stack_precedence_push(&stack,precedItemCtor(NULL,DOLLAR)); //push starting tokent
     stack.top->data->reduction = true; //set to close
-    
+
     PrecedItem *topItem;
     Element curInputIndex;
     Token * curInputToken;
@@ -539,7 +533,7 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_as
             return freeStack(&stack, stackAST, false);
         }
         // #2 read token from array
-        curInputToken = list->TokenArray[(*index)]; 
+        curInputToken = list->TokenArray[(*index)];
 
         // #3 get input index to compare in preced table
         curInputIndex = getIndex(curInputToken, symtable); //get index to locate action in preced_table
@@ -548,7 +542,7 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_as
             debug_print("PA: Failed getting index. Line: %d.\n",curInputToken->lineNum);
             return freeStack(&stack, stackAST, false);
         }
-        
+
         // #4 if function call do it seperately
         //    can only be reduced to expression and pushed to AST stack
         if (curInputToken->type == t_functionId) //function call
@@ -557,9 +551,9 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_as
                 continue;//success
             THROW_ERROR(SYNTAX_ERR,curInputToken->lineNum);
             return freeStack(&stack, stackAST, false);//parsing failed
-        }        
+        }
         // debug_log("Working on #%d element: %d\n",(*index),curInputIndex);
-        
+
         // #5 make action based on element combination
         switch (preced_table[topItem->element][curInputIndex]) //search preced table
         {
@@ -583,10 +577,18 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_as
             }
             break; //input token stays the same, // look at another top terminal
 
-        case 'x': // $ __ $ //no terminal left but $
-            return freeStack(&stack, stackAST, true);
-
         default:
+            if(curInputIndex == RIGHT_BRACKET || curInputIndex == DOLLAR) //Valid end of expression is)
+            {
+                if(reduce(&stack, stackAST, symtable)) // if what is on stack is reducable -> reduce
+                {
+                    //check if stack is reduce only to 1 EXPRESSION and DOLLAR
+                    if (stack.top != NULL)
+                        if (stack.top->next != NULL)
+                            if (stack.top->next->data->element == DOLLAR && stack.top->data->element == EXPRESSION) //must end with
+                                return freeStack(&stack, stackAST, true);
+                }
+            }
             /* SYNTAX ERROR */
             THROW_ERROR(SYNTAX_ERR,curInputToken->lineNum);
             debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);

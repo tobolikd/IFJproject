@@ -22,7 +22,6 @@ void ast_item_destr(AST_item *item) {
     // free function call data
     if (item->type == AST_FUNCTION_CALL) {
         fnc_call_data_destr(item->data->functionCallData);
-        free(item->data->functionCallData);
     }
 
     // free string constant
@@ -53,6 +52,7 @@ void fnc_call_data_destr(AST_function_call_data *data) {
         free(deleted);
         deleted = next;
     }
+    free(data);
 }
 
 #define ALLOCATE_AST_DATA                   \
