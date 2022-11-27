@@ -9,6 +9,7 @@ extern "C"
 #include <cstdlib>
 #include <time.h>
 #include <iostream>
+#include <array>
 
 #include "test-lex-analyzer.hpp"
 
@@ -25,7 +26,7 @@ TEST_P(testCheckProlog, returnValue)
     EXPECT_EQ(returnValue, checkProlog(tmpFile,&lineNum)) << "Processed input: |" << dataIn << "|" << endl;
 }
 
-INSTANTIATE_TEST_CASE_P(BASIC, testCheckProlog,
+INSTANTIATE_TEST_SUITE_P(BASIC, testCheckProlog,
                         testing::Values(
                             make_tuple(0, "<?php declare(strict_types=1);"),
                             make_tuple(0, "<?php\ndeclare(strict_types=1);"),
@@ -134,7 +135,7 @@ INSTANTIATE_TEST_SUITE_P(BASIC, testGetTokenCorrect,
                         );
 
 
-                        
+
 class testGetTokenIncorrect : public testBaseForFiles {};
 
 TEST_P(testGetTokenIncorrect, returnValue)
@@ -190,18 +191,13 @@ class testLexAnalyzerCorrect : public testBaseForLex {};
 TEST_P(testLexAnalyzerCorrect, tokenArray)
 {
     tokenNum = 0;
-    
+
     returnedList = lexAnalyser(tmpFile);
-    
+
     ASSERT_FALSE(returnedList == NULL) << "RETURNED LIST IS NULL\nInput file: |" << get<2>(GetParam()) << "|" << endl;
 
     while (tokenNum < 5)
     {
-        if (expectedType[tokenNum] == t_EOF)
-        {
-            EXPECT_EQ(tokenNum, returnedList->length);
-            break;
-        }
         if (tokenNum >= returnedList->length)
         {
             FAIL() << "TOKEN LIST IS SHORTER THAN EXPECTED" << listInfo() << endl;
@@ -268,4 +264,4 @@ INSTANTIATE_TEST_SUITE_P(ADVANCED, testLexAnalyzerCorrect,
                                 array<string, 5>{" ","<","<","var","456.7e123"},
                                 "<?php declare(     strict_types\n=1);\" \"<<$var\t456.7e123")
                             )
-                        );   
+                        );

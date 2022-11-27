@@ -3,7 +3,13 @@ SOURCE_DIR=./src/
 
 SOURCES += lex-analyzer.c
 SOURCES += syn-analyzer.c
+SOURCES += sem-analyzer.c
+SOURCES += preced-analyzer.c
 SOURCES += code-gen.c
+SOURCES += ast.c
+SOURCES += stack.c
+SOURCES += symtable.c
+SOURCES += devel.c
 SOURCES += main.c
 
 TARGETS = $(addprefix $(SOURCE_DIR), $(SOURCES))
@@ -16,12 +22,12 @@ CFLAGS=-std=c99 -Wall -Wextra -pedantic -lm -fcommon
 all: clean compile
 
 compile:
-	$(CC) $(CFLAGS) $(TARGETS) -o $(PROJECT) 
+	$(CC) $(CFLAGS) $(TARGETS) -o $(PROJECT)
 
 run: compile
 	./$(PROJECT)
 
-compile_tests: 
+compile_tests:
 	cmake -S . -B build
 	cmake --build build
 
@@ -29,10 +35,10 @@ tests: compile_tests
 	./build/tests-all || true
 
 valgrind: compile_tests
-	valgrind --leak-check=full --show-leak-kinds=all build/tests-all ./build/tests-all || true
+	valgrind -s --leak-check=full --show-leak-kinds=all build/tests-all ./build/tests-all || true
 
 clean:
-	@rm -f $(PROJECT)
+	rm -f $(PROJECT)
 
 purge: clean
-	@rm -fr build
+	rm -fr build

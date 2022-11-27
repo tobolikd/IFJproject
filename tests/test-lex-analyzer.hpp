@@ -24,13 +24,13 @@ using std::array;
 FILE *prepTmpFile(const char *in)
 {
     FILE *file = tmpfile();
-    
+
     if (file == NULL)
     {
         cerr << "\n\nTEST ERROR - could not open tmpfile\n\n";
         return NULL;
     }
-    
+
     fputs(in, file);
 
     rewind(file);
@@ -89,11 +89,11 @@ class testBaseForTokens : public ::testing::TestWithParam<tuple<TokenType, strin
         void SetUp() override
         {
             srand(time(0)); // init rand()
-            
+
             expectedType = get<0>(GetParam());
             expectedData = get<1>(GetParam());
             dataIn = get<2>(GetParam());
-            
+
             lineNum = rand(); // get random line num
 
             tmpFile = prepTmpFile(dataIn.data());
@@ -125,7 +125,7 @@ class testBaseForTokens : public ::testing::TestWithParam<tuple<TokenType, strin
             string data = (returnedToken->data == NULL) ? "<NULL>" : "|" + string(returnedToken->data) + "|";
             out += "\n\tData: " + data;
             out += "\n\tLine number: " + to_string(lineNum);
-            return out; 
+            return out;
         }
 };
 
@@ -152,11 +152,11 @@ class testBaseForLex : public ::testing::TestWithParam<tuple<array<TokenType, 5>
         void SetUp() override
         {
             srand(time(0)); // init rand()
-            
+
             expectedType = get<0>(GetParam());
             expectedData = get<1>(GetParam());
             dataIn = get<2>(GetParam());
-            
+
             lineNum = rand(); // get random line num
 
             tmpFile = prepTmpFile(dataIn.data());
@@ -185,7 +185,7 @@ class testBaseForLex : public ::testing::TestWithParam<tuple<array<TokenType, 5>
             out += "\n\tData: ";
             if (returnedToken->data == NULL) {out += "<NULL>";} else {out += "|" + string(returnedToken->data) + "|";}
             out += "\n\tLine number: " + to_string(lineNum) + "\n";
-            return out; 
+            return out;
         }
 
         string listInfo()

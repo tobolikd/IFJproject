@@ -3,9 +3,8 @@
 #include "code-gen.h"
 #include "error-codes.h"
 
-enum ifjErrCode errorCode = SUCCESS;
-
 int main () {
+    errorCode = SUCCESS;
     /* SCANNER */
     FILE *fp;
 
@@ -19,10 +18,12 @@ int main () {
         return errorCode;
     }
 #if (DEBUG == 1)
-    prinTokenList(list);
+    printTokenList(list);
 #endif
 
-    // free memory 
+    synAnalyser(list);  // start syn analyzer
+
+    // free memory
     listDtor(list);
     fclose(fp);
     /* END OF SCANNER */
