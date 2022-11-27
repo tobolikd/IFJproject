@@ -106,7 +106,8 @@ void codeGenerator(stack_ast_t *ast) {
                 genFncDeclare(ast, ctx);
                 break;
 
-            case AST_RETURN:
+            case AST_RETURN_VOID:
+            case AST_RETURN_EXPR:
                 genReturn(ast, ctx);
                 break;
 
