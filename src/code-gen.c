@@ -84,13 +84,13 @@ void codeGenerator(stack_ast_t *ast) {
 
             case AST_WHILE:
                 PUSH_WHILE();
-                PRINT_WHILE_BEGIN_LABEL();
+                INST_LABEL(LABEL_WHILE_BEGIN());
                 POP_AND_CALL(genWhile);
                 break;
 
             case AST_ELSE:
                 PUSH_ELSE();
-                PRINT_ELSE_LABEL();
+                INST_LABEL(LABEL_ELSE());
                 break;
 
             case AST_ASSIGN:
@@ -145,19 +145,21 @@ void codeGenerator(stack_ast_t *ast) {
                             printAstStack(ast);
                         }
 #endif
-                        PRINT_ENDIF_LABEL();
+                        INST_JUMP(LABEL_ENDELSE());
                         break;
 
                     case BLOCK_ELSE:
-                        PRINT_ENDELSE_LABEL();
+                        INST_LABEL(LABEL_ENDELSE());
                         break;
 
                     case BLOCK_WHILE:
-                        PRINT_WHILE_END_LABEL();
+                        INST_JUMP(LABEL_WHILE_BEGIN());
+                        INST_LABEL(LABEL_WHILE_END());
                         break;
 
                     case BLOCK_DECLARE:
-                        PRINT_RETURN();
+                        INST_RETURN(); // print return for case of void function
+                                       // with no return statement at end of it
                         ctx->currentFncDeclaration = NULL;
                         break;
 
