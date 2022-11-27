@@ -255,7 +255,8 @@ Token* tokenCtor(TokenType type, int lineNum, char* data)
             new->data = parseString(new->data);
             if (new->data == NULL)
             {
-                debug_print("Line %d: Lexical error inside string-parseString",lineNum);
+                debug_log("Lexical error inside string. fnc parseString");
+                THROW_ERROR(LEXICAL_ERR,lineNum);
                 tokenDtor(new);
                 return NULL; // error inside string
             }
@@ -523,6 +524,7 @@ Token* getToken(FILE* fp,int *lineNum)
             return NULL;
 
         case AlmostEndOfProgram:
+            free(data);
             return NULL; //nothing should come after ?>
 
         case ID:
@@ -605,7 +607,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge);
                 return tokenCtor(t_comparator, *lineNum, data);
             }
-            debug_print("Line %d - Lexical Error\n", *lineNum);
+            THROW_ERROR(LEXICAL_ERR,*lineNum);
             free(data);
             return NULL;
 
@@ -679,7 +681,8 @@ Token* getToken(FILE* fp,int *lineNum)
                 curState = EulDouble;
                 break;
             }
-            debug_print("Line %d - Number cannot end with operator sign.\n", *lineNum);
+            debug_print("Number cannot end with operator sign.\n",);
+            THROW_ERROR(LEXICAL_ERR,*lineNum);
             free(data);
             return NULL; //return error
 
@@ -713,7 +716,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge);
                 curState = ExclamEqual;break;
             }
-            debug_print("Line %d - Lexical error.\n", *lineNum);
+            THROW_ERROR(LEXICAL_ERR,*lineNum);
             free(data);
             return NULL; //return error
 
@@ -723,7 +726,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge);
                 return tokenCtor(t_comparator, *lineNum, data);
             }
-            debug_print("Line %d - Lexical error.\n", *lineNum);
+            THROW_ERROR(LEXICAL_ERR,*lineNum);
             free(data);
             return NULL; //return error
 
