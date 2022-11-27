@@ -488,11 +488,6 @@ bool synAnalyser(TokenList *list)
     ht_table_t *table = ht_init();
     fncTable = ht_init();
     stack_ast_init(&stackSyn);
-    // if (!list->TokenArray[0]) // what does this do?
-    // {
-    //     errorCode = LEXICAL_ERR;
-    //     return false;
-    // }
     /* START OF RECURSIVE DESCENT */
     if (checkSyntax(list, &index, table) == false)
     {

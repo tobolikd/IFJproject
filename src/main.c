@@ -19,21 +19,29 @@ int main () {
         fclose(fp);
         return errorCode;
     }
-    fncTable = InitializedHTableFnctionDecs(list);
-    if(fncTable == NULL){ //error in hashtable
-        debug_log("\n %i \n", errorCode);
+
+    fncTable = InitializedHTableFnctionDecs(list); //first descent
+    if(fncTable == NULL) //error in first descent
+    {
+        debug_log("\n Error in first descent. Error code: %i.\n", errorCode);
         listDtor(list);
         fclose(fp);
         return errorCode;
     }
+
 #if (DEBUG == 1)
-    //printTokenList(list);
+    printTokenList(list);
 #endif
-    synAnalyser(list);  // start syn analyzer
+
+    if(synAnalyser(list) == true)  // start syn analyzer
+    {
+        // .. go to code gen
+    }
+    
     // free memory
     listDtor(list);
     fclose(fp);
-    /* END OF SCANNER */
-    debug_log("\n %i \n", errorCode);
+
+    debug_log("PROGRAM RETURNED %i.\n", errorCode);
     return errorCode;
 }

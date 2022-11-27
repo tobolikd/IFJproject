@@ -467,12 +467,9 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
             case t_string:
                 fnc_call_data_add_param(fncCallData, HtoAType(curParam.type), list->TokenArray[*index]->data);
                 break;        
-                    break;        
-                break;   
-                    break;        
-                break;   
+
             default:
-                //something else
+                debug_log("PA: Literal data type was not recognized. Line number: %d.",list->TokenArray[*index]->lineNum);
                 break;
             }
         }
