@@ -134,17 +134,11 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
     case AST_STRING:
         THROW_ERROR(SEMANTIC_RUN_TYPE_ERR,stack->top->data->token->lineNum);
         break;
-    case AST_VAR:
-    case AST_FUNCTION_CALL:
-    {
+    default:
         //push operation * (-1)
         int negative = -1;
         stack_ast_push(stackAST,ast_item_const(AST_INT,&negative));
         stack_ast_push(stackAST,ast_item_const(AST_MULTIPLY,NULL)); //push operation multiply
-        break;
-    }
-    default://should never happen
-        THROW_ERROR(SEMANTIC_OTHER_ERR,stack->top->data->token->lineNum);
         break;
     }
     //handle E -> -E

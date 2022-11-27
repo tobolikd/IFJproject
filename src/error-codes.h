@@ -52,7 +52,7 @@ extern enum ifjErrCode errorCode;
 #define MALLOC_ERR do{errorCode = INTERNAL_ERR; fprintf(stderr, "INTERNAL: malloc returned NULL"); } while(0)
 
 #define THROW_ERROR(CODE, ...)                                      \
-    if (CODE == SUCCESS){                                           \
+    if (errorCode == SUCCESS){                                      \
         errorCode = CODE;                                           \
         switch (errorCode){                                         \
         case LEXICAL_ERR:                                           \
