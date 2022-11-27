@@ -23,7 +23,6 @@ int checkProlog(FILE* fp, int *lineNum)
     char *prolog = "<?php";
     if(prolog[0]==fgetc(fp) )
         if(prolog[1]==fgetc(fp))
-        {
             if(prolog[2]==fgetc(fp))
                 if(prolog[3]==fgetc(fp))
                     if(prolog[4]==fgetc(fp))
@@ -36,10 +35,6 @@ int checkProlog(FILE* fp, int *lineNum)
                                 if(!checkDeclare(fp,lineNum))
                                     return 0;
                         }
-            THROW_ERROR(LEXICAL_ERR,1);
-            debug_print("%s : Mistake in prolog.\n",prolog);
-            return 1;
-        }
     THROW_ERROR(SYNTAX_ERR,1);
     debug_print("%s : Mistake in prolog.\n",prolog);
     return 1;
@@ -832,7 +827,7 @@ TokenList *lexAnalyser(FILE *fp)
         if (curToken == NULL)
         {
             listDtor(list);
-            errorCode = LEXICAL_ERR;
+            THROW_ERROR(LEX_ANALYZER_H,lineNum);
             return NULL;
         }
 
