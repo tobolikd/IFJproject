@@ -169,10 +169,12 @@ void genBuiltIns();
 #define INST_DPRINT() printf("DPRINT\n")
 
 // generating symbols
-#define VAR_AUX(num) printf("<aux%%%d>", num)
-#define VAR_CODE(id) printf("<%s>", id)
-#define CONST_FLOAT(value) printf("<%a>", value)
-#define CONST_INT(value) printf("<%d>", value)
+#define VAR_AUX(num) printf("<LF@aux%%%d>", num)
+#define VAR_CODE(frame, id) printf("<%s@%s>", frame, id)
+#define CONST_FLOAT(value) printf("<float@%a>", value)
+#define CONST_INT(value) printf("<int@%d>", value)
+#define CONST_BOOL(value) printf("<bool@%d>", value)
+#define CONST_NIL() printf("<nil@nil>")
 #define CONST_STRING(ptr) do { printf("<"); genString(ptr); printf(">"); } while
 
 #define LABEL(label) printf("<%s>", label)
