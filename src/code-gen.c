@@ -209,7 +209,11 @@ void genFncCall(CODE_GEN_PARAMS) {
 }
 
 void genIf(CODE_GEN_PARAMS) {
+    switch (stack_ast_top(ast)->type) {
 
+        default:
+            ERR_INTERNAL(genIf, "not recognized type on top of stack - %d", stack_ast_top(ast)->type);
+    }
 }
 
 
@@ -218,7 +222,7 @@ void genWhile(CODE_GEN_PARAMS) {
 }
 
 
-void genString(CODE_GEN_PARAMS) {
+void genString(char *string) {
 
 }
 
