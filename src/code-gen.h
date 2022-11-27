@@ -117,7 +117,7 @@ void genBuiltIns();
 #define INST_PUSHFRAME() printf("PUSHFRAME\n")
 #define INST_POPFRAME() printf("POPFRAME\n")
 #define INST_DEFVAR(var) do { printf("DEFVAR "); var; printf("\n"); } while (0)
-#define INST_CALL(label) do { printf("CALL <%s>\n", label); } while (0)
+#define INST_CALL(label) do { printf("CALL "); label; printf("\n"); } while (0)
 #define INST_RETURN() printf("RETURN\n")
 #define INST_PUSHS(symb) do { printf("PUSHS "); symb; printf("\n"); } while (0)
 #define INST_POPS(var) do { printf("POPS "); var; printf("\n"); } while (0)
@@ -158,12 +158,12 @@ void genBuiltIns();
 #define INST_GETCHAR(var, symb1, symb2) do { printf("GETACHAR "); var; SPACE, symb1; SPACE symb2; printf("\n"); } while (0)
 #define INST_SETCHAR(var, symb1, symb2) do { printf("SETCHAR "); var; SPACE, symb1; SPACE symb2; printf("\n"); } while (0)
 #define INST_TYPE(var, symb) do { printf("TYPE "); var; SPACE symb printf("\n"); } while (0)
-#define INST_LABEL(label) do { printf("LABEL <%s>\n", label); } while (0)
-#define INST_JUMP(label) do { printf("JUMP <%s>\n", label); } while (0)
-#define INST_JUMPIFEQ(label, symb1, symb2) do { printf("JUMPIFEQ <%s> ", label); symb1; SPACE symb2; printf("\n"); } while (0)
-#define INST_JUMPIFNEQ(label, symb1, symb2) do { printf("JUMPIFNEQ <%s> ", label); symb1; SPACE symb2; printf("\n"); } while (0)
-#define INST_JUMPIFEQS(label) printf("JUMPIFEQS <%s>\n", label)
-#define INST_JUMPIFNEQS(label) printf("JUMPIFNEQS <%s>\n", label)
+#define INST_LABEL(label) do { printf("LABEL "); label; printf("\n"); } while (0)
+#define INST_JUMP(label) do { printf("JUMP "); label; printf("\n"); } while (0)
+#define INST_JUMPIFEQ(label, symb1, symb2) do { printf("JUMPIFEQ "); label; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_JUMPIFNEQ(label, symb1, symb2) do { printf("JUMPIFNEQ "); label; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_JUMPIFEQS(label) do { printf("JUMPIFEQS "); label; printf("\n") } while (0)
+#define INST_JUMPIFNEQS(label) do { printf("JUMPIFNEQS "); label; printf("\n"); } while (0)
 #define INST_EXIT(value) printf("EXIT %d\n", value)
 #define INST_BREAK() printf("BREAK\n")
 #define INST_DPRINT() printf("DPRINT\n")
@@ -175,27 +175,16 @@ void genBuiltIns();
 #define CONST_INT(value) printf("<%d>", value)
 #define CONST_STRING(ptr) do { printf("<"); genString(ptr); printf(">"); } while
 
-// generating conditions
-// IF ELSE
-#define PRINT_IF_JMP(JUMP_INSTRUCTION) printf("%s else%%%d", #JUMP_INSTRUCTION, stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL(label) printf("<%s>", label)
 
-#define PRINT_ENDIF_LABEL() printf("JUMP end_else%%%d\n", stack_code_block_top(&ctx->blockStack)->labelNum)
+// generating condition labels
 
-#define PRINT_ELSE_LABEL() printf("LABEL else%%%d\n", stack_code_block_top(&ctx->blockStack)->labelNum)
+// if else
+#define LABEL_ELSE() printf("<else%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_ENDELSE() printf("<end_else%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
 
-#define PRINT_ENDELSE_LABEL() printf("LABEL end_else%%%d\n", stack_code_block_top(&ctx->blockStack)->labelNum)
-
-// WHILE
-#define PRINT_WHILE_BEGIN_LABEL() printf("LABEL while_begin%%%d\n", stack_code_block_top(&ctx->blockStack)->labelNum)
-
-#define PRINT_WHILE_JMP(JUMP_INSTRUCTION) printf("%s while_end%%%d", #JUMP_INSTRUCTION, stack_code_block_top(&ctx->blockStack)->labelNum)
-
-#define PRINT_WHILE_END_LABEL()                                                      \
-    do {printf("JUMP while_begin%%%d\n", stack_code_block_top(&ctx->blockStack)->labelNum); \
-        printf("LABEL while_end%%%d\n", stack_code_block_top(&ctx->blockStack)->labelNum);  \
-    } while(0)
-
-// FUNCTION DECLARE
-#define PRINT_RETURN() printf("RETURN\n")
+// while
+#define LABEL_WHILE_BEGIN() printf("<while_begin%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_WHILE_END() printf("<while_end%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
 
 #endif // IFJ_CODE_GEN_H
