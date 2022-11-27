@@ -11,6 +11,7 @@ extern "C"
 #include <cstdlib>
 #include <time.h>
 #include <iostream>
+#include <array>
 
 #include "../src/preced-analyzer.h"
 #include "test-preced-analyzer.hpp"
