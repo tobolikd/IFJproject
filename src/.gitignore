@@ -1,0 +1,9 @@
+# ignore all
+
+/*
+
+# except
+
+!*.c
+!*.h
+!code.ifjcode22

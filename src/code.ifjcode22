@@ -1,0 +1,74 @@
+.IFJcode22
+
+# pregenerated code containing built in functions
+# and auxiliary functions for IFJ22
+
+# black hole var to dispose stack and unwanted values
+DEFVAR GF@black%hole
+
+# jump over pregenerated code
+JUMP end%pregenerated%end
+
+# resolve%condition
+# gets value on top of stack and returns true/false on stack
+LABEL resolve%condition
+
+DEFVAR GF@aux%condition
+POPS GF@aux%condition
+PUSHS GF@aux%condition # save back to stack
+TYPE GF@aux%condition GF@aux%condition # save type
+
+JUMPIFEQ cond%int string@int GF@aux%condition
+JUMPIFEQ cond%bool string@bool GF@aux%condition
+JUMPIFEQ cond%float string@float GF@aux%condition
+JUMPIFEQ cond%string string@string GF@aux%condition
+JUMPIFEQ cond%nil string@nil GF@aux%condition
+
+EXIT int@99 # variable not initialized
+
+# true
+LABEL cond%true
+PUSHS bool@true
+RETURN
+
+# false
+LABEL cond%false
+PUSHS bool@false
+RETURN
+
+#int
+LABEL cond%int
+PUSHS int@0
+JUMPIFEQS cond%true
+JUMP cond%false
+
+# bool - value already on top of stack
+LABEL cond%bool
+RETURN
+
+# float
+LABEL cond%float
+PUSHS float@0x0p+0
+JUMPIFEQS cond%true
+JUMP cond%false
+
+# string
+LABEL cond%string
+PUSHS string@0
+JUMPIFEQS cond%true
+JUMP cond%false
+
+# nil
+LABEL cond%nil
+PUSHS GF@black%hole
+JUMP cond%false
+RETURN
+
+
+
+# end of pregenarated code
+LABEL end%pregenerated%end
+
+
+
+# START OF MAIN CODE
