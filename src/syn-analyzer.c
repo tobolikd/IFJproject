@@ -175,7 +175,6 @@ bool functionDeclare(TokenList *list, int *index, ht_table_t *table)
         (*index)++;
         if (list->TokenArray[*index]->type == t_functionId)
         {
-            // ht_search(table, list->TokenArray[*index]->type); // USE WITH GLOBAL VAR FROM ADA'S FIRST
             (*index)++;
             if (list->TokenArray[*index]->type == t_lPar)
             {
@@ -351,10 +350,10 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         (*index)++;
         if (list->TokenArray[*index]->type == t_semicolon) // eps
         {
-            //stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, false));
+            // stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, false));
             return true;
         }
-        //stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, true));
+        // stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, true));
         if (parseExpression(list, index, table, &stackSyn) == false)
         {
             return false;

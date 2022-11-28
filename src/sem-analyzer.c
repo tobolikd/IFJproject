@@ -58,7 +58,7 @@ var_type_t typeforFnDec(TokenList *list, int *index) {
             } else if (!strcmp(list->TokenArray[*index]->data, "string")) {
                 return null_string_t;
             } else {
-                errorCode = SYNTAX_ERR;
+                THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
                 return error;
             }
         case t_type:
@@ -70,11 +70,11 @@ var_type_t typeforFnDec(TokenList *list, int *index) {
             } else if (!strcmp(list->TokenArray[*index]->data, "string")) {
                 return string_t;
             } else {
-                errorCode = SYNTAX_ERR;
+                THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
                 return error;
             }
         default:
-            errorCode = SYNTAX_ERR;
+            THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
             return error;
     }
 }
@@ -88,7 +88,7 @@ var_type_t functionTypeForFunDec(TokenList *list, int *index)
         {
             return void_t;
         }
-        errorCode = SYNTAX_ERR;
+        THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
         return error;
     }
     else if (list->TokenArray[*index]->type == t_type || list->TokenArray[*index]->type == t_nullType)
@@ -96,7 +96,7 @@ var_type_t functionTypeForFunDec(TokenList *list, int *index)
         // debug_log("in FNC TYPE\n");
         return typeforFnDec(list, index);
     }
-    errorCode = SYNTAX_ERR;
+    THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
     return error;
 }
 
@@ -105,10 +105,10 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
     while(list->TokenArray[index]->type != t_EOF){
         if(list->TokenArray[index]->type == t_function){
             index++;
-            if(list->TokenArray[index]->type != t_functionId){errorCode = SYNTAX_ERR; return NULL;}
+            if(list->TokenArray[index]->type != t_functionId){THROW_ERROR(SYNTAX_ERR, list->TokenArray[index]->lineNum); return NULL;}
             ht_item_t *tmp = ht_insert(fncSymtable, list->TokenArray[index]->data, void_t, true); //just temporary type void_t, will change it at the end
             if(tmp == NULL){//redeclaration of fction.
-                errorCode = SEMANTIC_FUNCTION_DEFINITION_ERR;
+                THROW_ERROR(SEMANTIC_VARIABLE_ERR, list->TokenArray[index]->lineNum);
                 debug_log("redeclaration of fction %i", errorCode);
                 return NULL;}
             //debug_log(" item identifier %s\n", tmp->identifier);
@@ -124,7 +124,7 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
                 
                 (index)++;
 
-                if (list->TokenArray[index]->type != t_varId) { errorCode = SYNTAX_ERR;return NULL;}
+                if (list->TokenArray[index]->type != t_varId) { THROW_ERROR(SYNTAX_ERR, list->TokenArray[index]->lineNum);return NULL;}
 
                 ht_param_append(tmp, list->TokenArray[index]->data, tmpParamType);
                 debug_log("param %s \n", tmp->fnc_data.params->varId);
@@ -140,19 +140,19 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
                             tmpParamType = typeforFnDec(list,&index);
                             (index)++;
 
-                            if (list->TokenArray[index]->type != t_varId) {errorCode = SYNTAX_ERR;return NULL;}
+                            if (list->TokenArray[index]->type != t_varId) {THROW_ERROR(SYNTAX_ERR, list->TokenArray[index]->lineNum);return NULL;}
 
                             ht_param_append(tmp, list->TokenArray[index]->data, tmpParamType);
                             //debug_log("another param %s\n", tmp->fnc_data.params->next->varId);
                             (index)++;
 
-                            if (list->TokenArray[index]->type != t_rPar && list->TokenArray[index]->type != t_comma) {errorCode = SYNTAX_ERR; return NULL;}
+                            if (list->TokenArray[index]->type != t_rPar && list->TokenArray[index]->type != t_comma) {THROW_ERROR(SYNTAX_ERR, list->TokenArray[index]->lineNum); return NULL;}
 
                             //nerovna se prave zav, muzeme dal prirazovat, projeli jsme dowhilem, protoze tak by mohl byt dalsi znak ), tak to projde a zjisti chybu pri prvnim pruchodu
                         } while (list->TokenArray[index]->type != t_rPar);
                     }
                     else {//next token after varID is not comma
-                        errorCode = SYNTAX_ERR;
+                        THROW_ERROR(SYNTAX_ERR, list->TokenArray[index]->lineNum);
                         return NULL;
                     }
                 }
