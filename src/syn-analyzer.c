@@ -437,16 +437,22 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
             {
                 return true;
             }
-            // NECHAT???
-            (*index)++;
+            
             if (parseExpression(list, index, table, &stackSyn) == false) // <assign> -> <expr>
             {
                 return false;
             }
-            if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
+            else
             {
-                return true;
+                if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
+                {
+                    return true;
+                }
+                THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+                return false;
             }
+
+            (*index)++; // is this correct/necessary?
         }
         break;
     }
@@ -499,7 +505,7 @@ bool synAnalyser(TokenList *list)
 {
     int index = 0;
     ht_table_t *table = ht_init();
-    fncTable = ht_init();
+    // fncTable = ht_init();
     stack_ast_init(&stackSyn);
     /* START OF RECURSIVE DESCENT */
     if (checkSyntax(list, &index, table) == false)
