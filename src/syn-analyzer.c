@@ -254,7 +254,7 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         if (list->TokenArray[*index]->type == t_lPar)
         {
             (*index)++;
-            if (list->TokenArray[*index]->type == t_lPar || list->TokenArray[*index]->type == t_rPar)
+            if (list->TokenArray[*index]->type == t_rPar)
             {
                 THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
                 return false;
@@ -315,7 +315,7 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         if (list->TokenArray[*index]->type == t_lPar)
         {
             (*index)++;
-            if (list->TokenArray[*index]->type == t_lPar || list->TokenArray[*index]->type == t_rPar)
+            if (list->TokenArray[*index]->type == t_rPar)
             {
                 THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
                 return false;
