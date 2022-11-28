@@ -15,27 +15,29 @@ ht_table_t *initFncSymtable()
     /*all integrated fnctions declaration*/
 
     // "reads"
-    ht_item_t *reads = ht_insert(fncSymtable, "reads", null_string_t, true);
+    ht_insert(fncSymtable, "reads", null_string_t, true);
 
     // "readi"
-    ht_item_t *readi = ht_insert(fncSymtable, "readi", null_int_t, true);
+    ht_insert(fncSymtable, "readi", null_int_t, true);
 
     // "readf"
-    ht_item_t *readf = ht_insert(fncSymtable, "readf", null_float_t, true);
+    ht_insert(fncSymtable, "readf", null_float_t, true);
 
     // "write"
-    ht_item_t *write = ht_insert(fncSymtable, "write", void_t, true);
+    ht_insert(fncSymtable, "write", void_t, true);
 
     // "strlen"
     ht_item_t *strlenItem = ht_insert(fncSymtable, "strlen", int_t, true);
-    ht_param_append(strlenItem, "strlen", int_t);
+    ht_param_append(strlenItem, "strlenParam", int_t);
 
     // "substring"
     ht_item_t  *substringItem = ht_insert(fncSymtable, "substring", string_t, true);
-    ht_param_append(substringItem, "subString", string_t);
+    ht_param_append(substringItem, "subStringParam", string_t);
     ht_param_append(substringItem, "endingIndex", int_t);
     ht_param_append(substringItem, "startingIndex", int_t);
 
+    debug_log("%s \n", substringItem->identifier);
+    debug_log("%s \n", substringItem->fnc_data.params->varId);
     // "ord"
     ht_item_t  *ordItem = ht_insert(fncSymtable, "ord", int_t, true);
     ht_param_append(ordItem, "ordinaryValueString", string_t);
@@ -116,44 +118,47 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
             (index)++;
             if(list->TokenArray[index]->type == t_lPar) {
                 (index)++;
-                typeCheck(list, &index);
+                if(list->TokenArray[index]->type != t_rPar){ //if there are no params, skip adding params.
+                    //adding params
+                    typeCheck(list, &index);
 
-                if(errorCode == SYNTAX_ERR){ return NULL;}
+                    if(errorCode == SYNTAX_ERR){ return NULL;}
 
-                var_type_t tmpParamType = typeforFnDec(list,&index);
-                
-                (index)++;
+                    var_type_t tmpParamType = typeforFnDec(list,&index);
 
-                if (list->TokenArray[index]->type != t_varId) { errorCode = SYNTAX_ERR;return NULL;}
+                    (index)++;
 
-                ht_param_append(tmp, list->TokenArray[index]->data, tmpParamType);
-                debug_log("param %s \n", tmp->fnc_data.params->varId);
-                (index)++;
+                    if (list->TokenArray[index]->type != t_varId) { errorCode = SYNTAX_ERR;return NULL;}
 
-                if(list->TokenArray[index]->type != t_rPar) {
-                    if (list->TokenArray[index]->type == t_comma) {
-                        do {
-                            (index)++;
+                    ht_param_append(tmp, list->TokenArray[index]->data, tmpParamType);
+                    debug_log("param %s \n", tmp->fnc_data.params->varId);
+                    (index)++;
 
-                            if (!typeCheck(list, &index)) { return NULL; } //setting errcode in the function already
+                    if(list->TokenArray[index]->type != t_rPar) {
+                        if (list->TokenArray[index]->type == t_comma) {
+                            do {
+                                (index)++;
 
-                            tmpParamType = typeforFnDec(list,&index);
-                            (index)++;
+                                if (!typeCheck(list, &index)) { return NULL; } //setting errcode in the function already
 
-                            if (list->TokenArray[index]->type != t_varId) {errorCode = SYNTAX_ERR;return NULL;}
+                                tmpParamType = typeforFnDec(list,&index);
+                                (index)++;
 
-                            ht_param_append(tmp, list->TokenArray[index]->data, tmpParamType);
-                            //debug_log("another param %s\n", tmp->fnc_data.params->next->varId);
-                            (index)++;
+                                if (list->TokenArray[index]->type != t_varId) {errorCode = SYNTAX_ERR;return NULL;}
 
-                            if (list->TokenArray[index]->type != t_rPar && list->TokenArray[index]->type != t_comma) {errorCode = SYNTAX_ERR; return NULL;}
+                                ht_param_append(tmp, list->TokenArray[index]->data, tmpParamType);
+                                //debug_log("another param %s\n", tmp->fnc_data.params->next->varId);
+                                (index)++;
 
-                            //nerovna se prave zav, muzeme dal prirazovat, projeli jsme dowhilem, protoze tak by mohl byt dalsi znak ), tak to projde a zjisti chybu pri prvnim pruchodu
-                        } while (list->TokenArray[index]->type != t_rPar);
-                    }
-                    else {//next token after varID is not comma
-                        errorCode = SYNTAX_ERR;
-                        return NULL;
+                                if (list->TokenArray[index]->type != t_rPar && list->TokenArray[index]->type != t_comma) {errorCode = SYNTAX_ERR; return NULL;}
+
+                                //nerovna se prave zav, muzeme dal prirazovat, projeli jsme dowhilem, protoze tak by mohl byt dalsi znak ), tak to projde a zjisti chybu pri prvnim pruchodu
+                            } while (list->TokenArray[index]->type != t_rPar);
+                        }
+                        else {//next token after varID is not comma
+                            errorCode = SYNTAX_ERR;
+                            return NULL;
+                        }
                     }
                 }
                 (index)++;
