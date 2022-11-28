@@ -83,7 +83,7 @@ void genWhile(CODE_GEN_PARAMS);
  * stack top - string constant
  * output - generate string in appropriate format
  */
-void genString(CODE_GEN_PARAMS);
+void genString(char *string);
 
 /* genReturn
  *
@@ -109,28 +109,84 @@ void genReturn(CODE_GEN_PARAMS);
  */
 void genBuiltIns();
 
-#define PRINT_START() printf(".IFJcode22\n")
+#define SPACE printf(" ");
 
-// IF ELSE
-#define PRINT_IF_JMP(JUMP_INSTRUCTION) printf("%s else%%%d", #JUMP_INSTRUCTION, stack_code_block_top(&ctx->blockStack)->labelNum)
+// macros for instructions
+#define INST_MOVE(var, symb) do { printf("MOVE "); var; SPACE symb; printf("\n"); } while (0)
+#define INST_CREATEFRAME() printf("PUSHFRAME\n")
+#define INST_PUSHFRAME() printf("PUSHFRAME\n")
+#define INST_POPFRAME() printf("POPFRAME\n")
+#define INST_DEFVAR(var) do { printf("DEFVAR "); var; printf("\n"); } while (0)
+#define INST_CALL(label) do { printf("CALL "); label; printf("\n"); } while (0)
+#define INST_RETURN() printf("RETURN\n")
+#define INST_PUSHS(symb) do { printf("PUSHS "); symb; printf("\n"); } while (0)
+#define INST_POPS(var) do { printf("POPS "); var; printf("\n"); } while (0)
+#define INST_CLEARS() printf("CLEARS\n")
+#define INST_ADD(var, symb1, symb2) do { printf("ADD "); var; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_SUB(var, symb1, symb2) do { printf("SUB "); var; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_MUL(var, symb1, symb2) do { printf("MUL "); var; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_DIV(var, symb1, symb2) do { printf("DIV "); var; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_IDIV(var, symb1, symb2) do { printf("IDIV "); var; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_ADDS() printf("ADDS\n")
+#define INST_SUBS() printf("SUBS\n")
+#define INST_MULS() printf("MULS\n")
+#define INST_DIVS() printf("DIVS\n")
+#define INST_LT(var, symb1, symb2) do { printf("LT "); var; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_GT(var, symb1, symb2) do { printf("GT "); var; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_EQ(var, symb1, symb2) do { printf("EQ "); var; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_LTS() printf("LTS\n")
+#define INST_GTS() printf("GTS\n")
+#define INST_EQS() printf("EQS\n")
+#define INST_AND(var, symb1, symb2) do { printf("AND "); var; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_OR(var, symb1, symb2) do { printf("OR "); var; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_NOT(var, symb) do { printf("NOT "); var; SPACE symb; printf("\n"); } while (0)
+#define INST_ANDS() printf("ANDS\n")
+#define INST_ORS() printf("ORS\n")
+#define INST_NOTS() printf("NOTS\n")
+#define INST_INT2FLOAT(var, symb) do { printf("INT2FLOAT "); var; SPACE symb; printf("\n"); } while (0)
+#define INST_FLOAT2INT(var, symb) do { printf("FLOAT2INT "); var; SPACE symb; printf("\n"); } while (0)
+#define INST_INT2CHAR(var, symb) do { printf("INT2CHAR"); var; SPACE symb; printf("\n"); } while (0)
+#define INST_STRI2INT(var, symb) do { printf("STRI2INT"); var; SPACE symb; printf("\n"); } while (0)
+#define INST_INT2FLOATS() printf("INT2FLOATS\n")
+#define INST_FLOAT2INTS() printf("FLOAT2INTS\n")
+#define INST_INT2CHARS() printf("INT2CHARS\n")
+#define INST_STRI2INTS() printf("STRI2INTS\n")
+#define INST_READ(var, type) do { printf("READ "); var; SPACE printf(type); printf("\n"); } while (0)
+#define INST_WRITE(symb) do { printf("WRITE "); symb; printf("\n"); } while (0)
+#define INST_CONCAT(var, symb1, symb2) do { printf("CONCAT "); var; SPACE, symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_STRLEN(var, symb) do { printf("STRLEN "); var; SPACE symb; printf("\n"); } while (0)
+#define INST_GETCHAR(var, symb1, symb2) do { printf("GETACHAR "); var; SPACE, symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_SETCHAR(var, symb1, symb2) do { printf("SETCHAR "); var; SPACE, symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_TYPE(var, symb) do { printf("TYPE "); var; SPACE symb printf("\n"); } while (0)
+#define INST_LABEL(label) do { printf("LABEL "); label; printf("\n"); } while (0)
+#define INST_JUMP(label) do { printf("JUMP "); label; printf("\n"); } while (0)
+#define INST_JUMPIFEQ(label, symb1, symb2) do { printf("JUMPIFEQ "); label; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_JUMPIFNEQ(label, symb1, symb2) do { printf("JUMPIFNEQ "); label; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_JUMPIFEQS(label) do { printf("JUMPIFEQS "); label; printf("\n") } while (0)
+#define INST_JUMPIFNEQS(label) do { printf("JUMPIFNEQS "); label; printf("\n"); } while (0)
+#define INST_EXIT(value) printf("EXIT %d\n", value)
+#define INST_BREAK() printf("BREAK\n")
+#define INST_DPRINT() printf("DPRINT\n")
 
-#define PRINT_ENDIF_LABEL() printf("JUMP end_else%%%d\n", stack_code_block_top(&ctx->blockStack)->labelNum)
+// generating symbols
+#define VAR_AUX(num) printf("<LF@aux%%%d>", num)
+#define VAR_CODE(frame, id) printf("<%s@%s>", frame, id)
+#define CONST_FLOAT(value) printf("<float@%a>", value)
+#define CONST_INT(value) printf("<int@%d>", value)
+#define CONST_BOOL(value) printf("<bool@%d>", value)
+#define CONST_NIL() printf("<nil@nil>")
+#define CONST_STRING(ptr) do { printf("<"); genString(ptr); printf(">"); } while
 
-#define PRINT_ELSE_LABEL() printf("LABEL else%%%d\n", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL(label) printf("<%s>", label)
 
-#define PRINT_ENDELSE_LABEL() printf("LABEL end_else%%%d\n", stack_code_block_top(&ctx->blockStack)->labelNum)
+// generating condition labels
 
-// WHILE
-#define PRINT_WHILE_BEGIN_LABEL() printf("LABEL while_begin%%%d\n", stack_code_block_top(&ctx->blockStack)->labelNum)
+// if else
+#define LABEL_ELSE() printf("<else%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_ENDELSE() printf("<end_else%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
 
-#define PRINT_WHILE_JMP(JUMP_INSTRUCTION) printf("%s while_end%%%d", #JUMP_INSTRUCTION, stack_code_block_top(&ctx->blockStack)->labelNum)
-
-#define PRINT_WHILE_END_LABEL()                                                      \
-    do {printf("JUMP while_begin%%%d\n", stack_code_block_top(&ctx->blockStack)->labelNum); \
-        printf("LABEL while_end%%%d\n", stack_code_block_top(&ctx->blockStack)->labelNum);  \
-    } while(0)
-
-// FUNCTION DECLARE
-#define PRINT_RETURN() printf("RETURN\n")
+// while
+#define LABEL_WHILE_BEGIN() printf("<while_begin%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_WHILE_END() printf("<while_end%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
 
 #endif // IFJ_CODE_GEN_H

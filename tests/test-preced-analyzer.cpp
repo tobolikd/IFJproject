@@ -150,6 +150,7 @@ TEST_P(testCheckAST, expectedValue)
 INSTANTIATE_TEST_SUITE_P(FUNCTION_CALL_CORRECT, testCheckAST,
     testing::Values(
         make_tuple(true, "foo(1.2)"),
+        make_tuple(true, "doe()"),
         make_tuple(true, "$a * foo(1.2) < $a"),
         make_tuple(true, "$a/foo(1.2) <= -foo(1.2)+2"),
         make_tuple(true, "(foo(1.2)+foo(1.2))*foo(1.2) < foo(1.2)*(foo(1.2)*foo(1.2))"),
@@ -170,6 +171,7 @@ INSTANTIATE_TEST_SUITE_P(FUNCTION_CALL_CORRECT, testCheckAST,
 INSTANTIATE_TEST_SUITE_P(FUNCTION_CALL_INCORRECT, testCheckAST,
     testing::Values(
         make_tuple(false, "foo()"),
+        make_tuple(false, "doe(1.2)"),
         make_tuple(false, "foo(1.2,)"),
         make_tuple(false, "foo(1.2,1.2)"),
         make_tuple(false, "foo($c)"),

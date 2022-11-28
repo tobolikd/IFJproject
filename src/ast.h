@@ -21,7 +21,6 @@
  *      intValue - integer constant
  *      stringvalue - string constant
  *      floatValue - float constant
- *      blank - if the return statement returns value or not
  *      functionCallData - structure with fnc call attribs
  *          |- functionID - id of called function - only for debug
  *          |- function - pointer to fnc in symtable
@@ -77,7 +76,8 @@ typedef enum
 
     // program control (jumps)
     AST_FUNCTION_CALL = 60,  // data - AST_function_call_data *functionCallData
-    AST_RETURN, // data - bool blank
+    AST_RETURN_VOID,
+    AST_RETURN_EXPR,
     AST_IF,
     AST_ELSE,
     AST_WHILE,
@@ -143,10 +143,6 @@ typedef union
     double floatValue;       // AST_FLOAT
     ht_item_t *function;    // AST_DECLARE
     AST_function_call_data *functionCallData;   // AST_FUNCTION_CALL
-    bool blank;             // AST_RETURN
-                            // whether the return statement is empty or not
-                            // needed to determine if another item is part of
-                            // the return call
 } AST_data;
 
 /* AST_item - items in the AST
