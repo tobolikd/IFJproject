@@ -1,6 +1,8 @@
 #ifndef IFJ_CODE_GEN_DATA_H
 #define IFJ_CODE_GEN_DATA_H
 
+#include "symtable.h"
+
 typedef enum {
     BLOCK_IF,
     BLOCK_ELSE,
@@ -23,10 +25,23 @@ typedef struct {
  */
 void genBuiltIns();
 
+/* genVarDefs
+ *
+ * TODO comments
+ */
+void genVarDefs(ht_table_t *varSymtable);
+
 /* genResolveCondition
  *
  * TODO comments
  */
 void genResolveCondition();
+
+
+/* genExitLabels
+ *
+ * TODO comments
+ */
+void genExitLabels();
 
 #endif // IFJ_CODE_GEN_DATA_H

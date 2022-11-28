@@ -1,5 +1,7 @@
 #include "code-gen.h"
 #include "error-codes.h"
+#include "symtable.h"
+#include "code-gen-data.h"
 #include <stdlib.h>
 
 enum ifjErrCode errorCode;
@@ -47,10 +49,13 @@ code_block *codeBlockConst(code_block_type type, codeGenCtx *ctx) {
 #define PUSH_ELSE() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_ELSE, ctx))
 #define PUSH_WHILE() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_WHILE, ctx))
 
-void codeGenerator(stack_ast_t *ast) {
+void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
     if (stack_ast_empty(ast)) return;
     // generate built in functions
     genBuiltIns();
+
+    // generate variable definitions in local frame for whole program
+    genVarDefs(varSymtable);
 
     // allocate code context
     codeGenCtx *ctx = (codeGenCtx *) malloc(sizeof(codeGenCtx));
@@ -249,6 +254,7 @@ void genIf(CODE_GEN_PARAMS) {
             genCond(ast, ctx);
             break;
 		case AST_VAR:
+            CHECK_INIT(VAR_CODE("LF", stack_ast_top(ast)->data->variable->identifier));
             INST_PUSHS(VAR_CODE("LF", stack_ast_top(ast)->data->variable->identifier));
             break;
 		case AST_INT:

@@ -4,6 +4,7 @@
 #include "ast.h"
 #include "stack.h"
 #include "code-gen-data.h"
+#include "symtable.h"
 #include "error-codes.h"
 
 typedef struct {
@@ -24,7 +25,7 @@ typedef struct {
  *
  * ast - AST created in syn-sem analysis
  */
-void codeGenerator(stack_ast_t *ast);
+void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable);
 
 /* gen Assign
  *
@@ -182,6 +183,11 @@ void genReturn(CODE_GEN_PARAMS);
 #define CONST_STRING(ptr) genString(ptr)
 
 #define LABEL(label) printf("%s", label)
+// checking initialization
+#define CHECK_INIT(var) do{                                                     \
+    INST_TYPE(VAR_BLACKHOLE(), var);                                            \
+    INST_JUMPIFEQ(LABEL("not%init"), VAR_BLACKHOLE(), CONST_STRING(""));        \
+} while (0)
 
 // generating condition labels
 

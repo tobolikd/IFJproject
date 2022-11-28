@@ -9,7 +9,7 @@ void genBuiltIns(ht_table_t *varSymtable) {
 
     // generate global vars
     //
-    // black hole for disposing values
+    // black hole for disposing values and tmp use
     INST_DEFVAR(VAR_CODE("GF", "black%hole"));
     // aux var for resolve%condition
     INST_DEFVAR(VAR_CODE("GF", "aux%condition"));
@@ -18,8 +18,9 @@ void genBuiltIns(ht_table_t *varSymtable) {
     INST_JUMP(LABEL("end%pregenerated%end"));
 
     // generate functions (built in and aux)
-    genResolveCondition();
 
+    genResolveCondition();
+    genExitLabels();
 
     // end pregenerated
     INST_LABEL(LABEL("end%pregenerated%end"));
@@ -79,4 +80,35 @@ void genResolveCondition() {
 	INST_LABEL(LABEL("cond%nil"));
 	INST_PUSHS(VAR_CODE("GF", "black%hole"));
 	INST_JUMP(LABEL("cond%false"));
+}
+
+
+void genExitLabels() {
+    INST_LABEL(LABEL("not%init"));
+    INST_CLEARS();
+    INST_POPFRAME();
+    INST_EXIT(CONST_INT(SEMANTIC_VARIABLE_ERR));
+}
+
+void genVarDefs(ht_table_t *varSymtable) {
+    if (varSymtable == NULL) {
+        ERR_INTERNAL(genVarDefs, "symtable is NULL\n");
+        return;
+    }
+
+    // create TF
+    INST_CREATEFRAME();
+
+    ht_item_t *tmp;
+
+    for (int i = 0; i < HT_SIZE; i++) {
+        tmp = varSymtable->items[i];
+        while (tmp != NULL) {
+            INST_DEFVAR(VAR_CODE("TF", tmp->identifier));
+            tmp = tmp->next;
+        }
+    }
+
+    // push TF to LF
+    INST_PUSHFRAME();
 }
