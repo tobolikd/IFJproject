@@ -33,7 +33,7 @@ extern enum ifjErrCode errorCode;
     #define debug_print(...)
 #endif
 
-/* print logs using debug_log() macro
+/* print logs using debug_log() macro and some other developer functions in code
  * 0 - OFF
  * 1 - ON
  */

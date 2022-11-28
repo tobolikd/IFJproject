@@ -4,6 +4,7 @@
 #include "ast.h"
 #include "stack.h"
 #include "code-gen-data.h"
+#include "error-codes.h"
 
 typedef struct {
     // counts are used to generate unique labels and auxiliary variable names
@@ -196,5 +197,12 @@ void genReturn(CODE_GEN_PARAMS);
 // help functions
 #define AST_POP() stack_ast_pop(ast)
 #define AST_TOP() stack_ast_top(ast)
+
+#if DEBUG == 1
+    #define COMMENT(...) do { printf("# "); printf(__VA_ARGS__); printf("\n"); } while (0)
+#else
+    #define COMMENT(...)
+#endif
+
 
 #endif // IFJ_CODE_GEN_H

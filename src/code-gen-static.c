@@ -23,6 +23,9 @@ void genBuiltIns(ht_table_t *varSymtable) {
 
     // end pregenerated
     INST_LABEL(LABEL("end%pregenerated%end"));
+
+    COMMENT("END OF PREGENERATED PART");
+    COMMENT("BEGINING OF PROGRAM PART");
 }
 
 void genResolveCondition() {
