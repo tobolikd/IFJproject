@@ -399,7 +399,6 @@ AST_param_type HtoAType(var_type_t type)
     if (type == void_t)
         return AST_P_NULL;
     return AST_P_NULL;
-
 }
 
 bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
@@ -422,77 +421,55 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
     // #3  matching data type to declaration
     // #3a create AST FUNCTION CALL ITEM
     AST_function_call_data *fncCallData = fnc_call_data_const(fncTable,function->identifier);
-    if (function->fnc_data.params != NULL) //expecting some function paramenter 
+    (*index)++;
+
+    while(list->TokenArray[*index]->type != t_rPar) //check parameter type compared to declaration
     {
-        param_info_t curParam = function->fnc_data.params[0]; //first parameter
-        for (unsigned i = 0; i < function->fnc_data.paramCount; i++) //check parameter type compared to declaration
+        switch (list->TokenArray[*index]->type)
         {
-            (*index)++;
-            //PARAM AS VARIABLE
-            if (list->TokenArray[*index]->type == t_varId)
+        case t_varId:
+            if (ht_search(symtable,list->TokenArray[*index]->data) == NULL) //not in symtable
             {
-                if (ht_search(symtable,list->TokenArray[*index]->data) == NULL) //not in symtable
-                {
-                    fnc_call_data_destr(fncCallData);
-                    THROW_ERROR(SEMANTIC_VARIABLE_ERR,list->TokenArray[*index]->lineNum);
-                    return false;
-                }
-                ht_search(symtable,list->TokenArray[*index]->data)->referenceCounter++; //variable referenced
-
-                // #3a add parameter to AST FUNCTION CALL ITEM
-                fnc_call_data_add_param(fncCallData, AST_P_VAR, ht_search(symtable,list->TokenArray[*index]->data));
+                fnc_call_data_destr(fncCallData);
+                THROW_ERROR(SEMANTIC_VARIABLE_ERR,list->TokenArray[*index]->lineNum);
+                return false;
             }
-            //PARAM AS <LITERAL>
-            //compare data type with <literals>
-            else
+            ht_search(symtable,list->TokenArray[*index]->data)->referenceCounter++; //variable referenced
+            //add variable as function parameter
+            fnc_call_data_add_param(fncCallData, AST_P_VAR, ht_search(symtable,list->TokenArray[*index]->data));
+            break;
+        case t_int:
             {
-                // #3a add parameter to AST FUNCTION CALL ITEM
-                switch (list->TokenArray[*index]->type)
-                {
-                case t_int:
-                    {
-                        int intData = atoi(list->TokenArray[*index]->data);
-                        fnc_call_data_add_param(fncCallData, HtoAType(curParam.type), &intData);
-                    }
-                    break;
-                case t_float:
-                    {
-                        double floatData = atof(list->TokenArray[*index]->data);
-                        fnc_call_data_add_param(fncCallData, HtoAType(curParam.type), &floatData);
-                    }
-                    break;
-                case t_string:
-                    fnc_call_data_add_param(fncCallData, HtoAType(curParam.type), list->TokenArray[*index]->data);
-                    break;
-
-                default:
-                    debug_log("PA: Literal data type was not recognized. Line number: %d.",list->TokenArray[*index]->lineNum);
-                    break;
-                }
+                int intData = atoi(list->TokenArray[*index]->data);
+                fnc_call_data_add_param(fncCallData, AST_P_INT, &intData);
             }
-            //check if there should be more parameters
-            if (i < (function->fnc_data.paramCount)+1)
+            break;
+        case t_float:
             {
-                (*index)++;
-                if (list->TokenArray[*index]->type != t_colon) //there must be colon
-                    continue;//                 |
-                //if false, it fals through to  V
+                double floatData = atof(list->TokenArray[*index]->data);
+                fnc_call_data_add_param(fncCallData, AST_P_FLOAT, &floatData);
             }
-            else //this is the last param
-                continue;
-
+            break;
+        case t_string:
+            fnc_call_data_add_param(fncCallData, AST_P_STRING, list->TokenArray[*index]->data);
+            break;
+        default:
             fnc_call_data_destr(fncCallData);
-            THROW_ERROR(SEMANTIC_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
-        } //end of for cycle
-    }//end of if statement - expecting parameters
-    else // expecting zero parameters
+            THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
+            return false;
+        }
         (*index)++;
+        if (list->TokenArray[*index]->type != t_colon)//does 
+            break;//                      |
+        (*index)++;//                     |
+        //if false, it fals through to    V
+    } //end of while cycle
 
     // #4 )
     if (list->TokenArray[*index]->type != t_rPar)
     {
         fnc_call_data_destr(fncCallData);
-        THROW_ERROR(SEMANTIC_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
+        THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
         return false;
     }
     (*index)++;//move cursor
