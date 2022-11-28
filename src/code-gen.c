@@ -27,6 +27,7 @@ code_block *codeBlockConst(code_block_type type, codeGenCtx *ctx) {
             break;
 
         case BLOCK_DECLARE:
+            new->labelNum = -1;
             break;
 
         default:
@@ -41,6 +42,7 @@ code_block *codeBlockConst(code_block_type type, codeGenCtx *ctx) {
 
 #define POP_AND_CALL(FNC) do { AST_POP(); FNC(ast, ctx); } while (0)
 
+#define PUSH_FNC_DECL() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_DECLARE, ctx))
 #define PUSH_IF() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_IF, ctx))
 #define PUSH_ELSE() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_ELSE, ctx))
 #define PUSH_WHILE() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_WHILE, ctx))
@@ -103,7 +105,10 @@ void codeGenerator(stack_ast_t *ast) {
                 break;
 
             case AST_FUNCTION_DECLARE:
-                genFncDeclare(ast, ctx);
+                PUSH_FNC_DECL();
+                ctx->currentFncDeclaration = AST_TOP()->data->function;
+                INST_LABEL(LABEL(AST_TOP()->data->function->identifier));
+                AST_POP();
                 break;
 
             case AST_RETURN_VOID:
