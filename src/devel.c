@@ -134,13 +134,12 @@ void printAstItem(AST_item *item) {
             AST_TYPE("function call");
             printAstFnc(item->data->functionCallData);
             break;  // data - AST_function_call_data *functionCallData
-        case AST_RETURN:
-            AST_TYPE("return");
-            if (item->data->blank == true)
-                AST_DATA("empty return statement");
-            else
-                AST_DATA("return statement with expression");
-            break; // data - bool blank
+        case AST_RETURN_VOID:
+            AST_TYPE("return (void)");
+            break;
+        case AST_RETURN_EXPR:
+            AST_TYPE("return (expression)");
+            break;
         case AST_IF:
             AST_TYPE("if");
             break;

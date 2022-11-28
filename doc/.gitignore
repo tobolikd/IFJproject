@@ -1,0 +1,9 @@
+# ignore all
+*
+
+# except
+!.gitignore
+!Makefile
+!*.tex
+!*.bib
+!*.pdf

@@ -31,6 +31,4 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
 
 bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_ast_t *stackAST);
 
-
-
 #endif // IFJ_SYN_ANALYZER_H

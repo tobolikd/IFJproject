@@ -22,7 +22,6 @@ void ast_item_destr(AST_item *item) {
     // free function call data
     if (item->type == AST_FUNCTION_CALL) {
         fnc_call_data_destr(item->data->functionCallData);
-        free(item->data->functionCallData);
     }
 
     // free string constant
@@ -53,6 +52,7 @@ void fnc_call_data_destr(AST_function_call_data *data) {
         free(deleted);
         deleted = next;
     }
+    free(data);
 }
 
 #define ALLOCATE_AST_DATA                   \
@@ -126,10 +126,10 @@ AST_item *ast_item_const(AST_type type, void *data) {
             ALLOCATE_AST_DATA;
             new->data->functionCallData = (AST_function_call_data *) data;
             break;  // data - AST_function_call_data *functionCallData
-        case AST_RETURN:
-            ALLOCATE_AST_DATA;
-            new->data->blank = *((bool *) data);
-            break; // data - bool blank
+        case AST_RETURN_EXPR:
+        case AST_RETURN_VOID:
+            new->data = NULL;
+            break;
         case AST_IF:
         case AST_ELSE:
         case AST_WHILE:

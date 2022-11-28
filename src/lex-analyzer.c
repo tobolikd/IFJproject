@@ -35,6 +35,7 @@ int checkProlog(FILE* fp, int *lineNum)
                                 if(!checkDeclare(fp,lineNum))
                                     return 0;
                         }
+    THROW_ERROR(LEXICAL_ERR,1);
     debug_print("%s : Mistake in prolog.\n",prolog);
     return 1;
 }
@@ -48,11 +49,12 @@ int checkDeclare(FILE *fp,int *lineNum)
     TokenType cmpType[7] = {t_functionId,t_lPar,t_functionId,t_assign,t_int,t_rPar,t_semicolon};
 
     for (int i = 0; i < 7; i++) //get all tokens declare ( strict_types = 1 ) ; = 7 in total
-    {
+    {       
         tmpList = appendToken(tmpList,getToken(fp,lineNum)); //append next token to list of token
 
         if(tmpList->TokenArray[i] == NULL)//expected 7 tokens, not less
         {
+            THROW_ERROR(LEXICAL_ERR,1);
             free(tmpList);
             return 1;
         }
@@ -253,7 +255,8 @@ Token* tokenCtor(TokenType type, int lineNum, char* data)
             new->data = parseString(new->data);
             if (new->data == NULL)
             {
-                debug_print("Line %d: Lexical error inside string-parseString",lineNum);
+                debug_log("Lexical error inside string. fnc parseString");
+                THROW_ERROR(LEXICAL_ERR,lineNum);
                 tokenDtor(new);
                 return NULL; // error inside string
             }
@@ -521,6 +524,7 @@ Token* getToken(FILE* fp,int *lineNum)
             return NULL;
 
         case AlmostEndOfProgram:
+            free(data);
             return NULL; //nothing should come after ?>
 
         case ID:
@@ -603,7 +607,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge);
                 return tokenCtor(t_comparator, *lineNum, data);
             }
-            debug_print("Line %d - Lexical Error\n", *lineNum);
+            THROW_ERROR(LEXICAL_ERR,*lineNum);
             free(data);
             return NULL;
 
@@ -623,7 +627,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if (curEdge == 'e' || curEdge == 'E')
             {
                 data = appendChar(data,curEdge);
-                curState = EulNum;
+                curState = ExpNum;
                 break;
             }
             ungetc(curEdge,fp);//catch the "force-out" edge
@@ -638,7 +642,7 @@ Token* getToken(FILE* fp,int *lineNum)
             if (curEdge == 'e' || curEdge == 'E')
             {
                 data = appendChar(data,curEdge);
-                curState = EulNum;
+                curState = ExpNum;
                 break;
             }
             //if there is anything else...
@@ -652,17 +656,17 @@ Token* getToken(FILE* fp,int *lineNum)
             ungetc(curEdge,fp);//catch the "force-out" edge
             return tokenCtor(t_float, *lineNum, data);
 
-        case EulNum:
+        case ExpNum:
             if (isdigit(curEdge))
             {
                 data = appendChar(data,curEdge);
-                curState = EulDouble;
+                curState = ExpDouble;
                 break;
             }
             if (curEdge == '+' || curEdge == '-')
             {
                 data = appendChar(data,curEdge);
-                curState = EulNumExtra;
+                curState = ExpNumExtra;
                 break;
             }
             //cannot end with e as its last character
@@ -670,31 +674,32 @@ Token* getToken(FILE* fp,int *lineNum)
             free(data);
             return NULL;
 
-        case EulNumExtra:
+        case ExpNumExtra:
             if (isdigit(curEdge))
             {
                 data = appendChar(data,curEdge);
-                curState = EulDouble;
+                curState = ExpDouble;
                 break;
             }
-            debug_print("Line %d - Number cannot end with operator sign.\n", *lineNum);
+            debug_print("Number cannot end with operator sign.\n");
+            THROW_ERROR(LEXICAL_ERR,*lineNum);
             free(data);
             return NULL; //return error
 
-        case EulDouble:
+        case ExpDouble:
             if (isdigit(curEdge))
             {
                 data = appendChar(data,curEdge);
                 break;
             }
-            //previous state == EulNum
+            //previous state == ExpNum
             if (data[strlen(data)-1] == 'e' || data[strlen(data)-1] == 'E' )
             {
                 debug_print("Line %d - %c Unpropper double number ending.\n", *lineNum,curEdge);
                 free(data);
                 return NULL;
             }
-            //previous state == EulNUmExtra
+            //previous state == ExpNUmExtra
             if (data[strlen(data)-1] == '+' || data[strlen(data)-1] == '-' )
             {
                 debug_print("Line %d - %c Unpropper double number ending.\n", *lineNum,curEdge);
@@ -711,7 +716,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge);
                 curState = ExclamEqual;break;
             }
-            debug_print("Line %d - Lexical error.\n", *lineNum);
+            THROW_ERROR(LEXICAL_ERR,*lineNum);
             free(data);
             return NULL; //return error
 
@@ -721,7 +726,7 @@ Token* getToken(FILE* fp,int *lineNum)
                 data = appendChar(data, curEdge);
                 return tokenCtor(t_comparator, *lineNum, data);
             }
-            debug_print("Line %d - Lexical error.\n", *lineNum);
+            THROW_ERROR(LEXICAL_ERR,*lineNum);
             free(data);
             return NULL; //return error
 
@@ -825,7 +830,7 @@ TokenList *lexAnalyser(FILE *fp)
         if (curToken == NULL)
         {
             listDtor(list);
-            errorCode = LEXICAL_ERR;
+            THROW_ERROR(LEX_ANALYZER_H,lineNum);
             return NULL;
         }
 
