@@ -205,12 +205,12 @@ void genAssign(CODE_GEN_PARAMS) {
 
 }
 
-int genExpr(CODE_GEN_PARAMS) {
-    return 0;
+void genExpr(CODE_GEN_PARAMS) {
+
 }
 
-int genCond(CODE_GEN_PARAMS) {
-    return 0;
+void genCond(CODE_GEN_PARAMS) {
+
 }
 
 void genFncDeclare(CODE_GEN_PARAMS) {
@@ -231,9 +231,8 @@ void genIf(CODE_GEN_PARAMS) {
 		case AST_DIVIDE:
 		case AST_MULTIPLY:
 		case AST_CONCAT:
-            // expression
-            INST_PUSHS(VAR_AUX(genExpr(ast, ctx))); // gen expression
-                                                    // push result to stack
+            genExpr(ast, ctx); // gen expression
+                               // result will be on stack
             break;
 		case AST_EQUAL:
 		case AST_NOT_EQUAL:
@@ -241,9 +240,9 @@ void genIf(CODE_GEN_PARAMS) {
 		case AST_GREATER_EQUAL:
 		case AST_LESS:
 		case AST_LESS_EQUAL:
-            INST_JUMPIFNEQ(LABEL_ELSE(), VAR_AUX(genCond(ast, ctx)), CONST_BOOL("true"));
-            AST_POP();
-            return;
+            // result will be on stack
+            genCond(ast, ctx);
+            break;
 		case AST_VAR:
             INST_PUSHS(VAR_CODE("LF", stack_ast_top(ast)->data->variable->identifier));
             break;
@@ -280,30 +279,21 @@ void genWhile(CODE_GEN_PARAMS) {
 }
 
 
-void genString(char *string) {
-
+void genString(char *str) {
+    if (str == NULL) {ERR_INTERNAL(genString, "NULL string pointer"); return;}
+    printf("string@");
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (str[i] <= 32 || str[i] == 35 || str[i] == 92) {
+            printf("\\%03d", str[i]);
+        } else {
+            printf("%c", str[i]);
+        }
+    }
 }
 
 
 void genReturn(CODE_GEN_PARAMS) {
 
-}
-
-
-void genBuiltIns() {
-    FILE *pregenerated = fopen("code.ifjcode22", "r");
-    if (pregenerated == NULL) {
-        ERR_INTERNAL(genBuiltIns, "failed to open file\n");
-    }
-
-    // print generated file
-    char c = fgetc(pregenerated);
-    while (c != EOF) {
-        printf ("%c", c);
-        c = fgetc(pregenerated);
-    }
-
-    fclose(pregenerated);
 }
 
 

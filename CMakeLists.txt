@@ -11,6 +11,7 @@ set(PROJECT_FILES
     src/ast.c
     src/stack.c
     src/code-gen.c
+    src/code-gen-static.c
     src/devel.c
 )
 

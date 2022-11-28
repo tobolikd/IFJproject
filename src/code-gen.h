@@ -41,10 +41,9 @@ void genAssign(CODE_GEN_PARAMS);
  *  - constants statically
  *  - variables dynamically
  *
- * returns number of aux var where the result is stored
- * (could be stored on stack too, might implement later)
+ * result will be stored on stack
  */
-int genExpr(CODE_GEN_PARAMS);
+void genExpr(CODE_GEN_PARAMS);
 
 /* genCond
  *
@@ -53,9 +52,9 @@ int genExpr(CODE_GEN_PARAMS);
  *
  * based on operator convert if needed
  *
- * returns number of aux var where true/false is stored
+ * result (boolean) will be stored on stack
  */
-int genCond(CODE_GEN_PARAMS);
+void genCond(CODE_GEN_PARAMS);
 
 /* genFncDeclare
  *
@@ -95,7 +94,7 @@ void genWhile(CODE_GEN_PARAMS);
  * output - generate string in appropriate format
  * note: just print, dont pop
  */
-void genString(char *string);
+void genString(char *str);
 
 /* genReturn
  *
@@ -111,21 +110,12 @@ void genString(char *string);
  */
 void genReturn(CODE_GEN_PARAMS);
 
-/* genBuiltIns
- *
- * this function is called before code generation
- * generate code for built in function
- * label is the same as function name
- *
- * also generate functions for type conversion and type checks
- */
-void genBuiltIns();
 
 #define SPACE printf(" ");
 
 // macros for instructions
 #define INST_MOVE(var, symb) do { printf("MOVE "); var; SPACE symb; printf("\n"); } while (0)
-#define INST_CREATEFRAME() printf("PUSHFRAME\n")
+#define INST_CREATEFRAME() printf("CREATEFRAME\n")
 #define INST_PUSHFRAME() printf("PUSHFRAME\n")
 #define INST_POPFRAME() printf("POPFRAME\n")
 #define INST_DEFVAR(var) do { printf("DEFVAR "); var; printf("\n"); } while (0)
@@ -169,14 +159,14 @@ void genBuiltIns();
 #define INST_STRLEN(var, symb) do { printf("STRLEN "); var; SPACE symb; printf("\n"); } while (0)
 #define INST_GETCHAR(var, symb1, symb2) do { printf("GETACHAR "); var; SPACE, symb1; SPACE symb2; printf("\n"); } while (0)
 #define INST_SETCHAR(var, symb1, symb2) do { printf("SETCHAR "); var; SPACE, symb1; SPACE symb2; printf("\n"); } while (0)
-#define INST_TYPE(var, symb) do { printf("TYPE "); var; SPACE symb printf("\n"); } while (0)
+#define INST_TYPE(var, symb) do { printf("TYPE "); var; SPACE symb; printf("\n"); } while (0)
 #define INST_LABEL(label) do { printf("LABEL "); label; printf("\n"); } while (0)
 #define INST_JUMP(label) do { printf("JUMP "); label; printf("\n"); } while (0)
 #define INST_JUMPIFEQ(label, symb1, symb2) do { printf("JUMPIFEQ "); label; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
 #define INST_JUMPIFNEQ(label, symb1, symb2) do { printf("JUMPIFNEQ "); label; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
-#define INST_JUMPIFEQS(label) do { printf("JUMPIFEQS "); label; printf("\n") } while (0)
+#define INST_JUMPIFEQS(label) do { printf("JUMPIFEQS "); label; printf("\n"); } while (0)
 #define INST_JUMPIFNEQS(label) do { printf("JUMPIFNEQS "); label; printf("\n"); } while (0)
-#define INST_EXIT(value) printf("EXIT %d\n", value)
+#define INST_EXIT(value) do { printf("EXIT "); value; printf("\n"); } while (0)
 #define INST_BREAK() printf("BREAK\n")
 #define INST_DPRINT() printf("DPRINT\n")
 

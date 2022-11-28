@@ -6,6 +6,7 @@ SOURCES += syn-analyzer.c
 SOURCES += sem-analyzer.c
 SOURCES += preced-analyzer.c
 SOURCES += code-gen.c
+SOURCES += code-gen-static.c
 SOURCES += ast.c
 SOURCES += stack.c
 SOURCES += symtable.c
