@@ -482,7 +482,7 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
                 continue;
 
             fnc_call_data_destr(fncCallData);
-            THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
+            THROW_ERROR(SEMANTIC_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
         } //end of for cycle
     }//end of if statement - expecting parameters
     else // expecting zero parameters
@@ -492,7 +492,7 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
     if (list->TokenArray[*index]->type != t_rPar)
     {
         fnc_call_data_destr(fncCallData);
-        THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
+        THROW_ERROR(SEMANTIC_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
         return false;
     }
     (*index)++;//move cursor
