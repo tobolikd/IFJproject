@@ -351,10 +351,10 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
         (*index)++;
         if (list->TokenArray[*index]->type == t_semicolon) // eps
         {
-            // stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, false));
+            //stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, false));
             return true;
         }
-        // stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, true));
+        //stack_ast_push(&stackSyn, ast_item_const(AST_RETURN, true));
         if (parseExpression(list, index, table, &stackSyn) == false)
         {
             return false;
@@ -387,6 +387,18 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
                 stack_ast_push(&stackSyn, ast_item_const(AST_VAR, ht_insert(table, list->TokenArray[(*index) - 1]->data, void_t, false)));
                 return true;
             }
+            else if (list->TokenArray[*index]->type != t_assign) // <r-side> -> <expr>
+            {
+                (*index)--;
+                if (parseExpression(list, index, table, &stackSyn) == false) // <assign> -> <expr>
+                {
+                    return false;
+                }
+                if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
+                {
+                    return true;
+                }
+            }
             else if (list->TokenArray[*index]->type == t_assign) // <r-side> -> = <expr>
             {
                 (*index)++;
@@ -406,9 +418,6 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
                 {
                     return true;
                 }
-                // FIX: $a = 5; se momentálně nevyhodnotí jako chyba, protože tu není žádný else,
-                // předpokládám, že se o tohle postará precendAnalyser
-                // zbytek programu je pak posunutý
             }
             else
             {
@@ -429,6 +438,7 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
             {
                 return true;
             }
+            // NECHAT???
             (*index)++;
             if (parseExpression(list, index, table, &stackSyn) == false) // <assign> -> <expr>
             {
