@@ -9,7 +9,7 @@ typedef struct {
     // counts are used to generate unique labels and auxiliary variable names
     unsigned auxCount;
     unsigned ifCount;
-    unsigned elseCount;
+    unsigned elseNum;
     unsigned whileCount;
     ht_item_t *currentFncDeclaration; // pointer to fnc symtable
                                       // NULL - in main body
@@ -45,6 +45,17 @@ void genAssign(CODE_GEN_PARAMS);
  * (could be stored on stack too, might implement later)
  */
 int genExpr(CODE_GEN_PARAMS);
+
+/* genCond
+ *
+ * stack - top relational operation
+ * output - generated comparison
+ *
+ * based on operator convert if needed
+ *
+ * returns number of aux var where true/false is stored
+ */
+int genCond(CODE_GEN_PARAMS);
 
 /* genFncDeclare
  *
@@ -82,6 +93,7 @@ void genWhile(CODE_GEN_PARAMS);
  *
  * stack top - string constant
  * output - generate string in appropriate format
+ * note: just print, dont pop
  */
 void genString(char *string);
 
@@ -169,11 +181,12 @@ void genBuiltIns();
 #define INST_DPRINT() printf("DPRINT\n")
 
 // generating symbols
+#define VAR_BLACKHOLE() printf("GF@black%%hole")
 #define VAR_AUX(num) printf("LF@aux%%%d", num)
 #define VAR_CODE(frame, id) printf("%s@%s", frame, id)
 #define CONST_FLOAT(value) printf("float@%a", value)
 #define CONST_INT(value) printf("int@%d", value)
-#define CONST_BOOL(value) printf("bool@%d", value)
+#define CONST_BOOL(value) printf("bool@%s", value)
 #define CONST_NIL() printf("nil@nil")
 #define CONST_STRING(ptr) genString(ptr)
 
@@ -188,5 +201,10 @@ void genBuiltIns();
 // while
 #define LABEL_WHILE_BEGIN() printf("while_begin%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
 #define LABEL_WHILE_END() printf("while_end%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
+
+
+// help functions
+#define AST_POP() stack_ast_pop(ast)
+#define AST_TOP() stack_ast_top(ast)
 
 #endif // IFJ_CODE_GEN_H
