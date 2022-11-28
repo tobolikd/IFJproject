@@ -68,7 +68,8 @@
             return;                                                             \
                                                                                 \
         stack->bottom = deleted->previous;                                      \
-        stack->bottom->next = NULL;                                             \
+        if (stack->bottom != NULL)                                              \
+            stack->bottom->next = NULL;                                         \
         DESTRUCTOR(deleted->data);                                              \
         free(deleted);                                                          \
     }                                                                           \
