@@ -135,89 +135,89 @@ void genImplicitConversions() {
 
     INST_TYPE(VAR_BLACKHOLE(), AUX1);
 
-    INST_JUMPIFEQ(LABEL("conv%first%int"), VAR_BLACKHOLE(), CONST_STRING("int"));
-    INST_JUMPIFEQ(LABEL("conv%first%float"), VAR_BLACKHOLE(), CONST_STRING("float"));
-    INST_JUMPIFEQ(LABEL("conv%first%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%first%int"), VAR_BLACKHOLE(), CONST_STRING("int"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%first%float"), VAR_BLACKHOLE(), CONST_STRING("float"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%first%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 
     // int ?
-    INST_LABEL(LABEL("conv%first%int"));
+    INST_LABEL(LABEL("conv%arithm%first%int"));
 
     INST_TYPE(VAR_BLACKHOLE(), AUX2);
 
-    INST_JUMPIFEQ(LABEL("conv%int%int"), VAR_BLACKHOLE(), CONST_STRING("int"));
-    INST_JUMPIFEQ(LABEL("conv%int%float"), VAR_BLACKHOLE(), CONST_STRING("float"));
-    INST_JUMPIFEQ(LABEL("conv%int%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%int%int"), VAR_BLACKHOLE(), CONST_STRING("int"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%int%float"), VAR_BLACKHOLE(), CONST_STRING("float"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%int%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 
     // float ?
-    INST_LABEL(LABEL("conv%first%float"));
+    INST_LABEL(LABEL("conv%arithm%first%float"));
 
     INST_TYPE(VAR_BLACKHOLE(), AUX2);
 
-    INST_JUMPIFEQ(LABEL("conv%float%int"), VAR_BLACKHOLE(), CONST_STRING("int"));
-    INST_JUMPIFEQ(LABEL("conv%float%float"), VAR_BLACKHOLE(), CONST_STRING("float"));
-    INST_JUMPIFEQ(LABEL("conv%float%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%float%int"), VAR_BLACKHOLE(), CONST_STRING("int"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%float%float"), VAR_BLACKHOLE(), CONST_STRING("float"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%float%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 
     // nil ?
-    INST_LABEL(LABEL("conv%first%nil"));
+    INST_LABEL(LABEL("conv%arithm%first%nil"));
 
     INST_TYPE(VAR_BLACKHOLE(), AUX2);
 
-    INST_JUMPIFEQ(LABEL("conv%nil%int"), VAR_BLACKHOLE(), CONST_STRING("int"));
-    INST_JUMPIFEQ(LABEL("conv%nil%float"), VAR_BLACKHOLE(), CONST_STRING("float"));
-    INST_JUMPIFEQ(LABEL("conv%nil%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%nil%int"), VAR_BLACKHOLE(), CONST_STRING("int"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%nil%float"), VAR_BLACKHOLE(), CONST_STRING("float"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%nil%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 
     // int int
     // float float
-    INST_LABEL(LABEL("conv%int%int"));
-    INST_LABEL(LABEL("conv%float%float"));
+    INST_LABEL(LABEL("conv%arithm%int%int"));
+    INST_LABEL(LABEL("conv%arithm%float%float"));
     INST_PUSHS(AUX2);
     INST_PUSHS(AUX1);
     INST_RETURN();
 
     // int float
-    INST_LABEL(LABEL("conv%int%float"));
+    INST_LABEL(LABEL("conv%arithm%int%float"));
     INST_INT2FLOAT(AUX1, AUX1);
     INST_PUSHS(AUX2);
     INST_PUSHS(AUX1);
     INST_RETURN();
 
     // int nil
-    INST_LABEL(LABEL("conv%int%nil"));
+    INST_LABEL(LABEL("conv%arithm%int%nil"));
     INST_PUSHS(CONST_INT(0));
     INST_PUSHS(AUX1);
     INST_RETURN();
 
     // float int
-    INST_LABEL(LABEL("conv%float%int"));
+    INST_LABEL(LABEL("conv%arithm%float%int"));
     INST_INT2FLOAT(AUX2, AUX2);
     INST_PUSHS(AUX2);
     INST_PUSHS(AUX1);
     INST_RETURN();
 
     // float nil
-    INST_LABEL(LABEL("conv%float%nil"));
+    INST_LABEL(LABEL("conv%arithm%float%nil"));
     INST_PUSHS(CONST_FLOAT((double) 0));
     INST_PUSHS(AUX1);
     INST_RETURN();
 
     // nil int
-    INST_LABEL(LABEL("conv%nil%int"));
+    INST_LABEL(LABEL("conv%arithm%nil%int"));
     INST_PUSHS(AUX2);
     INST_PUSHS(CONST_INT(0));
     INST_RETURN();
 
     // nil float
-    INST_LABEL(LABEL("conv%nil%float"));
+    INST_LABEL(LABEL("conv%arithm%nil%float"));
     INST_PUSHS(AUX2);
     INST_PUSHS(CONST_FLOAT((double) 0));
     INST_RETURN();
 
     // nil nil
-    INST_LABEL(LABEL("conv%nil%nil"));
+    INST_LABEL(LABEL("conv%arithm%nil%nil"));
     INST_PUSHS(CONST_INT(0));
     INST_PUSHS(CONST_INT(0));
     INST_RETURN();
@@ -242,7 +242,7 @@ void genImplicitConversions() {
     INST_TYPE(VAR_BLACKHOLE(), VAR_BLACKHOLE());
     INST_JUMPIFEQ(LABEL("conv%to%float%int"), VAR_BLACKHOLE(), CONST_STRING("int"));
     INST_JUMPIFEQ(LABEL("conv%to%float%float"), VAR_BLACKHOLE(), CONST_STRING("float"));
-    INST_JUMPIFEQ(LABEL("conv%to%float%int"), VAR_BLACKHOLE(), CONST_STRING("nil"));
+    INST_JUMPIFEQ(LABEL("conv%to%float%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 
     INST_LABEL(LABEL("conv%to%float%int"));
@@ -269,12 +269,48 @@ void genImplicitConversions() {
     INST_POPS(AUX2);
 
     INST_TYPE(VAR_BLACKHOLE(), AUX1);
-    INST_JUMPIFNEQ(LABEL("unknown%type"), VAR_BLACKHOLE(), CONST_STRING("string"));
-    INST_TYPE(VAR_BLACKHOLE(), AUX2);
-    INST_JUMPIFNEQ(LABEL("unknown%type"), VAR_BLACKHOLE(), CONST_STRING("string"));
+    INST_JUMPIFEQ(label("conv%concat%first%string"), VAR_BLACKHOLE(), CONST_STRING("string"));
+    INST_JUMPIFEQ(LABEL("conv%concat%first%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
+    INST_JUMP(LABEL("unknown%type"));
 
+    // string ?
+    INST_LABEL(label("conv%concat%first%string"));
+
+    INST_TYPE(VAR_BLACKHOLE(), AUX2);
+    INST_JUMPIFEQ(label("conv%concat%string%string"), VAR_BLACKHOLE(), CONST_STRING("string"));
+    INST_JUMPIFEQ(LABEL("conv%concat%string%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
+    INST_JUMP(LABEL("unknown%type"));
+
+    // nil ?
+    INST_LABEL(label("conv%concat%first%nil"));
+
+    INST_TYPE(VAR_BLACKHOLE(), AUX2);
+    INST_JUMPIFEQ(label("conv%concat%nil%string"), VAR_BLACKHOLE(), CONST_STRING("string"));
+    INST_JUMPIFEQ(LABEL("conv%concat%nil%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
+    INST_JUMP(LABEL("unknown%type"));
+
+    // string string
+    INST_PUSHS(CONST_STRING(""));
+    INST_LABEL(LABEL("conv%concat%string%string"));
     INST_PUSHS(AUX2);
     INST_PUSHS(AUX1);
     INST_RETURN();
 
+    // string nil
+    INST_LABEL(LABEL("conv%concat%string%nil"));
+    INST_PUSHS(CONST_STRING(""));
+    INST_PUSHS(AUX1);
+    INST_RETURN();
+
+    // nil string
+    INST_LABEL(LABEL("conv%concat%nil%string"));
+    INST_PUSHS(AUX1);
+    INST_PUSHS(CONST_STRING(""));
+    INST_RETURN();
+
+    // nil nil
+    INST_LABEL(LABEL("conv%concat%nil%nil"));
+    INST_PUSHS(CONST_STRING(""));
+    INST_PUSHS(CONST_STRING(""));
+    INST_RETURN();
 }
