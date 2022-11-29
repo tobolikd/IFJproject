@@ -13,6 +13,8 @@ enum ifjErrCode {
     SEMANTIC_RUN_PARAMETER_ERR = 4, // incorrect type/count in function call
                                     // or incorrect return value type
     SEMANTIC_VARIABLE_ERR = 5, // usage of undefined variable
+    SEMANTIC_RUN_VARIABLE_ERR = 5, // usage of undefined variable
+    SEMANTIC_RETURN_ERR = 6, // missing or redundand return expression
     SEMANTIC_RUN_RETURN_ERR = 6, // missing or redundand return expression
     SEMANTIC_RUN_TYPE_ERR = 7, // type incompabilty in aritmetic, string,
                                // or relation expressions

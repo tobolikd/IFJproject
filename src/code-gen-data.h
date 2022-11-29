@@ -37,11 +37,19 @@ void genVarDefs(ht_table_t *varSymtable);
  */
 void genResolveCondition();
 
-
 /* genExitLabels
  *
  * TODO comments
  */
 void genExitLabels();
+
+/* genImplicitConversions
+ *
+ * TODO comments
+ */
+void genImplicitConversions();
+
+#define AUX1 VAR_CODE("GF", "aux%1")
+#define AUX2 VAR_CODE("GF", "aux%2")
 
 #endif // IFJ_CODE_GEN_DATA_H
