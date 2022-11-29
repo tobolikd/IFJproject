@@ -27,7 +27,7 @@
 25. <type> -> ?float
 26. <assign> -> <expr>
 27. <assign> -> <var> <r-side>
-28. <assign> -> ε
+28. <r-side> -> <expr>
 29. <r-side> -> = <expr>
 30. <r-side> -> ε
 31. <var> -> $varId
