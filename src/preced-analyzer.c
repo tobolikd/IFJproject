@@ -455,6 +455,9 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
         case t_string:
             fnc_call_data_add_param(fncCallData, AST_P_STRING, list->TokenArray[*index]->data);
             break;
+        case t_null:
+            fnc_call_data_add_param(fncCallData, AST_P_NULL, NULL);
+            break;
         default:
             fnc_call_data_destr(fncCallData);
             THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
