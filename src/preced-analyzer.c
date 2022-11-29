@@ -96,6 +96,9 @@ void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
     case t_string:
         stack_ast_push(stackAST,ast_item_const(AST_STRING,item->token->data));
         break;
+    case t_null:
+        stack_ast_push(stackAST,ast_item_const(AST_NULL,NULL));
+        break;
     default:
         THROW_ERROR(SEMANTIC_OTHER_ERR, item->token->lineNum);
         break;
@@ -339,6 +342,8 @@ Element getIndex(Token *input, ht_table_t* symtable)
             return DATA;//_FLOAT
         case t_string:
             return DATA;//_STRING
+        case t_null:
+            return DATA;//_null
         case t_lPar:
             return LEFT_BRACKET;
         case t_rPar:
