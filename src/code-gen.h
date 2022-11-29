@@ -170,7 +170,7 @@ void genReturn(CODE_GEN_PARAMS);
 #define INST_JUMPIFNEQS(label) do { printf("JUMPIFNEQS "); label; printf("\n"); } while (0)
 #define INST_EXIT(value) do { printf("EXIT "); value; printf("\n"); } while (0)
 #define INST_BREAK() printf("BREAK\n")
-#define INST_DPRINT() printf("DPRINT\n")
+#define INST_DPRINT(symb) do { printf("DPRINT "); symb; printf("\n"); } while (0)
 
 // generating symbols
 #define VAR_BLACKHOLE() printf("GF@black%%hole")
