@@ -157,7 +157,7 @@ void genReturn(CODE_GEN_PARAMS);
 #define INST_STRI2INTS() printf("STRI2INTS\n")
 #define INST_READ(var, type) do { printf("READ "); var; SPACE printf(type); printf("\n"); } while (0)
 #define INST_WRITE(symb) do { printf("WRITE "); symb; printf("\n"); } while (0)
-#define INST_CONCAT(var, symb1, symb2) do { printf("CONCAT "); var; SPACE, symb1; SPACE symb2; printf("\n"); } while (0)
+#define INST_CONCAT(var, symb1, symb2) do { printf("CONCAT "); var; SPACE; symb1; SPACE symb2; printf("\n"); } while (0)
 #define INST_STRLEN(var, symb) do { printf("STRLEN "); var; SPACE symb; printf("\n"); } while (0)
 #define INST_GETCHAR(var, symb1, symb2) do { printf("GETACHAR "); var; SPACE, symb1; SPACE symb2; printf("\n"); } while (0)
 #define INST_SETCHAR(var, symb1, symb2) do { printf("SETCHAR "); var; SPACE, symb1; SPACE symb2; printf("\n"); } while (0)
@@ -201,8 +201,8 @@ void genReturn(CODE_GEN_PARAMS);
 
 
 // help functions
-#define AST_POP() stack_ast_pop(ast)
-#define AST_TOP() stack_ast_top(ast)
+#define AST_POP() stack_ast_pop_b(ast)
+#define AST_TOP() stack_ast_bot(ast)
 
 #if DEBUG == 1
     #define COMMENT(...) do { printf("# "); printf(__VA_ARGS__); printf("\n"); } while (0)

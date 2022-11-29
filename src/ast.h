@@ -90,6 +90,7 @@ typedef enum
      * AST_ELSE
      * AST_WHILE
      */
+    AST_END_EXPRESSION=98,
     AST_END_BLOCK = 99
 } AST_type;
 

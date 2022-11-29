@@ -188,7 +188,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                 break;
 
                 default:
-                    ERR_INTERNAL(codeGenerator, "unknown AST type \n");
+                    ERR_INTERNAL(codeGenerator, "unknown AST type. Type number: %d\n",tmp->type);
                     break;
         }
     }
@@ -216,6 +216,101 @@ void genAssign(CODE_GEN_PARAMS) {
 }
 
 void genExpr(CODE_GEN_PARAMS) {
+    AST_item *item = AST_TOP(); 
+    while (item->type != AST_END_EXPRESSION){
+        switch (item->type)
+        {
+        // <literals>
+        case AST_INT:
+            INST_PUSHS(CONST_INT(item->data->intValue));
+            break;
+        
+        case AST_FLOAT:
+            INST_PUSHS(CONST_FLOAT(item->data->floatValue));
+            break;
+
+        case AST_STRING:
+            INST_PUSHS(CONST_STRING(item->data->stringValue));
+            break;
+
+        case AST_ADD:
+            INST_CALL(LABEL("conv%arithmetic"));
+            INST_ADDS();
+            break;
+
+        case AST_SUBTRACT:
+            INST_CALL(LABEL("conv%arithmetic"));
+            INST_SUBS();
+            break;
+
+        case AST_MULTIPLY:
+            INST_CALL(LABEL("conv%arithmetic"));
+            INST_MULS();
+            break;
+
+        case AST_DIVIDE:
+            INST_CALL(LABEL("conv%div"));
+            INST_DIVS();
+            break;
+
+        case AST_CONCAT:
+            INST_CALL(LABEL("conv%concat"));
+            INST_CREATEFRAME();
+            INST_PUSHFRAME();
+            INST_DEFVAR(VAR_AUX(1));
+            INST_DEFVAR(VAR_AUX(2));
+            INST_POPS(VAR_AUX(1));
+            INST_POPS(VAR_AUX(2));
+            INST_CONCAT(VAR_AUX(1),VAR_AUX(1),VAR_AUX(2));
+            INST_PUSHS(VAR_AUX(1));
+            INST_POPFRAME();
+            break;
+
+        case AST_EQUAL:
+            INST_CALL(LABEL("conv%rel"));
+            INST_EQS();
+            break;
+
+        case AST_NOT_EQUAL:
+            INST_CALL(LABEL("conv%rel"));
+            INST_EQS();
+            INST_NOTS();
+            break;
+
+        case AST_LESS:
+            INST_CALL(LABEL("conv%rel"));
+            INST_LTS();
+            break;
+
+        case AST_LESS_EQUAL:
+            INST_CALL(LABEL("conv%rel"));
+            INST_GTS();
+            INST_NOTS();
+            break;
+
+        case AST_GREATER:
+            INST_CALL(LABEL("conv%rel"));
+            INST_GTS();
+            break;
+
+        case AST_GREATER_EQUAL:
+            INST_CALL(LABEL("conv%rel"));
+            INST_LTS();
+            INST_NOTS();
+            break;
+
+        case AST_END_EXPRESSION:
+            continue;
+
+        default:
+            ERR_INTERNAL(genExpr, "Unexpected item type in expression. Item type: %d\n",item->type); 
+            return;
+        }
+        
+    AST_POP();//pop current
+    item =AST_TOP();//show next
+    }
+    AST_POP();//pop AST_END_EXPR
 
 }
 
@@ -235,7 +330,7 @@ void genIf(CODE_GEN_PARAMS) {
     if (stack_ast_empty(ast)) { ERR_INTERNAL(genIf, "empty if condition\n"); return; }
     // for non bool expressions push result to stack
     // relational or null - generate jump directly
-    switch (stack_ast_top(ast)->type) {
+    switch (AST_TOP()->type) {
 		case AST_ADD:
 		case AST_SUBTRACT:
 		case AST_DIVIDE:
@@ -254,17 +349,17 @@ void genIf(CODE_GEN_PARAMS) {
             genCond(ast, ctx);
             break;
 		case AST_VAR:
-            CHECK_INIT(VAR_CODE("LF", stack_ast_top(ast)->data->variable->identifier));
-            INST_PUSHS(VAR_CODE("LF", stack_ast_top(ast)->data->variable->identifier));
+            CHECK_INIT(VAR_CODE("LF", AST_TOP()->data->variable->identifier));
+            INST_PUSHS(VAR_CODE("LF", AST_TOP()->data->variable->identifier));
             break;
 		case AST_INT:
-            INST_PUSHS(CONST_INT(stack_ast_top(ast)->data->intValue));
+            INST_PUSHS(CONST_INT(AST_TOP()->data->intValue));
             break;
 		case AST_STRING:
-            INST_PUSHS(CONST_STRING(stack_ast_top(ast)->data->stringValue));
+            INST_PUSHS(CONST_STRING(AST_TOP()->data->stringValue));
             break;
 		case AST_FLOAT:
-            INST_PUSHS(CONST_FLOAT(stack_ast_top(ast)->data->floatValue));
+            INST_PUSHS(CONST_FLOAT(AST_TOP()->data->floatValue));
             break;
 		case AST_NULL: // allways false
             INST_JUMP(LABEL_ELSE());
@@ -272,7 +367,7 @@ void genIf(CODE_GEN_PARAMS) {
             return;
 
         default:
-            ERR_INTERNAL(genIf, "not recognized type on top of stack - %d\n", stack_ast_top(ast)->type);
+            ERR_INTERNAL(genIf, "not recognized type on top of stack - %d\n", AST_TOP()->type);
             return;
     }
 
