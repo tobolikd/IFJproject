@@ -40,6 +40,8 @@
         stack->top = deleted->next;                                             \
         if (stack->top != NULL)                                                 \
             stack->top->previous = NULL;                                        \
+        else                                                                    \
+            stack->bottom = NULL;                                               \
         DESTRUCTOR(deleted->data);                                              \
         free(deleted);                                                          \
     }                                                                           \
@@ -70,6 +72,8 @@
         stack->bottom = deleted->previous;                                      \
         if (stack->bottom != NULL)                                              \
             stack->bottom->next = NULL;                                         \
+        else                                                                    \
+            stack->top = NULL;                                                  \
         DESTRUCTOR(deleted->data);                                              \
         free(deleted);                                                          \
     }                                                                           \
