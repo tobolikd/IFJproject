@@ -13,8 +13,9 @@
 #include "symtable.h"
 
 
-bool params(TokenList *list, int *index);
-bool param(TokenList *list, int *index);
+bool params(TokenList *list, int *index, ht_item_t *curFunction);
+bool param(TokenList *list, int *index, ht_item_t *curFunction);
+var_type_t getType(TokenList *list, int *index);
 bool typeCheck(TokenList *list, int *index);
 bool functionType(TokenList *list, int *index);
 bool functionDeclare(TokenList *list, int *index, ht_table_t *table);

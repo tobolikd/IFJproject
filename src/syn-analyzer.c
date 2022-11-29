@@ -24,7 +24,7 @@ stack_ast_t stackSyn;
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
 
 // <params> -> , <type> <var> <params> || eps
-bool params(TokenList *list, int *index)
+bool params(TokenList *list, int *index, ht_item_t *curFunction)
 {
     if (list->TokenArray[*index]->type == t_rPar) // -> eps
     {
@@ -34,15 +34,17 @@ bool params(TokenList *list, int *index)
     if (list->TokenArray[*index]->type == t_comma) // -> , [comma]
     {
         (*index)++;
-        if (typeCheck(list, index) == false) // call type check
+        if (typeCheck(list, index) == false) // call type check for syntax check
         {
             return false;
         }
+        var_type_t typeInfo = getType(list, index); // store current variable type
         (*index)++;
         if (list->TokenArray[*index]->type == t_varId)
         {
+            ht_param_append(curFunction, list->TokenArray[*index]->data, typeInfo);
             (*index)++;
-            if (params(list, index) == false) // -> <params>
+            if (params(list, index, curFunction) == false) // -> <params>
             {
                 return false;
             }
@@ -62,21 +64,23 @@ bool params(TokenList *list, int *index)
 }
 
 // <param> -> <type> <var> <params> || eps
-bool param(TokenList *list, int *index)
+bool param(TokenList *list, int *index, ht_item_t *curFunction)
 {
     if (list->TokenArray[*index]->type == t_rPar) // -> eps
     {
         return true;
     }
-    if (typeCheck(list, index) == false) // call type check
+    if (typeCheck(list, index) == false) // call type check for syntax check
     {
         return false;
     }
+    var_type_t typeInfo = getType(list, index); // store current variable type
     (*index)++;
     if (list->TokenArray[*index]->type == t_varId)
     {
+        ht_param_append(curFunction, list->TokenArray[*index]->data, typeInfo);
         (*index)++;
-        if (params(list, index) == false) // -> <params>
+        if (params(list, index, curFunction) == false) // -> <params>
         {
             return false;
         }
@@ -87,6 +91,41 @@ bool param(TokenList *list, int *index)
         return false;
     }
     return true;
+}
+
+var_type_t getType(TokenList *list, int *index)
+{
+    switch (list->TokenArray[*index]->type)
+    {
+    case t_nullType:
+        if (!strcmp(list->TokenArray[*index]->data, "int"))
+        {
+            return null_int_t;
+        }
+        else if (!strcmp(list->TokenArray[*index]->data, "float"))
+        {
+            return null_float_t;
+        }
+        else if (!strcmp(list->TokenArray[*index]->data, "string"))
+        {
+            return null_string_t;
+        }
+        break;
+    case t_type:
+        if (!strcmp(list->TokenArray[*index]->data, "int"))
+        {
+            return int_t;
+        }
+        else if (!strcmp(list->TokenArray[*index]->data, "float"))
+        {
+            return float_t;
+        }
+        else if (!strcmp(list->TokenArray[*index]->data, "string"))
+        {
+            return string_t;
+        }
+        break;
+    }
 }
 
 // <type> -> int || string || float || ?int || ?string || ?float
@@ -170,18 +209,23 @@ bool functionDeclare(TokenList *list, int *index, ht_table_t *table)
     debug_log("FNC-DECL %i ", *index);
     if (list->TokenArray[*index]->type == t_function)
     {
-        // ht_table_t *fntable = ht_init();    // create new symtable for Local Frame
+        ht_table_t *fncDecTable = ht_init(); // create new symtable for Function Frame
         debug_log("FNC-DECL FUNCTION FUNCTION %i ", *index);
         (*index)++;
         if (list->TokenArray[*index]->type == t_functionId)
         {
-            // ht_search(table, list->TokenArray[*index]->type); // USE WITH GLOBAL VAR FROM ADA'S FIRST
+            ht_item_t *curFunction = ht_search(fncTable, list->TokenArray[*index]->data);
+            if (curFunction == NULL)
+            {
+                THROW_ERROR(INTERNAL_ERR, list->TokenArray[*index]->lineNum);
+                return false;
+            }
             (*index)++;
             if (list->TokenArray[*index]->type == t_lPar)
             {
                 (*index)++;
                 debug_log("FNC-DECL FUNCTION PARAM %i \n", *index);
-                if (param(list, index) == false)
+                if (param(list, index, curFunction) == false)
                 {
                     return false;
                 }
@@ -201,7 +245,7 @@ bool functionDeclare(TokenList *list, int *index, ht_table_t *table)
                             (*index)++;
                             if (list->TokenArray[*index]->type != t_rCurl)
                             {
-                                if (statList(list, index, table) == false)
+                                if (statList(list, index, fncDecTable) == false)
                                 {
                                     return false;
                                 }
@@ -438,7 +482,7 @@ bool statement(TokenList *list, int *index, ht_table_t *table)
             {
                 return true;
             }
-            
+
             if (parseExpression(list, index, table, &stackSyn) == false) // <assign> -> <expr>
             {
                 return false;
@@ -506,7 +550,6 @@ bool synAnalyser(TokenList *list)
 {
     int index = 0;
     ht_table_t *table = ht_init();
-    // fncTable = ht_init();
     stack_ast_init(&stackSyn);
     /* START OF RECURSIVE DESCENT */
     if (checkSyntax(list, &index, table) == false)
