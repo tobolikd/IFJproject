@@ -4,12 +4,14 @@
 #include "ast.h"
 #include "stack.h"
 #include "code-gen-data.h"
+#include "symtable.h"
+#include "error-codes.h"
 
 typedef struct {
     // counts are used to generate unique labels and auxiliary variable names
     unsigned auxCount;
     unsigned ifCount;
-    unsigned elseCount;
+    unsigned elseNum;
     unsigned whileCount;
     ht_item_t *currentFncDeclaration; // pointer to fnc symtable
                                       // NULL - in main body
@@ -23,7 +25,7 @@ typedef struct {
  *
  * ast - AST created in syn-sem analysis
  */
-void codeGenerator(stack_ast_t *ast);
+void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable);
 
 /* gen Assign
  *
@@ -41,10 +43,20 @@ void genAssign(CODE_GEN_PARAMS);
  *  - constants statically
  *  - variables dynamically
  *
- * returns number of aux var where the result is stored
- * (could be stored on stack too, might implement later)
+ * result will be stored on stack
  */
-int genExpr(CODE_GEN_PARAMS);
+void genExpr(CODE_GEN_PARAMS);
+
+/* genCond
+ *
+ * stack - top relational operation
+ * output - generated comparison
+ *
+ * based on operator convert if needed
+ *
+ * result (boolean) will be stored on stack
+ */
+void genCond(CODE_GEN_PARAMS);
 
 /* genFncDeclare
  *
@@ -82,8 +94,9 @@ void genWhile(CODE_GEN_PARAMS);
  *
  * stack top - string constant
  * output - generate string in appropriate format
+ * note: just print, dont pop
  */
-void genString(char *string);
+void genString(char *str);
 
 /* genReturn
  *
@@ -99,21 +112,12 @@ void genString(char *string);
  */
 void genReturn(CODE_GEN_PARAMS);
 
-/* genBuiltIns
- *
- * this function is called before code generation
- * generate code for built in function
- * label is the same as function name
- *
- * also generate functions for type conversion and type checks
- */
-void genBuiltIns();
 
 #define SPACE printf(" ");
 
 // macros for instructions
 #define INST_MOVE(var, symb) do { printf("MOVE "); var; SPACE symb; printf("\n"); } while (0)
-#define INST_CREATEFRAME() printf("PUSHFRAME\n")
+#define INST_CREATEFRAME() printf("CREATEFRAME\n")
 #define INST_PUSHFRAME() printf("PUSHFRAME\n")
 #define INST_POPFRAME() printf("POPFRAME\n")
 #define INST_DEFVAR(var) do { printf("DEFVAR "); var; printf("\n"); } while (0)
@@ -157,36 +161,54 @@ void genBuiltIns();
 #define INST_STRLEN(var, symb) do { printf("STRLEN "); var; SPACE symb; printf("\n"); } while (0)
 #define INST_GETCHAR(var, symb1, symb2) do { printf("GETACHAR "); var; SPACE, symb1; SPACE symb2; printf("\n"); } while (0)
 #define INST_SETCHAR(var, symb1, symb2) do { printf("SETCHAR "); var; SPACE, symb1; SPACE symb2; printf("\n"); } while (0)
-#define INST_TYPE(var, symb) do { printf("TYPE "); var; SPACE symb printf("\n"); } while (0)
+#define INST_TYPE(var, symb) do { printf("TYPE "); var; SPACE symb; printf("\n"); } while (0)
 #define INST_LABEL(label) do { printf("LABEL "); label; printf("\n"); } while (0)
 #define INST_JUMP(label) do { printf("JUMP "); label; printf("\n"); } while (0)
 #define INST_JUMPIFEQ(label, symb1, symb2) do { printf("JUMPIFEQ "); label; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
 #define INST_JUMPIFNEQ(label, symb1, symb2) do { printf("JUMPIFNEQ "); label; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
-#define INST_JUMPIFEQS(label) do { printf("JUMPIFEQS "); label; printf("\n") } while (0)
+#define INST_JUMPIFEQS(label) do { printf("JUMPIFEQS "); label; printf("\n"); } while (0)
 #define INST_JUMPIFNEQS(label) do { printf("JUMPIFNEQS "); label; printf("\n"); } while (0)
-#define INST_EXIT(value) printf("EXIT %d\n", value)
+#define INST_EXIT(value) do { printf("EXIT "); value; printf("\n"); } while (0)
 #define INST_BREAK() printf("BREAK\n")
-#define INST_DPRINT() printf("DPRINT\n")
+#define INST_DPRINT(symb) do { printf("DPRINT "); symb; printf("\n"); } while (0)
 
 // generating symbols
-#define VAR_AUX(num) printf("<LF@aux%%%d>", num)
-#define VAR_CODE(frame, id) printf("<%s@%s>", frame, id)
-#define CONST_FLOAT(value) printf("<float@%a>", value)
-#define CONST_INT(value) printf("<int@%d>", value)
-#define CONST_BOOL(value) printf("<bool@%d>", value)
-#define CONST_NIL() printf("<nil@nil>")
-#define CONST_STRING(ptr) do { printf("<"); genString(ptr); printf(">"); } while
+#define VAR_BLACKHOLE() printf("GF@black%%hole")
+#define VAR_AUX(num) printf("LF@aux%%%d", num)
+#define VAR_CODE(frame, id) printf("%s@%s", frame, id)
+#define CONST_FLOAT(value) printf("float@%a", value)
+#define CONST_INT(value) printf("int@%d", value)
+#define CONST_BOOL(value) printf("bool@%s", value)
+#define CONST_NIL() printf("nil@nil")
+#define CONST_STRING(ptr) genString(ptr)
 
-#define LABEL(label) printf("<%s>", label)
+#define LABEL(label) printf("%s", label)
+// checking initialization
+#define CHECK_INIT(var) do{                                                     \
+    INST_TYPE(VAR_BLACKHOLE(), var);                                            \
+    INST_JUMPIFEQ(LABEL("not%init"), VAR_BLACKHOLE(), CONST_STRING(""));        \
+} while (0)
 
 // generating condition labels
 
 // if else
-#define LABEL_ELSE() printf("<else%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
-#define LABEL_ENDELSE() printf("<end_else%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_ELSE() printf("else%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_ENDELSE() printf("end_else%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
 
 // while
-#define LABEL_WHILE_BEGIN() printf("<while_begin%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
-#define LABEL_WHILE_END() printf("<while_end%%%d>", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_WHILE_BEGIN() printf("while_begin%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_WHILE_END() printf("while_end%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
+
+
+// help functions
+#define AST_POP() stack_ast_pop(ast)
+#define AST_TOP() stack_ast_top(ast)
+
+#if DEBUG == 1
+    #define COMMENT(...) do { printf("# "); printf(__VA_ARGS__); printf("\n"); } while (0)
+#else
+    #define COMMENT(...)
+#endif
+
 
 #endif // IFJ_CODE_GEN_H
