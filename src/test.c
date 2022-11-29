@@ -17,28 +17,28 @@ int main() {
     ht_item_t var;
     var.identifier = "a";
 
-    stack_ast_push(ast, ast_item_const(AST_END_BLOCK, NULL));
-    stack_ast_push(ast, ast_item_const(AST_ELSE, NULL));
-    stack_ast_push(ast, ast_item_const(AST_END_BLOCK, NULL));
+    stack_ast_push_b(ast, ast_item_const(AST_END_BLOCK, NULL));
+    stack_ast_push_b(ast, ast_item_const(AST_ELSE, NULL));
+    stack_ast_push_b(ast, ast_item_const(AST_END_BLOCK, NULL));
 
     // nested
-    stack_ast_push(ast, ast_item_const(AST_END_BLOCK, NULL));
-    stack_ast_push(ast, ast_item_const(AST_ELSE, NULL));
-    stack_ast_push(ast, ast_item_const(AST_END_BLOCK, NULL));
-    stack_ast_push(ast, ast_item_const(AST_STRING, tmpString));
-    stack_ast_push(ast, ast_item_const(AST_IF, NULL));
+    stack_ast_push_b(ast, ast_item_const(AST_END_BLOCK, NULL));
+    stack_ast_push_b(ast, ast_item_const(AST_ELSE, NULL));
+    stack_ast_push_b(ast, ast_item_const(AST_END_BLOCK, NULL));
+    stack_ast_push_b(ast, ast_item_const(AST_STRING, tmpString));
+    stack_ast_push_b(ast, ast_item_const(AST_IF, NULL));
 
-    stack_ast_push(ast, ast_item_const(AST_VAR, &var));
-    stack_ast_push(ast, ast_item_const(AST_IF, NULL));
+    stack_ast_push_b(ast, ast_item_const(AST_VAR, &var));
+    stack_ast_push_b(ast, ast_item_const(AST_IF, NULL));
 
 
     /* function declare and return
     ht_item_t fnc_declare;
     fnc_declare.identifier = "write";
 
-    stack_ast_push(ast, ast_item_const(AST_END_BLOCK, NULL));
-    stack_ast_push(ast, ast_item_const(AST_RETURN_VOID, NULL));
-    stack_ast_push(ast, ast_item_const(AST_FUNCTION_DECLARE, &fnc_declare));
+    stack_ast_push_b(ast, ast_item_const(AST_END_BLOCK, NULL));
+    stack_ast_push_b(ast, ast_item_const(AST_RETURN_VOID, NULL));
+    stack_ast_push_b(ast, ast_item_const(AST_FUNCTION_DECLARE, &fnc_declare));
     */
     ht_table_t *fncSymtable = ht_init();
     codeGenerator(ast, fncSymtable);
