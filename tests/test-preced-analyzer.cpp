@@ -203,7 +203,7 @@ class DoubleValue : public CheckDoubleValue {};
 TEST_P(DoubleValue, expectedValue)
 {
     parseExpression(testList,&index,testTableVar,&testStack);
-    EXPECT_DOUBLE_EQ(expectedValue,testStack.top->data->data->floatValue) << "Processing input: |" << get<1>(GetParam()) << "| ..." << endl;
+    EXPECT_DOUBLE_EQ(expectedValue,testStack.top->next->data->data->floatValue) << "Processing input: |" << get<1>(GetParam()) << "| ..." << endl;
 }
 
 INSTANTIATE_TEST_SUITE_P(CONST_CORRECT_ADVANCED, DoubleValue,
