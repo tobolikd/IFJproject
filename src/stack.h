@@ -42,15 +42,20 @@
     typedef struct stack_##NAME##_item {                        \
         TYPE data;                                              \
         struct stack_##NAME##_item *next;                       \
+        struct stack_##NAME##_item *previous;                   \
     } stack_##NAME##_item_t;                                    \
                                                                 \
     typedef struct {                                            \
         stack_##NAME##_item_t *top;                             \
+        stack_##NAME##_item_t *bottom;                          \
     } stack_##NAME##_t;                                         \
                                                                 \
   void stack_##NAME##_init(stack_##NAME##_t *stack);            \
   void stack_##NAME##_push(stack_##NAME##_t *stack, TYPE item); \
+  void stack_##NAME##_push_b(stack_##NAME##_t *stack, TYPE item);\
   void stack_##NAME##_pop(stack_##NAME##_t *stack);             \
+  void stack_##NAME##_pop_b(stack_##NAME##_t *stack);           \
+  TYPE stack_##NAME##_bot(stack_##NAME##_t *stack);             \
   TYPE stack_##NAME##_top(stack_##NAME##_t *stack);             \
   bool stack_##NAME##_empty(stack_##NAME##_t *stack);
 
