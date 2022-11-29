@@ -363,19 +363,21 @@ PrecedItem *precedItemCtor(Token *token, Element type)
     return newItem;
 }
 
-bool freeStack(stack_precedence_t *stack, stack_ast_t *stack2, bool returnValue)
+bool freeStack(stack_precedence_t *stack, stack_ast_t *ast, bool returnValue)
 {
     while (!stack_precedence_empty(stack))
         stack_precedence_pop(stack);
 
     if (returnValue == false) //dispose the whole ast stack
     {
-        while (!stack_ast_empty(stack2))
+        while (!stack_ast_empty(ast))
         {
-            debug_log("DELETING: stack ast type: %d\n",stack_ast_top(stack2)->type);
-            stack_ast_pop(stack2);
+            debug_log("DELETING: stack ast type: %d\n",stack_ast_top(ast)->type);
+            stack_ast_pop(ast);
         }
     }
+    else
+        stack_ast_push(ast,ast_item_const(AST_END_EXPRESSION,NULL)); 
     return returnValue;
 }
 
