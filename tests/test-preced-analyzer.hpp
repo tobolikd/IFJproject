@@ -86,6 +86,7 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
             char b[] = "b";
             char foo[] = "foo";
             char doe[] = "doe";
+            char poo[] = "poo";
             char param[] = "param";
 
             ht_insert(testTableVar,a,int_t,false);//insert to symtables
@@ -96,7 +97,12 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
             ht_param_append(ht_insert(fncTable,foo,int_t,true),param,float_t);
             ASSERT_FALSE(ht_search(fncTable,foo) == NULL);
             ASSERT_FALSE(ht_search(fncTable,foo)->fnc_data.params == NULL);
-            
+           
+            ht_insert(fncTable,poo,int_t,true);
+            ASSERT_FALSE(ht_search(fncTable,poo) == NULL);
+            ht_param_append(ht_search(fncTable,poo),param,float_t);
+            ht_param_append(ht_search(fncTable,poo),param,float_t);
+
             ht_insert(fncTable,doe,int_t,true);
             ASSERT_FALSE(ht_search(fncTable,doe) == NULL);
 

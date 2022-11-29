@@ -421,10 +421,12 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
     // #3  matching data type to declaration
     // #3a create AST FUNCTION CALL ITEM
     AST_function_call_data *fncCallData = fnc_call_data_const(fncTable,function->identifier);
-    (*index)++;
 
-    while(list->TokenArray[*index]->type != t_rPar) //check parameter type compared to declaration
+    while(1) //check parameter type compared to declaration
     {
+        (*index)++;
+        if (list->TokenArray[*index]->type == t_rPar)
+            break;
         switch (list->TokenArray[*index]->type)
         {
         case t_varId:
@@ -457,16 +459,17 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
             fnc_call_data_destr(fncCallData);
             THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
             return false;
-        }
+        }//end of switch
+
         (*index)++;
-        if (list->TokenArray[*index]->type != t_colon)//does 
+        if (list->TokenArray[*index]->type != t_comma)//does 
             break;//                      |
-        (*index)++;//                     |
         //if false, it fals through to    V
     } //end of while cycle
 
+
     // #4 )
-    if (list->TokenArray[*index]->type != t_rPar)
+    if (list->TokenArray[*index]->type != t_rPar || list->TokenArray[*index-1]->type == t_comma)
     {
         fnc_call_data_destr(fncCallData);
         THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
