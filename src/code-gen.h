@@ -201,8 +201,8 @@ void genReturn(CODE_GEN_PARAMS);
 
 
 // help functions
-#define AST_POP() stack_ast_pop(ast)
-#define AST_TOP() stack_ast_top(ast)
+#define AST_POP() stack_ast_pop_b(ast)
+#define AST_TOP() stack_ast_bot(ast)
 
 #if DEBUG == 1
     #define COMMENT(...) do { printf("# "); printf(__VA_ARGS__); printf("\n"); } while (0)
