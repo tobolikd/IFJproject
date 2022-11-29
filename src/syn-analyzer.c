@@ -182,12 +182,15 @@ bool functionDeclare(TokenList *list, int *index, ht_table_t *table)
                 return false;
             }
             stack_ast_push(&stackSyn, ast_item_const(AST_FUNCTION_DECLARE, curFunction));
-            while (curFunction->fnc_data.paramCount != 0)   // insert params to symtable
+            int counterParam = curFunction->fnc_data.paramCount;
+            param_info_t * nextParam = curFunction->fnc_data.params;
+            while (counterParam != 0)   // insert params to symtable
             {
-                ht_insert(fncDecTable, curFunction->fnc_data.params->varId, curFunction->fnc_data.params->type, false);
-                debug_log("VAR PARAM ID %s ", curFunction->fnc_data.params->varId);
-                curFunction->fnc_data.paramCount--;
-                curFunction->fnc_data.params = curFunction->fnc_data.params->next;
+                ht_insert(fncDecTable, nextParam->varId, nextParam->type, false);
+                debug_log("VAR PARAM ID %s\n", nextParam->varId);
+                counterParam--;
+                nextParam = nextParam->next;
+                //curFunction->fnc_data.params = curFunction->fnc_data.params->next;
             }
             (*index)++;
             if (list->TokenArray[*index]->type == t_lPar)
