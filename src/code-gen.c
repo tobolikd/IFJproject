@@ -223,7 +223,7 @@ void genAssign(CODE_GEN_PARAMS) {
 void genExpr(CODE_GEN_PARAMS) {
     AST_item *item = AST_TOP();
     if (item->type == AST_END_EXPRESSION) //empty expression
-        INST_PUSHS(CONST_NIL());//nil is the ruslt of empty expression  
+        debug_log("genExpr - empty expression\n"); 
 
     while (item->type != AST_END_EXPRESSION){
         switch (item->type)
