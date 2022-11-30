@@ -17,7 +17,9 @@
  *  |- data
  *      |- one of:
  *      variable - pointer to var in symtable
- *      function - pointer to fnc in symtable
+ *      functionDeclareData
+ *          |- function - pointer to fnc in symtable
+ *          |- varSymtable - local symtable for function declaration
  *      intValue - integer constant
  *      stringvalue - string constant
  *      floatValue - float constant
@@ -132,6 +134,17 @@ typedef struct
     AST_fnc_param *params;
 } AST_function_call_data;
 
+/* function declare data
+ *
+ * function - pointer to symtable
+ * varSymtable - local symtable for function declare
+ */
+typedef struct
+{
+    ht_item_t *function;
+    ht_table_t *varSymtable;
+} AST_function_declare_data;
+
 /* AST_item->data for AST_TYPES
  *
  * not mentioned types have AST_item->data = NULL
@@ -142,8 +155,8 @@ typedef union
     int intValue;           // AST_INT
     char *stringValue;      // AST_STRING
     double floatValue;       // AST_FLOAT
-    ht_item_t *function;    // AST_DECLARE
     AST_function_call_data *functionCallData;   // AST_FUNCTION_CALL
+    AST_function_declare_data *functionDeclareData; //AST_FUNCTION_DECLARE
 } AST_data;
 
 /* AST_item - items in the AST
@@ -170,6 +183,13 @@ AST_item *ast_item_const(AST_type type, void *data);
  *  note: symtable data will be freed on symtable destruction
  */
 void ast_item_destr(AST_item *deleted);
+
+/* fnc_declare_data_const
+ *  - allocate fnc declare data and fill with data
+ *  function - pointer to declared function in symtable
+ *  varSymtable - local variable symtable for declared function
+ */
+AST_function_declare_data *fnc_declare_data_const(ht_item_t *function, ht_table_t *varSymtable);
 
 /* fnc_call_data_const
  *  - allocate and initialize function call data structure

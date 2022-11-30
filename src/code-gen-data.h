@@ -29,7 +29,7 @@ void genBuiltIns();
  *
  * TODO comments
  */
-void genVarDefs(ht_table_t *varSymtable);
+void genVarDefs(ht_table_t *varSymtable, ht_item_t *function);
 
 /* genResolveCondition
  *

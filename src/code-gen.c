@@ -55,7 +55,9 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
     genBuiltIns();
 
     // generate variable definitions in local frame for whole program
-    genVarDefs(varSymtable);
+    INST_CREATEFRAME();
+    INST_PUSHFRAME();
+    genVarDefs(varSymtable, NULL);
 
     // allocate code context
     codeGenCtx *ctx = (codeGenCtx *) malloc(sizeof(codeGenCtx));
@@ -111,8 +113,11 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 
             case AST_FUNCTION_DECLARE:
                 PUSH_FNC_DECL();
-                ctx->currentFncDeclaration = AST_TOP()->data->function;
-                INST_LABEL(LABEL(AST_TOP()->data->function->identifier));
+                // update ctx
+                ctx->currentFncDeclaration = AST_TOP()->data->functionDeclareData->function;
+                INST_LABEL(LABEL(AST_TOP()->data->functionDeclareData->function->identifier));
+                // define vars in local frame (frame is created on function call)
+                genVarDefs(AST_TOP()->data->functionDeclareData->varSymtable, AST_TOP()->data->functionDeclareData->function);
                 AST_POP();
                 break;
 
@@ -216,7 +221,7 @@ void genAssign(CODE_GEN_PARAMS) {
 }
 
 void genExpr(CODE_GEN_PARAMS) {
-    AST_item *item = AST_TOP(); 
+    AST_item *item = AST_TOP();
     while (item->type != AST_END_EXPRESSION){
         switch (item->type)
         {
@@ -224,7 +229,7 @@ void genExpr(CODE_GEN_PARAMS) {
         case AST_INT:
             INST_PUSHS(CONST_INT(item->data->intValue));
             break;
-        
+
         case AST_FLOAT:
             INST_PUSHS(CONST_FLOAT(item->data->floatValue));
             break;
@@ -303,10 +308,10 @@ void genExpr(CODE_GEN_PARAMS) {
             continue;
 
         default:
-            ERR_INTERNAL(genExpr, "Unexpected item type in expression. Item type: %d\n",item->type); 
+            ERR_INTERNAL(genExpr, "Unexpected item type in expression. Item type: %d\n",item->type);
             return;
         }
-        
+
     AST_POP();//pop current
     item =AST_TOP();//show next
     }
