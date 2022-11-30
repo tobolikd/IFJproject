@@ -217,7 +217,13 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 }
 
 void genAssign(CODE_GEN_PARAMS) {
-
+    AST_POP(); //pop AST_ASSIGN
+    AST_item *assignTo = AST_TOP(); //save variable
+    if (assignTo->type != AST_VAR)
+        ERR_INTERNAL(genAssign,"Attempt to assign to a non variable type. Type: %d\n",assignTo->type);
+    AST_POP(); //pop AST_VAR
+    genExpr();
+    INST_POPS(VAR_CODE("LF",assignTo->data->variable->identifier));//pop value into variable
 }
 
 void genExpr(CODE_GEN_PARAMS) {
@@ -489,6 +495,8 @@ void genReturn(CODE_GEN_PARAMS) {
     //function return
     if (AST_TOP()->type == AST_RETURN_VOID)
     {
+        if (ctx->currentFncDeclaration->fnc_data.returnType != void_t)
+            ERR_INTERNAL(genReturn,"This should not have gotten through syn anal.\n");            
         INST_PUSHS(CONST_NIL());//function return void
         INST_RETURN();
     }
