@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 
-void genBuiltIns(ht_table_t *varSymtable) {
+void genBuiltIns() {
     printf(".IFJcode22\n");
 
     // generate global vars

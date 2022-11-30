@@ -407,13 +407,13 @@ void genFncCall(CODE_GEN_PARAMS) {
         case AST_P_INT:
             INST_MOVE(VAR_CODE("TF",ref->varId),CONST_INT(param->data->intValue));
             break;
-		case AST_P_STRING:
+        case AST_P_STRING:
             INST_MOVE(VAR_CODE("TF",ref->varId),CONST_FLOAT(param->data->floatValue));
             break;
-		case AST_P_FLOAT:
+        case AST_P_FLOAT:
             INST_MOVE(VAR_CODE("TF",ref->varId),CONST_STRING(param->data->stringValue));
             break;
-		case AST_P_NULL: // allways false
+        case AST_P_NULL: // allways false
             INST_MOVE(VAR_CODE("TF",ref->varId),CONST_NIL());
         default:
             break;
