@@ -126,7 +126,7 @@ void printAstItem(AST_item *item) {
         // fnc declaration
         case AST_FUNCTION_DECLARE:
             AST_TYPE("function declaration");
-            AST_DATA(item->data->function->identifier);
+            AST_DATA(item->data->functionCallData->function->identifier);
             break;   // data - ht_item_t *function
 
         // program control (jumps)

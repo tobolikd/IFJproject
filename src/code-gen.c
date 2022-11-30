@@ -55,7 +55,9 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
     genBuiltIns();
 
     // generate variable definitions in local frame for whole program
-    genVarDefs(varSymtable);
+    INST_CREATEFRAME();
+    INST_PUSHFRAME();
+    genVarDefs(varSymtable, NULL);
 
     // allocate code context
     codeGenCtx *ctx = (codeGenCtx *) malloc(sizeof(codeGenCtx));
@@ -111,8 +113,11 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 
             case AST_FUNCTION_DECLARE:
                 PUSH_FNC_DECL();
-                ctx->currentFncDeclaration = AST_TOP()->data->function;
-                INST_LABEL(LABEL(AST_TOP()->data->function->identifier));
+                // update ctx
+                ctx->currentFncDeclaration = AST_TOP()->data->functionDeclareData->function;
+                INST_LABEL(LABEL(AST_TOP()->data->functionDeclareData->function->identifier));
+                // define vars in local frame (frame is created on function call)
+                genVarDefs(AST_TOP()->data->functionDeclareData->varSymtable, AST_TOP()->data->functionDeclareData->function);
                 AST_POP();
                 break;
 
@@ -138,7 +143,6 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 			case AST_STRING:
 			case AST_FLOAT:
 			case AST_NULL:
-			case AST_END_EXPRESSION:
                 genExpr(ast, ctx); // generate expression, but throw data away
 				break;
 
@@ -217,7 +221,7 @@ void genAssign(CODE_GEN_PARAMS) {
 }
 
 void genExpr(CODE_GEN_PARAMS) {
-    AST_item *item = AST_TOP(); 
+    AST_item *item = AST_TOP();
     if (item->type == AST_END_EXPRESSION) //empty expression
         INST_PUSHS(CONST_NIL());//nil is the ruslt of empty expression  
 
@@ -228,7 +232,7 @@ void genExpr(CODE_GEN_PARAMS) {
         case AST_INT:
             INST_PUSHS(CONST_INT(item->data->intValue));
             break;
-        
+
         case AST_FLOAT:
             INST_PUSHS(CONST_FLOAT(item->data->floatValue));
             break;
@@ -307,10 +311,10 @@ void genExpr(CODE_GEN_PARAMS) {
             continue;
 
         default:
-            ERR_INTERNAL(genExpr, "Unexpected item type in expression. Item type: %d\n",item->type); 
+            ERR_INTERNAL(genExpr, "Unexpected item type in expression. Item type: %d\n",item->type);
             return;
         }
-        
+
     AST_POP();//pop current
     item =AST_TOP();//show next
     }
@@ -421,26 +425,18 @@ void genIf(CODE_GEN_PARAMS) {
             genCond(ast, ctx);
             break;
 		case AST_VAR:
-        {
             CHECK_INIT(VAR_CODE("LF", AST_TOP()->data->variable->identifier));
             INST_PUSHS(VAR_CODE("LF", AST_TOP()->data->variable->identifier));
             break;
-        }
-        case AST_INT:
-        {
+		case AST_INT:
             INST_PUSHS(CONST_INT(AST_TOP()->data->intValue));
             break;
-        }
 		case AST_STRING:
-        {
             INST_PUSHS(CONST_STRING(AST_TOP()->data->stringValue));
             break;
-        }
 		case AST_FLOAT:
-        {
             INST_PUSHS(CONST_FLOAT(AST_TOP()->data->floatValue));
             break;
-        }
 		case AST_NULL: // allways false
             INST_JUMP(LABEL_ELSE());
             AST_POP();
@@ -461,6 +457,7 @@ void genIf(CODE_GEN_PARAMS) {
 
 
 void genWhile(CODE_GEN_PARAMS) {
+
 }
 
 

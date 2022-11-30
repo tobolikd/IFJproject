@@ -24,6 +24,11 @@ void ast_item_destr(AST_item *item) {
         fnc_call_data_destr(item->data->functionCallData);
     }
 
+    // free function declare data
+    if (item->type == AST_FUNCTION_DECLARE) {
+        free(item->data->functionDeclareData);
+    }
+
     // free string constant
     if (item->type == AST_STRING) {
         free(item->data->stringValue);
@@ -118,7 +123,7 @@ AST_item *ast_item_const(AST_type type, void *data) {
         // fnc declaration
         case AST_FUNCTION_DECLARE:
             ALLOCATE_AST_DATA;
-            new->data->function = (ht_item_t *) data;
+            new->data->functionDeclareData = (AST_function_declare_data *) data;
             break;   // data - ht_item_t *function
 
         // program control (jumps)
@@ -142,6 +147,16 @@ AST_item *ast_item_const(AST_type type, void *data) {
             new->data = NULL;
             break;
     }
+    return new;
+}
+
+AST_function_declare_data *fnc_declare_data_const(ht_item_t *function, ht_table_t *varSymtable) {
+    AST_function_declare_data *new = (AST_function_declare_data *) malloc(sizeof(AST_function_declare_data));
+    CHECK_MALLOC_PTR(new);
+
+    new->function = function;
+    new->varSymtable = varSymtable;
+
     return new;
 }
 
