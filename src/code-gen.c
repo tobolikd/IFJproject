@@ -81,19 +81,18 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
             ERR_INTERNAL(codeGenerator, "top of AST stack is same as last generated item\n");
             break;
         }
-
         tmp = AST_TOP();
 
         switch (tmp->type) {
             case AST_IF:
                 PUSH_IF();
-                POP_AND_CALL(genIf);
+                POP_AND_CALL(genCondition);
                 break;
 
             case AST_WHILE:
                 PUSH_WHILE();
                 INST_LABEL(LABEL_WHILE_BEGIN());
-                POP_AND_CALL(genWhile);
+                POP_AND_CALL(genCondition);
                 break;
 
             case AST_ELSE:
@@ -126,7 +125,8 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                 genReturn(ast, ctx);
                 break;
 
-            // not assigned expression
+            // expressions are postfix
+            // cant have empty expression with just operator
             case AST_ADD:
 			case AST_SUBTRACT:
 			case AST_DIVIDE:
@@ -138,12 +138,16 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 			case AST_GREATER_EQUAL:
 			case AST_LESS:
 			case AST_LESS_EQUAL:
+            case AST_END_EXPRESSION:
+                ERR_INTERNAL(codeGenerator, "empty operation on top of ast");
+                break;
+            // begining of postfix expression
 			case AST_VAR:
 			case AST_INT:
 			case AST_STRING:
 			case AST_FLOAT:
 			case AST_NULL:
-                genExpr(ast, ctx); // generate expression, but throw data away
+                genExpr(ast, ctx); // generate expression, but do nothing with the data
 				break;
 
             case AST_END_BLOCK:
@@ -178,8 +182,11 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                         break;
 
                     case BLOCK_DECLARE:
-                        INST_RETURN(); // print return for case of void function
-                                       // with no return statement at end of it
+                        if (ctx->currentFncDeclaration->fnc_data.returnType == void_t) {
+                            // generate return for void function
+                            INST_PUSHS(CONST_NIL());
+                            INST_RETURN();
+                        }
                         ctx->currentFncDeclaration = NULL;
                         break;
 
@@ -428,45 +435,32 @@ void genFncCall(CODE_GEN_PARAMS) {
     INST_POPFRAME();
 }
 
-void genIf(CODE_GEN_PARAMS) {
+void genCondition(CODE_GEN_PARAMS) {
     if (stack_ast_empty(ast)) { ERR_INTERNAL(genIf, "empty if condition\n"); return; }
     // for non bool expressions push result to stack
     // relational or null - generate jump directly
     switch (AST_TOP()->type) {
-		case AST_ADD:
-		case AST_SUBTRACT:
-		case AST_DIVIDE:
-		case AST_MULTIPLY:
-		case AST_CONCAT:
-            genExpr(ast, ctx); // gen expression
-                               // result will be on stack
-            break;
-		case AST_EQUAL:
-		case AST_NOT_EQUAL:
-		case AST_GREATER:
-		case AST_GREATER_EQUAL:
-		case AST_LESS:
-		case AST_LESS_EQUAL:
-            // result will be on stack
-            genCond(ast, ctx);
+        case AST_ADD:
+        case AST_SUBTRACT:
+        case AST_DIVIDE:
+        case AST_MULTIPLY:
+        case AST_CONCAT:
+        case AST_EQUAL:
+        case AST_NOT_EQUAL:
+        case AST_GREATER:
+        case AST_GREATER_EQUAL:
+        case AST_LESS:
+        case AST_LESS_EQUAL:
+        case AST_END_EXPRESSION:
+            ERR_INTERNAL(genCondition, "empty operation on top of ast");
             break;
 		case AST_VAR:
-            CHECK_INIT(VAR_CODE("LF", AST_TOP()->data->variable->identifier));
-            INST_PUSHS(VAR_CODE("LF", AST_TOP()->data->variable->identifier));
-            break;
 		case AST_INT:
-            INST_PUSHS(CONST_INT(AST_TOP()->data->intValue));
-            break;
 		case AST_STRING:
-            INST_PUSHS(CONST_STRING(AST_TOP()->data->stringValue));
-            break;
 		case AST_FLOAT:
-            INST_PUSHS(CONST_FLOAT(AST_TOP()->data->floatValue));
+		case AST_NULL:
+            genExpr(ast, ctx); // gen expression, result will be on stack
             break;
-		case AST_NULL: // allways false
-            INST_JUMP(LABEL_ELSE());
-            AST_POP();
-            return;
 
         default:
             ERR_INTERNAL(genIf, "not recognized type on top of stack - %d\n", AST_TOP()->type);
@@ -475,17 +469,21 @@ void genIf(CODE_GEN_PARAMS) {
 
     // non bool value jumps - value is on top of stack
     INST_CALL(LABEL("resolve%condition")); // call resolve condition
+
     // push true to stack for comparison
     INST_PUSHS(CONST_BOOL("true"));
-    INST_JUMPIFNEQS(LABEL_ELSE()); // if result false jump to else
-    AST_POP();
+    switch (stack_code_block_top(&ctx->blockStack)->type) {
+        case BLOCK_IF:
+            INST_JUMPIFNEQS(LABEL_ELSE()); // if - cond false jump to else
+            break;
+        case BLOCK_WHILE:
+            INST_JUMPIFNEQS(LABEL_WHILE_END()); // while - cond false jump to endwhile
+            break;
+        default:
+            ERR_INTERNAL(genCondition, "block stack is neither if or while");
+            return;
+    }
 }
-
-
-void genWhile(CODE_GEN_PARAMS) {
-
-}
-
 
 void genString(char *str) {
     if (str == NULL) {ERR_INTERNAL(genString, "NULL string pointer"); return;}
@@ -554,5 +552,4 @@ void genReturn(CODE_GEN_PARAMS) {
         INST_RETURN(); //return from function 
     }
 }
-
 

@@ -44,7 +44,8 @@ void genResolveCondition() {
 	INST_JUMPIFEQ(LABEL("cond%bool"), CONST_STRING("bool"), VAR_BLACKHOLE());
 	INST_JUMPIFEQ(LABEL("cond%float"), CONST_STRING("float"), VAR_BLACKHOLE());
 	INST_JUMPIFEQ(LABEL("cond%string"), CONST_STRING("string"), VAR_BLACKHOLE());
-	INST_JUMPIFEQ(LABEL("cond%nil"), CONST_STRING("nil"), VAR_BLACKHOLE());
+    // nil - always false
+	INST_JUMPIFEQ(LABEL("cond%false"), CONST_STRING("nil"), VAR_BLACKHOLE());
 
 	INST_EXIT(CONST_INT(99)); // variable not initialized
 
@@ -78,10 +79,6 @@ void genResolveCondition() {
 	INST_JUMPIFEQ(LABEL("cond%false"), CONST_STRING("0"), AUX1);
 	INST_JUMPIFEQ(LABEL("cond%false"), CONST_STRING(""), AUX1);
 	INST_JUMP(LABEL("cond%true"));
-
-    // nil - always false
-	INST_LABEL(LABEL("cond%nil"));
-	INST_JUMP(LABEL("cond%false"));
 }
 
 
@@ -435,7 +432,7 @@ void genImplicitConversions() {
 
     // nil string
     INST_LABEL(LABEL("conv%concat%nil%string"));
-    INST_PUSHS(AUX1);
+    INST_PUSHS(AUX2);
     INST_PUSHS(CONST_STRING(""));
     INST_RETURN();
 
@@ -444,4 +441,31 @@ void genImplicitConversions() {
     INST_PUSHS(CONST_STRING(""));
     INST_PUSHS(CONST_STRING(""));
     INST_RETURN();
+
+    /* conv%rel
+     *
+     * converts 2 operands from stack to the same type
+     * uses same logic as arithmetic operations + string type
+     */
+    INST_LABEL(LABEL("conv%rel"));
+    INST_POPS(AUX1);
+    INST_POPS(AUX2);
+
+    INST_TYPE(VAR_BLACKHOLE(), AUX1);
+    INST_JUMPIFEQ(LABEL("conv%concat%first%string"), VAR_BLACKHOLE(), CONST_STRING("string"));
+    INST_JUMPIFEQ(LABEL("conv%rel%first%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
+    // int or float - convert using arithmetic logic
+    INST_PUSHS(AUX2);
+    INST_PUSHS(AUX1);
+    INST_JUMP(LABEL("conv%arithmetic"));
+
+    // nil ?
+    INST_LABEL(LABEL("conv%rel%first%nil"));
+
+    INST_TYPE(VAR_BLACKHOLE(), AUX2);
+    INST_JUMPIFEQ(LABEL("conv%concat%nil%string"), VAR_BLACKHOLE(), CONST_STRING("string"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%nil%int"), VAR_BLACKHOLE(), CONST_STRING("int"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%nil%float"), VAR_BLACKHOLE(), CONST_STRING("float"));
+    INST_JUMPIFEQ(LABEL("conv%arithm%nil%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
+    INST_JUMP(LABEL("unknown%type"));
 }

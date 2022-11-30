@@ -16,8 +16,8 @@ void printAstParam(AST_fnc_param *param) {
         	break;
         case AST_P_VAR:
             debug_log("\t\t\t|- Type: |string|\n");
-            debug_log("\t\t\t|- Value: symtable variable");
-            debug_log("\t\t\t\t|- Id: %s", param->data->variable->identifier);
+            debug_log("\t\t\t|- Value: symtable variable\n");
+            debug_log("\t\t\t\t|- Id: %s\n", param->data->variable->identifier);
         	break;
         case AST_P_NULL:
             debug_log("\t\t\t|- Type: |null|\n");
@@ -52,7 +52,7 @@ void printAstItem(AST_item *item) {
     debug_print("\nWARNING(internal): called printAstItem with DEBUG 0, run with DEBUG 1 for more info\n");
 #endif
 
-    if (item == NULL) { debug_log("Item is NULL"); return; }
+    if (item == NULL) { debug_log("Item is NULL\n"); return; }
 
     debug_log("\nAST_item\n");
 
@@ -148,6 +148,10 @@ void printAstItem(AST_item *item) {
             break;
         case AST_WHILE:
             AST_TYPE("while");
+            break;
+
+        case AST_END_EXPRESSION:
+            AST_TYPE("expression end");
             break;
 
         case AST_END_BLOCK:
