@@ -25,10 +25,12 @@ int main() {
     stack_ast_push_b(ast, ast_item_const(AST_END_BLOCK, NULL));
     stack_ast_push_b(ast, ast_item_const(AST_ELSE, NULL));
     stack_ast_push_b(ast, ast_item_const(AST_END_BLOCK, NULL));
+    stack_ast_push_b(ast, ast_item_const(AST_END_EXPRESSION, NULL));
     stack_ast_push_b(ast, ast_item_const(AST_STRING, tmpString));
     stack_ast_push_b(ast, ast_item_const(AST_IF, NULL));
 
-    stack_ast_push_b(ast, ast_item_const(AST_VAR, &var));
+    stack_ast_push_b(ast, ast_item_const(AST_END_EXPRESSION, NULL));
+    stack_ast_push_b(ast, ast_item_const(AST_INT, &tmpInt));
     stack_ast_push_b(ast, ast_item_const(AST_IF, NULL));
 
 

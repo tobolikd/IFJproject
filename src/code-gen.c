@@ -71,6 +71,12 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
     ctx->currentFncDeclaration = NULL;
     stack_code_block_init(&ctx->blockStack);
 
+#if DEBUG == 1
+    debug_log("\n\nGENERATING AST:\n\n");
+    printAstStack(ast);
+#endif
+
+
     AST_item *tmp = NULL; // prevent looping on error in the code gen
     while (!stack_ast_empty(ast)) {
         if (errorCode != SUCCESS)
@@ -139,7 +145,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 			case AST_LESS:
 			case AST_LESS_EQUAL:
             case AST_END_EXPRESSION:
-                ERR_INTERNAL(codeGenerator, "empty operation on top of ast");
+                ERR_INTERNAL(codeGenerator, "empty operation on top of ast\n");
                 break;
             // begining of postfix expression
 			case AST_VAR:
