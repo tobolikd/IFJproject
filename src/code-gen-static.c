@@ -180,23 +180,23 @@ void genDataTypeComparisons(){
 	INST_JUMPIFEQ(LABEL("expect%string"), CONST_STRING("string"), AUX1);
 	INST_JUMPIFEQ(LABEL("expect%nil"), CONST_STRING("nil"), AUX1);
 
-    //nil || string expected
+    //int expected
     INST_LABEL(LABEL("expect%int"));
     INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("int"));
     INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_STRING("int"));
     INST_RETURN();
 
-    //nil || string expected
+    //bool expected
     INST_LABEL(LABEL("expect%bool"));
     INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("bool"));
     INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_STRING("bool"));
     INST_RETURN();
-    //nil || string expected
+    //float expected
     INST_LABEL(LABEL("expect%float"));
     INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("float"));
     INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_STRING("float"));
     INST_RETURN();
-    //nil || string expected
+    //string expected
     INST_LABEL(LABEL("expect%string"));
     INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("string"));
     INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_STRING("string"));
