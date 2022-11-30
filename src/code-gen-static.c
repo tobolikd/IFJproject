@@ -202,9 +202,6 @@ void genVarDefs(ht_table_t *varSymtable, ht_item_t* function) {
             tmpVar = tmpVar->next;
         }
     }
-
-    // push TF to LF
-    INST_PUSHFRAME();
 }
 
 void genImplicitConversions() {
