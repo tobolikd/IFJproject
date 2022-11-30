@@ -23,6 +23,7 @@ typedef struct
 }SyntaxItem;
 
 SyntaxItem SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct);
+void SyntaxDtor(ht_table_t *table, stack_ast_t *stackAST);
 
 bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
 bool param(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);

@@ -40,12 +40,7 @@ int main () {
     }
     // free memory
     listDtor(list);
-    ht_delete_all(SyntaxItem.table);
-    while (!stack_ast_empty(SyntaxItem.stackAST))
-    {
-        stack_ast_pop(SyntaxItem.stackAST);
-    }
-    free(SyntaxItem.stackAST);
+    SyntaxDtor(SyntaxItem.table, SyntaxItem.stackAST);
     fclose(fp);
 
     debug_log("PROGRAM RETURNED %i.\n", errorCode);

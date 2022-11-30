@@ -518,6 +518,17 @@ bool checkSyntax(SYN_ANALYZER_PARAMS)
     return true;
 }
 
+void SyntaxDtor(ht_table_t *table, stack_ast_t *stackAST)
+{
+    ht_delete_all(table);
+    while (!stack_ast_empty(stackAST))
+    {
+        stack_ast_pop(stackAST);
+    }
+
+    free(stackAST);
+}
+
 SyntaxItem SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct)
 {
     SyntaxItem SyntaxItem;
@@ -542,13 +553,7 @@ SyntaxItem synAnalyser(TokenList *list)
     /* RECURSIVE DESCENT */
     if (checkSyntax(list, &index, table, stackSyn) == false)
     {
-        ht_delete_all(table);
-        while (!stack_ast_empty(stackSyn))
-        {
-            stack_ast_pop(stackSyn);
-        }
-
-        free(stackSyn);
+        SyntaxDtor(table, stackSyn);
         return SyntaxItemCtor(NULL, NULL, false);
     }
     // ht_delete_all(table);
