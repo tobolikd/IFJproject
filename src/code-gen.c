@@ -218,6 +218,9 @@ void genAssign(CODE_GEN_PARAMS) {
 
 void genExpr(CODE_GEN_PARAMS) {
     AST_item *item = AST_TOP(); 
+    if (item->type == AST_END_EXPRESSION) //empty expression
+        INST_PUSHS(CONST_NIL());//nil is the ruslt of empty expression  
+
     while (item->type != AST_END_EXPRESSION){
         switch (item->type)
         {
@@ -382,7 +385,6 @@ void genIf(CODE_GEN_PARAMS) {
 
 
 void genWhile(CODE_GEN_PARAMS) {
-
 }
 
 
@@ -400,15 +402,46 @@ void genString(char *str) {
 
 
 void genReturn(CODE_GEN_PARAMS) {
-    if (ctx->currentFncDeclaration == NULL){ //in main body
+    //main body
+    if (ctx->currentFncDeclaration == NULL){
         INST_CLEARS();
         INST_POPFRAME();
+        // genExpr(ast,ctx); //expression resolved on stack
+        // INST_POPS(VAR_BLACKHOLE());
+        // INST_EXIT(VAR_BLACKHOLE());
         INST_EXIT(errorCode);
     }
-    else{
-        INST_RETURN(); //in function
-        ctx->currentFncDeclaration = NULL;
+
+    //function
+    genExpr(ast,ctx);
+    //compare return value of function vs return value of expression
+    switch (ctx->currentFncDeclaration->fnc_data.returnType)
+    {
+    case void_t:
+        INST_PUSHS(CONST_NIL());
+        break;
+
+    case int_t:
+        INST_PUSHS(CONST_INT(0));
+        break;
+
+    case float_t:
+        INST_PUSHS(CONST_FLOAT((double) 0));
+        break;
+
+    case string_t:
+        INST_PUSHS(CONST_INT("0"));
+        break;
+
+    default:
+        ERR_INTERNAL(genReturn,"Unexpected return type of function.\n");
+        break;
     }
+    //stack top next = result of expression
+    //stack top = expected
+    INST_CALL(LABEL("type%check"));//leaves result of expr on stack
+    INST_RETURN(); //return from function 
+
 }
 
 

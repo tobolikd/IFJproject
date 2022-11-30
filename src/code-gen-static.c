@@ -98,9 +98,9 @@ void genExitLabels() {
     INST_POPFRAME();
     INST_EXIT(CONST_INT(SEMANTIC_RUN_TYPE_ERR));
 
-    // invalid parameter in function call
-    INST_LABEL(LABEL("invalid%param"));
-    INST_DPRINT(CONST_STRING("unexpected parameter type in function call.\n"));
+    // invalid parameter type in function call or return type
+    INST_LABEL(LABEL("invalid%type"));
+    INST_DPRINT(CONST_STRING("Unexpected type in function call parameter or return value.\n"));
     INST_CLEARS();
     INST_POPFRAME();
     INST_EXIT(CONST_INT(SEMANTIC_RUN_PARAMETER_ERR));
@@ -108,47 +108,48 @@ void genExitLabels() {
 
 void genSemanticTypeCheck(){
     //REGULAR TYPE
-    INST_LABEL(LABEL("param%check"));
+    INST_LABEL(LABEL("type%check"));
     
 	INST_POPS(AUX1); // expected
 	INST_POPS(AUX2); // actual
-	
+	INST_PUSHS(AUX2); //keep actual on stack
+
     INST_TYPE(AUX1, AUX1);
     INST_TYPE(AUX2,AUX2);
 
     //get type of actual
-	INST_JUMPIFEQ(LABEL("paramCheck%int"), CONST_STRING("int"), AUX2);
-	INST_JUMPIFEQ(LABEL("paramCheck%bool"), CONST_STRING("bool"), AUX2);
-	INST_JUMPIFEQ(LABEL("paramCheck%float"), CONST_STRING("float"), AUX2);
-	INST_JUMPIFEQ(LABEL("paramCheck%string"), CONST_STRING("string"), AUX2);
+	INST_JUMPIFEQ(LABEL("typeCheck%int"), CONST_STRING("int"), AUX2);
+	INST_JUMPIFEQ(LABEL("typeCheck%bool"), CONST_STRING("bool"), AUX2);
+	INST_JUMPIFEQ(LABEL("typeCheck%float"), CONST_STRING("float"), AUX2);
+	INST_JUMPIFEQ(LABEL("typeCheck%string"), CONST_STRING("string"), AUX2);
 	//nil unexpected in this label
     INST_DPRINT(CONST_STRING("Expected parameter is not null type\n"));
-    INST_JUMPIFEQ(LABEL("invalid%param"), CONST_STRING("nil"), AUX2);
+    INST_JUMPIFEQ(LABEL("invalid%type"), CONST_STRING("nil"), AUX2);
     INST_JUMP(LABEL("unknown%type")); //default
 
     //int expected
-    INST_LABEL(LABEL("paramCheck%int"));
-	INST_JUMPIFNEQ(LABEL("invalid%param"), CONST_STRING("int"), AUX1);
+    INST_LABEL(LABEL("typeCheck%int"));
+	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("int"), AUX1);
     INST_RETURN();
 
     //float expected
-    INST_LABEL(LABEL("paramCheck%float"));
-	INST_JUMPIFNEQ(LABEL("invalid%param"), CONST_STRING("float"), AUX1);
+    INST_LABEL(LABEL("typeCheck%float"));
+	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("float"), AUX1);
     INST_RETURN();
 
     //string expected
-    INST_LABEL(LABEL("paramCheck%string"));
-	INST_JUMPIFNEQ(LABEL("invalid%param"), CONST_STRING("string"), AUX1);
+    INST_LABEL(LABEL("typeCheck%string"));
+	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("string"), AUX1);
     INST_RETURN();
 
     //bool expected
-    INST_LABEL(LABEL("paramCheck%bool"));
-	INST_JUMPIFNEQ(LABEL("invalid%param"), CONST_STRING("bool"), AUX1);
+    INST_LABEL(LABEL("typeCheck%bool"));
+	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("bool"), AUX1);
     INST_RETURN();
 
     //--------
     //NULLTYPE
-    INST_LABEL(LABEL("nullParam%check"));
+    INST_LABEL(LABEL("nullType%check"));
     
 	INST_POPS(AUX1); // expected
 	INST_POPS(AUX2); // actual
@@ -157,32 +158,32 @@ void genSemanticTypeCheck(){
     INST_TYPE(AUX2,AUX2);
 
     //get type of actual
-	INST_JUMPIFEQ(LABEL("nullParamCheck%int"), CONST_STRING("int"), AUX2);
-	INST_JUMPIFEQ(LABEL("nullParamCheck%bool"), CONST_STRING("bool"), AUX2);
-	INST_JUMPIFEQ(LABEL("nullParamCheck%float"), CONST_STRING("float"), AUX2);
-	INST_JUMPIFEQ(LABEL("nullParamCheck%string"), CONST_STRING("string"), AUX2);
+	INST_JUMPIFEQ(LABEL("nullTypeCheck%int"), CONST_STRING("int"), AUX2);
+	INST_JUMPIFEQ(LABEL("nullTypeCheck%bool"), CONST_STRING("bool"), AUX2);
+	INST_JUMPIFEQ(LABEL("nullTypeCheck%float"), CONST_STRING("float"), AUX2);
+	INST_JUMPIFEQ(LABEL("nullTypeCheck%string"), CONST_STRING("string"), AUX2);
 	//nil expected in this label
-	INST_JUMPIFNEQ(LABEL("invalid%param"), CONST_STRING("nill"), AUX2);//default
+	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("nill"), AUX2);//default
     INST_RETURN();//nil parameter
 
     //int expected
-    INST_LABEL(LABEL("nullParamCheck%int"));
-	INST_JUMPIFNEQ(LABEL("invalid%param"), CONST_STRING("int"), AUX1);
+    INST_LABEL(LABEL("nullTypeCheck%int"));
+	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("int"), AUX1);
     INST_RETURN();
 
     //float expected
-    INST_LABEL(LABEL("nullParamCheck%float"));
-	INST_JUMPIFNEQ(LABEL("invalid%param"), CONST_STRING("float"), AUX1);
+    INST_LABEL(LABEL("nullTypeCheck%float"));
+	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("float"), AUX1);
     INST_RETURN();
 
     //string expected
-    INST_LABEL(LABEL("nullParamCheck%string"));
-	INST_JUMPIFNEQ(LABEL("invalid%param"), CONST_STRING("string"), AUX1);
+    INST_LABEL(LABEL("nullTypeCheck%string"));
+	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("string"), AUX1);
     INST_RETURN();
 
     //bool expected
-    INST_LABEL(LABEL("nullParamCheck%bool"));
-	INST_JUMPIFNEQ(LABEL("invalid%param"), CONST_STRING("bool"), AUX1);
+    INST_LABEL(LABEL("nullTypeCheck%bool"));
+	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("bool"), AUX1);
     INST_RETURN();
 }
 
