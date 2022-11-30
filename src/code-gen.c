@@ -222,7 +222,7 @@ void genAssign(CODE_GEN_PARAMS) {
     if (assignTo->type != AST_VAR)
         ERR_INTERNAL(genAssign,"Attempt to assign to a non variable type. Type: %d\n",assignTo->type);
     AST_POP(); //pop AST_VAR
-    genExpr();
+    genExpr(ast,ctx);
     INST_POPS(VAR_CODE("LF",assignTo->data->variable->identifier));//pop value into variable
 }
 
