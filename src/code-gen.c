@@ -251,6 +251,10 @@ void genExpr(CODE_GEN_PARAMS) {
             INST_PUSHS(VAR_CODE("LF",item->data->variable->identifier));
             break;
 
+        case AST_FUNCTION_CALL:
+            genFncCall(ast,ctx);
+            break;
+
         case AST_ADD:
             INST_CALL(LABEL("conv%arithmetic"));
             INST_ADDS();
