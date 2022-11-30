@@ -400,7 +400,15 @@ void genString(char *str) {
 
 
 void genReturn(CODE_GEN_PARAMS) {
-
+    if (ctx->currentFncDeclaration == NULL){ //in main body
+        INST_CLEARS();
+        INST_POPFRAME();
+        INST_EXIT(errorCode);
+    }
+    else{
+        INST_RETURN(); //in function
+        ctx->currentFncDeclaration = NULL;
+    }
 }
 
 
