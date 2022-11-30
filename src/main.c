@@ -33,13 +33,19 @@ int main () {
     printTokenList(list);
 #endif
 
-    if(synAnalyser(list) == true)  // start syn analyzer
+    SyntaxItem SyntaxItem = synAnalyser(list);
+    if (SyntaxItem.correct == true) // start syn analyzer
     {
-        // .. go to code gen
+        codeGenerator(SyntaxItem.stackAST, SyntaxItem.table);
     }
-    
     // free memory
     listDtor(list);
+    ht_delete_all(SyntaxItem.table);
+    while (!stack_ast_empty(SyntaxItem.stackAST))
+    {
+        stack_ast_pop(SyntaxItem.stackAST);
+    }
+    free(SyntaxItem.stackAST);
     fclose(fp);
 
     debug_log("PROGRAM RETURNED %i.\n", errorCode);

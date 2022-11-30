@@ -15,6 +15,14 @@
 #define SYN_ANALYZER_PARAMS TokenList *list, int *index, ht_table_t *table, stack_ast_t *stackSyn
 #define SYN_ANALYZER_TYPE_N_PARAM_PARAMS TokenList *list, int *index
 
+typedef struct 
+{
+    ht_table_t *table;
+    stack_ast_t *stackAST;
+    bool correct;
+}SyntaxItem;
+
+SyntaxItem SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct);
 
 bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
 bool param(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
@@ -25,6 +33,6 @@ bool statList(SYN_ANALYZER_PARAMS);
 bool statement(SYN_ANALYZER_PARAMS);
 bool seqStats(SYN_ANALYZER_PARAMS);
 bool checkSyntax(SYN_ANALYZER_PARAMS);
-bool synAnalyser(TokenList *list);
+SyntaxItem synAnalyser(TokenList *list);
 
 #endif // IFJ_SYN_ANALYZER_H

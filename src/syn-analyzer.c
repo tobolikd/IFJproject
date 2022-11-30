@@ -17,7 +17,8 @@
 #include <string.h>
 
 enum ifjErrCode errorCode;
-ht_table_t *fncTable;
+ht_table_t *fncTable; // extern missing?
+// stack_declare_t stackDeclare;
 
 // list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
@@ -174,7 +175,7 @@ bool functionDeclare(SYN_ANALYZER_PARAMS)
         (*index)++;
         if (list->TokenArray[*index]->type == t_functionId)
         {
-            ht_item_t *curFunction = ht_search(fncTable, list->TokenArray[*index]->data);   // find fuction declare by fuctionID in symtable, created in first run
+            ht_item_t *curFunction = ht_search(fncTable, list->TokenArray[*index]->data); // find fuction declare by fuctionID in symtable, created in first run
             if (curFunction == NULL)
             {
                 THROW_ERROR(INTERNAL_ERR, list->TokenArray[*index]->lineNum);
@@ -182,13 +183,13 @@ bool functionDeclare(SYN_ANALYZER_PARAMS)
             }
             stack_ast_push(stackSyn, ast_item_const(AST_FUNCTION_DECLARE, fnc_declare_data_const(curFunction, fncDecTable)));
             int counterParam = curFunction->fnc_data.paramCount;
-            param_info_t * nextParam = curFunction->fnc_data.params;
-            while (counterParam != 0)   // insert params to symtable [Function Frame]
+            param_info_t *nextParam = curFunction->fnc_data.params;
+            while (counterParam != 0) // insert params to symtable [Function Frame]
             {
                 ht_insert(fncDecTable, nextParam->varId, nextParam->type, false);
                 debug_log("VAR PARAM ID %s\n", nextParam->varId);
                 counterParam--;
-                nextParam = nextParam->next;    // move to next parameter
+                nextParam = nextParam->next; // move to next parameter
             }
             (*index)++;
             if (list->TokenArray[*index]->type == t_lPar)
@@ -222,6 +223,7 @@ bool functionDeclare(SYN_ANALYZER_PARAMS)
                             }
                             if (list->TokenArray[*index]->type == t_rCurl)
                             {
+                                // stack_declare_push(&stackDeclare, fncDecTable);
                                 stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
                                 return true;
                             }
@@ -516,26 +518,44 @@ bool checkSyntax(SYN_ANALYZER_PARAMS)
     return true;
 }
 
-bool synAnalyser(TokenList *list)
+SyntaxItem SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct)
+{
+    SyntaxItem SyntaxItem;
+    SyntaxItem.table = table;
+    SyntaxItem.stackAST = stackAST;
+    SyntaxItem.correct = correct;
+    return SyntaxItem;
+}
+
+SyntaxItem synAnalyser(TokenList *list)
 {
     int index = 0;
     ht_table_t *table = ht_init();
-    stack_ast_t stackSyn;
-    stack_ast_init(&stackSyn);
-    /* START OF RECURSIVE DESCENT */
-    if (checkSyntax(list, &index, table, &stackSyn) == false)
+    stack_ast_t *stackSyn = (stack_ast_t *)malloc(sizeof(stack_ast_t));
+    if (stackSyn == NULL)
+    {
+        MALLOC_ERR;
+    }
+    stack_ast_init(stackSyn);
+    // stack_declare_init(&stackDeclare);  // initialize stack for Function Frames
+
+    /* RECURSIVE DESCENT */
+    if (checkSyntax(list, &index, table, stackSyn) == false)
     {
         ht_delete_all(table);
-        while (!stack_ast_empty(&stackSyn))
+        while (!stack_ast_empty(stackSyn))
         {
-            stack_ast_pop(&stackSyn);
+            stack_ast_pop(stackSyn);
         }
-        return false;
+
+        free(stackSyn);
+        return SyntaxItemCtor(NULL, NULL, false);
     }
-    ht_delete_all(table);
-    while (!stack_ast_empty(&stackSyn))
-    {
-        stack_ast_pop(&stackSyn);
-    }
-    return true;
+    // ht_delete_all(table);
+    // while (!stack_ast_empty(stackSyn))
+    // {
+    //     stack_ast_pop(stackSyn);
+    // }
+
+    return SyntaxItemCtor(table, stackSyn, true);
 }
