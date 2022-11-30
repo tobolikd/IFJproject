@@ -102,12 +102,13 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                 break;
 
             case AST_ASSIGN:
-                POP_AND_CALL(genAssign);
+                AST_POP();
+                genAssign(ast);
                 break;
 
-            // following cases dont pop, because AST item contains useful data
             case AST_FUNCTION_CALL:
-                genFncCall(ast, ctx);
+                genFncCall(ast);
+                INST_POPS(VAR_BLACKHOLE()); // dispose the return value
                 break;
 
             case AST_FUNCTION_DECLARE:
@@ -147,7 +148,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 			case AST_STRING:
 			case AST_FLOAT:
 			case AST_NULL:
-                genExpr(ast, ctx); // generate expression, but do nothing with the data
+                genExpr(ast); // generate expression, but do nothing with the data
 				break;
 
             case AST_END_BLOCK:
@@ -223,19 +224,23 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
     free(ctx);
 }
 
-void genAssign(CODE_GEN_PARAMS) {
+void genAssign(stack_ast_t *ast) {
     if (AST_TOP()->type != AST_VAR)
         ERR_INTERNAL(genAssign,"Attempt to assign to a non variable type.");
 
-    char *idenitfier; //save variable name
+    char *idenitfier = (char *) malloc((strlen(AST_TOP()->data->variable->identifier) + 1) * sizeof(char)); //save variable name
+    CHECK_MALLOC(idenitfier);
+
     strcpy(idenitfier,AST_TOP()->data->variable->identifier);
     AST_POP(); //pop AST_VAR
 
-    genExpr(ast,ctx);
+    genExpr(ast);
     INST_POPS(VAR_CODE("LF",idenitfier));//pop value into variable
+
+    free(idenitfier);
 }
 
-void genExpr(CODE_GEN_PARAMS) {
+void genExpr(stack_ast_t *ast) {
     AST_item *item = AST_TOP();
     if (item->type == AST_END_EXPRESSION) //empty expression
         debug_log("genExpr - empty expression\n");
@@ -262,7 +267,7 @@ void genExpr(CODE_GEN_PARAMS) {
             break;
 
         case AST_FUNCTION_CALL:
-            genFncCall(ast,ctx);
+            genFncCall(ast);
             break;
 
         case AST_ADD:
@@ -307,14 +312,14 @@ void genExpr(CODE_GEN_PARAMS) {
             //if types are not the same skip evaluation of eq, push false
 	        INST_JUMPIFNEQ(LABEL("incompatible%types"), AUX1, CONST_BOOL("true"));
             INST_EQS();
-            INST_JUMP("leave%eq");//skip incompatible types
+            INST_JUMP(LABEL("leave%eq"));//skip incompatible types
 
-            INST_LABEL("incompatible%types");
+            INST_LABEL(LABEL("incompatible%types"));
             INST_POPS(VAR_BLACKHOLE());//pop operand
             INST_POPS(VAR_BLACKHOLE());//pop operand
             INST_PUSHS(CONST_BOOL("false"));
 
-            INST_LABEL("leave%eq");
+            INST_LABEL(LABEL("leave%eq"));
             if (item->type == AST_NOT_EQUAL)
                 INST_NOTS();//negate the outcome
 
@@ -357,15 +362,13 @@ void genExpr(CODE_GEN_PARAMS) {
 
 }
 
-void genCond(CODE_GEN_PARAMS) {
+void genFncCall(stack_ast_t *ast) {
+    // check for write
+    if (!strcmp(AST_TOP()->data->functionCallData->function->identifier, "write")) {
+        genWrite(ast);
+        return;
+    }
 
-}
-
-void genFncDeclare(CODE_GEN_PARAMS) {
-
-}
-
-void genFncCall(CODE_GEN_PARAMS) {
     INST_CREATEFRAME(); // new TF frame for function
 
     AST_fnc_param *param = AST_TOP()->data->functionCallData->params;
@@ -438,6 +441,38 @@ void genFncCall(CODE_GEN_PARAMS) {
     INST_POPFRAME();
 }
 
+void genWrite(stack_ast_t *ast) {
+    AST_fnc_param *tmpParam = AST_TOP()->data->functionCallData->params;
+
+    while (tmpParam != NULL) {
+        switch (tmpParam->type) {
+            case AST_P_INT:
+                INST_WRITE(CONST_INT(tmpParam->data->intValue));
+                break;
+            case AST_P_FLOAT:
+                INST_WRITE(CONST_FLOAT(tmpParam->data->floatValue));
+                break;
+            case AST_P_STRING:
+                INST_WRITE(CONST_STRING(tmpParam->data->stringValue));
+                break;
+            case AST_P_NULL:
+                INST_WRITE(CONST_STRING(""));
+                break;
+            case AST_P_VAR:
+                INST_WRITE(VAR_CODE("LF", tmpParam->data->variable->identifier));
+                break;
+            default:
+                ERR_INTERNAL(genWrite, "not recognised parameter type");
+                break;
+        }
+    }
+
+    // push return value to stack
+    INST_PUSHS(CONST_NIL());
+    AST_POP();
+}
+
+
 void genCondition(CODE_GEN_PARAMS) {
     if (stack_ast_empty(ast)) { ERR_INTERNAL(genIf, "empty if condition\n"); return; }
     // for non bool expressions push result to stack
@@ -462,7 +497,7 @@ void genCondition(CODE_GEN_PARAMS) {
 		case AST_STRING:
 		case AST_FLOAT:
 		case AST_NULL:
-            genExpr(ast, ctx); // gen expression, result will be on stack
+            genExpr(ast); // gen expression, result will be on stack
             break;
 
         default:
@@ -519,7 +554,7 @@ void genReturn(CODE_GEN_PARAMS) {
     }
     else { //AST_RETURN_EXPR
         AST_POP();//pop AST_RETURN
-        genExpr(ast,ctx);//gets result of expression on stack
+        genExpr(ast);//gets result of expression on stack
         //compare return type of function vs type of expression
         switch (ctx->currentFncDeclaration->fnc_data.returnType)
         {
