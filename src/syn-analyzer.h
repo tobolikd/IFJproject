@@ -15,6 +15,8 @@
 #define SYN_ANALYZER_PARAMS TokenList *list, int *index, ht_table_t *table, stack_ast_t *stackSyn
 #define SYN_ANALYZER_TYPE_N_PARAM_PARAMS TokenList *list, int *index
 
+extern stack_declare_t stackDeclare;    // Global variable - stack for Function Frames
+
 typedef struct 
 {
     ht_table_t *table;

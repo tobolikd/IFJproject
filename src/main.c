@@ -4,7 +4,8 @@
 #include "error-codes.h"
 #include "sem-analyzer.h"
 
-ht_table_t *fncTable;   // Global variable - symtable for semantic controls with function declares
+ht_table_t *fncTable;                // Global variable - symtable for semantic controls with function declares
+stack_declare_t stackDeclare;       // Global variable - stack for Function Frames
 
 int main () {
     errorCode = SUCCESS;

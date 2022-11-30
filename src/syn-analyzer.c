@@ -18,7 +18,6 @@
 
 enum ifjErrCode errorCode;
 ht_table_t *fncTable; // extern missing?
-// stack_declare_t stackDeclare;
 
 // list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
@@ -223,7 +222,7 @@ bool functionDeclare(SYN_ANALYZER_PARAMS)
                             }
                             if (list->TokenArray[*index]->type == t_rCurl)
                             {
-                                // stack_declare_push(&stackDeclare, fncDecTable);
+                                stack_declare_push(&stackDeclare, fncDecTable);
                                 stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
                                 return true;
                             }
@@ -526,6 +525,11 @@ void SyntaxDtor(ht_table_t *table, stack_ast_t *stackAST)
         stack_ast_pop(stackAST);
     }
 
+    while (!stack_declare_empty(&stackDeclare))
+    {
+        stack_declare_pop(&stackDeclare);
+    }
+
     free(stackAST);
 }
 
@@ -548,7 +552,7 @@ SyntaxItem synAnalyser(TokenList *list)
         MALLOC_ERR;
     }
     stack_ast_init(stackSyn);
-    // stack_declare_init(&stackDeclare);  // initialize stack for Function Frames
+    stack_declare_init(&stackDeclare);  // initialize stack for Function Frames
 
     /* RECURSIVE DESCENT */
     if (checkSyntax(list, &index, table, stackSyn) == false)
@@ -556,11 +560,6 @@ SyntaxItem synAnalyser(TokenList *list)
         SyntaxDtor(table, stackSyn);
         return SyntaxItemCtor(NULL, NULL, false);
     }
-    // ht_delete_all(table);
-    // while (!stack_ast_empty(stackSyn))
-    // {
-    //     stack_ast_pop(stackSyn);
-    // }
 
     return SyntaxItemCtor(table, stackSyn, true);
 }
