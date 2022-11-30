@@ -23,7 +23,7 @@ ht_table_t *fncTable;
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
 
 // <params> -> , <type> <var> <params> || eps
-bool params(SYN_ANALYZER_TYPE_N_PARAMS_PARAMS)
+bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
     if (list->TokenArray[*index]->type == t_rPar) // -> eps
     {
@@ -61,7 +61,7 @@ bool params(SYN_ANALYZER_TYPE_N_PARAMS_PARAMS)
 }
 
 // <param> -> <type> <var> <params> || eps
-bool param(SYN_ANALYZER_TYPE_N_PARAMS_PARAMS)
+bool param(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
     if (list->TokenArray[*index]->type == t_rPar) // -> eps (empty parameter list)
     {
@@ -89,7 +89,7 @@ bool param(SYN_ANALYZER_TYPE_N_PARAMS_PARAMS)
 }
 
 // <type> -> int || string || float || ?int || ?string || ?float
-bool typeCheck(SYN_ANALYZER_TYPE_N_PARAMS_PARAMS)
+bool typeCheck(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
     switch (list->TokenArray[*index]->type)
     {
@@ -138,7 +138,7 @@ bool typeCheck(SYN_ANALYZER_TYPE_N_PARAMS_PARAMS)
 }
 
 // <fnc-type> -> void || int || string || float || ?int || ?string || ?float
-bool functionType(SYN_ANALYZER_TYPE_N_PARAMS_PARAMS)
+bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
     if (!strcmp(list->TokenArray[*index]->data, "void"))
     {
@@ -183,13 +183,12 @@ bool functionDeclare(SYN_ANALYZER_PARAMS)
             stack_ast_push(stackSyn, ast_item_const(AST_FUNCTION_DECLARE, fnc_declare_data_const(curFunction, fncDecTable)));
             int counterParam = curFunction->fnc_data.paramCount;
             param_info_t * nextParam = curFunction->fnc_data.params;
-            while (counterParam != 0)   // insert params to symtable
+            while (counterParam != 0)   // insert params to symtable [Function Frame]
             {
                 ht_insert(fncDecTable, nextParam->varId, nextParam->type, false);
                 debug_log("VAR PARAM ID %s\n", nextParam->varId);
                 counterParam--;
-                nextParam = nextParam->next;
-                //curFunction->fnc_data.params = curFunction->fnc_data.params->next;
+                nextParam = nextParam->next;    // move to next parameter
             }
             (*index)++;
             if (list->TokenArray[*index]->type == t_lPar)
@@ -402,7 +401,7 @@ bool statement(SYN_ANALYZER_PARAMS)
             else if (list->TokenArray[*index]->type != t_assign) // <r-side> -> <expr>
             {
                 (*index)--;
-                if (parseExpression(list, index, table, &stackSyn) == false) // <assign> -> <expr>
+                if (parseExpression(list, index, table, stackSyn) == false) // <assign> -> <expr>
                 {
                     return false;
                 }

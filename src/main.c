@@ -4,7 +4,7 @@
 #include "error-codes.h"
 #include "sem-analyzer.h"
 
-ht_table_t *fncTable;
+ht_table_t *fncTable;   // Global variable - symtable for semantic controls with function declares
 
 int main () {
     errorCode = SUCCESS;

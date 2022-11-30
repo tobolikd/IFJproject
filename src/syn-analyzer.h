@@ -13,13 +13,13 @@
 #include "symtable.h"
 
 #define SYN_ANALYZER_PARAMS TokenList *list, int *index, ht_table_t *table, stack_ast_t *stackSyn
-#define SYN_ANALYZER_TYPE_N_PARAMS_PARAMS TokenList *list, int *index
+#define SYN_ANALYZER_TYPE_N_PARAM_PARAMS TokenList *list, int *index
 
 
-bool params(SYN_ANALYZER_TYPE_N_PARAMS_PARAMS);
-bool param(SYN_ANALYZER_TYPE_N_PARAMS_PARAMS);
-bool typeCheck(SYN_ANALYZER_TYPE_N_PARAMS_PARAMS);
-bool functionType(SYN_ANALYZER_TYPE_N_PARAMS_PARAMS);
+bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
+bool param(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
+bool typeCheck(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
+bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
 bool functionDeclare(SYN_ANALYZER_PARAMS);
 bool statList(SYN_ANALYZER_PARAMS);
 bool statement(SYN_ANALYZER_PARAMS);
