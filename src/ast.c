@@ -133,6 +133,7 @@ AST_item *ast_item_const(AST_type type, void *data) {
         case AST_IF:
         case AST_ELSE:
         case AST_WHILE:
+        case AST_END_EXPRESSION:
         case AST_END_BLOCK:
             new->data = NULL;
             break;
