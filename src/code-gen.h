@@ -74,21 +74,13 @@ void genFncDeclare(CODE_GEN_PARAMS);
  */
 void genFncCall(CODE_GEN_PARAMS);
 
-/* genIf
+/* genCondition
  *
  * stack top - condition expression
- * output - process condition and generate jump
- *        - use macro PRINT_IF_JMP(JUMP_INSTRUCTION) - see below
+ * output - process and resolve condition
+ *        - jump acording to current block type (if, while)
  */
-void genIf(CODE_GEN_PARAMS);
-
-/* genWhile
- *
- * stack top - condition expression
- * output - proccess condition and generate jump
- *        - PRINT_WHILE_JMP(JUMP_INSTRUCTION) - see below
- */
-void genWhile(CODE_GEN_PARAMS);
+void genCondition(CODE_GEN_PARAMS);
 
 /* genString
  *
