@@ -163,7 +163,7 @@ void genSemanticTypeCheck(){
 	INST_JUMPIFEQ(LABEL("nullTypeCheck%float"), CONST_STRING("float"), AUX2);
 	INST_JUMPIFEQ(LABEL("nullTypeCheck%string"), CONST_STRING("string"), AUX2);
 	//nil expected in this label
-	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("nill"), AUX2);//default
+	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("nil"), AUX2);//default
     INST_RETURN();//nil parameter
 
     //int expected
