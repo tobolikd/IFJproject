@@ -34,14 +34,15 @@ int main () {
     printTokenList(list);
 #endif
 
-    SyntaxItem SyntaxItem = synAnalyser(list);
-    if (SyntaxItem.correct == true) // start syn analyzer
+    SyntaxItem *SyntaxItem = synAnalyser(list);
+    if (SyntaxItem->correct == true) // start syn analyzer
     {
-        codeGenerator(SyntaxItem.stackAST, SyntaxItem.table);
+        debug_log("TADY NE \n");
+        codeGenerator(SyntaxItem->stackAST, SyntaxItem->table);
     }
     // free memory
     listDtor(list);
-    SyntaxDtor(SyntaxItem.table, SyntaxItem.stackAST);
+    SyntaxDtor(SyntaxItem->table, SyntaxItem->stackAST);
     fclose(fp);
 
     debug_log("PROGRAM RETURNED %i.\n", errorCode);

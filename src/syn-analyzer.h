@@ -5,7 +5,7 @@
  */
 
 #ifndef IFJ_SYN_ANALYZER_H
-#define IFJ_SYN_ANALYZER_H 1 
+#define IFJ_SYN_ANALYZER_H 1
 
 #include "lex-analyzer.h"
 #include "syn-analyzer.h"
@@ -15,16 +15,16 @@
 #define SYN_ANALYZER_PARAMS TokenList *list, int *index, ht_table_t *table, stack_ast_t *stackSyn
 #define SYN_ANALYZER_TYPE_N_PARAM_PARAMS TokenList *list, int *index
 
-extern stack_declare_t stackDeclare;    // Global variable - stack for Function Frames
+extern stack_declare_t stackDeclare; // Global variable - stack for Function Frames
 
-typedef struct 
+typedef struct
 {
-    ht_table_t *table;
-    stack_ast_t *stackAST;
-    bool correct;
-}SyntaxItem;
+    ht_table_t *table;     // symtable with variables in main program (body)
+    stack_ast_t *stackAST; // stack for building AST
+    bool correct;          // true if recursion return true (correct recursive descent), false for error in recursive descent
+} SyntaxItem;
 
-SyntaxItem SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct);
+SyntaxItem *SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct);
 void SyntaxDtor(ht_table_t *table, stack_ast_t *stackAST);
 
 bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
@@ -36,6 +36,6 @@ bool statList(SYN_ANALYZER_PARAMS);
 bool statement(SYN_ANALYZER_PARAMS);
 bool seqStats(SYN_ANALYZER_PARAMS);
 bool checkSyntax(SYN_ANALYZER_PARAMS);
-SyntaxItem synAnalyser(TokenList *list);
+SyntaxItem *synAnalyser(TokenList *list);
 
 #endif // IFJ_SYN_ANALYZER_H

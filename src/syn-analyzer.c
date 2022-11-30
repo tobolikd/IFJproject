@@ -533,16 +533,17 @@ void SyntaxDtor(ht_table_t *table, stack_ast_t *stackAST)
     free(stackAST);
 }
 
-SyntaxItem SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct)
+SyntaxItem *SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct)
 {
-    SyntaxItem SyntaxItem;
-    SyntaxItem.table = table;
-    SyntaxItem.stackAST = stackAST;
-    SyntaxItem.correct = correct;
-    return SyntaxItem;
+    SyntaxItem *syntaxItem = (SyntaxItem *)malloc(sizeof(SyntaxItem));
+    CHECK_MALLOC_PTR(syntaxItem);
+    syntaxItem->table = table;
+    syntaxItem->stackAST = stackAST;
+    syntaxItem->correct = correct;
+    return syntaxItem;
 }
 
-SyntaxItem synAnalyser(TokenList *list)
+SyntaxItem *synAnalyser(TokenList *list)
 {
     int index = 0;
     ht_table_t *table = ht_init();
@@ -550,13 +551,15 @@ SyntaxItem synAnalyser(TokenList *list)
     if (stackSyn == NULL)
     {
         MALLOC_ERR;
+        return SyntaxItemCtor(NULL, NULL, false);
     }
     stack_ast_init(stackSyn);
-    stack_declare_init(&stackDeclare);  // initialize stack for Function Frames
+    stack_declare_init(&stackDeclare); // initialize stack for Function Frames
 
     /* RECURSIVE DESCENT */
     if (checkSyntax(list, &index, table, stackSyn) == false)
     {
+        debug_log("HELLO DEBILKU\n");
         SyntaxDtor(table, stackSyn);
         return SyntaxItemCtor(NULL, NULL, false);
     }
