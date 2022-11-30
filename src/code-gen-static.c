@@ -143,24 +143,24 @@ void genSemanticTypeCheck(){
     INST_LABEL(LABEL("type%check%int%nil"));
     INST_POPS(AUX1);
     INST_TYPE(VAR_BLACKHOLE(), AUX1);
-    INST_JUMPIFNEQ(LABEL("type%check%nil"), VAR_BLACKHOLE(), CONST_STRING("int"));
     INST_PUSHS(AUX1);
+    INST_JUMPIFNEQ(LABEL("type%check%nil"), VAR_BLACKHOLE(), CONST_STRING("int"));
     INST_RETURN();
 
     //nil || float expected
     INST_LABEL(LABEL("type%check%float%nil"));
     INST_POPS(AUX1);
     INST_TYPE(VAR_BLACKHOLE(), AUX1);
-    INST_JUMPIFNEQ(LABEL("type%check%nil"), VAR_BLACKHOLE(), CONST_STRING("float"));
     INST_PUSHS(AUX1);
+    INST_JUMPIFNEQ(LABEL("type%check%nil"), VAR_BLACKHOLE(), CONST_STRING("float"));
     INST_RETURN();
 
     //nil || string expected
     INST_LABEL(LABEL("type%check%string%nil"));
     INST_POPS(AUX1);
     INST_TYPE(VAR_BLACKHOLE(), AUX1);
-    INST_JUMPIFNEQ(LABEL("type%check%nil"), VAR_BLACKHOLE(), CONST_STRING("string"));
     INST_PUSHS(AUX1);
+    INST_JUMPIFNEQ(LABEL("type%check%nil"), VAR_BLACKHOLE(), CONST_STRING("string"));
     INST_RETURN();
 }
 

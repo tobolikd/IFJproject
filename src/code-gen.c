@@ -241,6 +241,10 @@ void genExpr(CODE_GEN_PARAMS) {
             INST_PUSHS(CONST_STRING(item->data->stringValue));
             break;
 
+        case AST_VAR:
+            INST_PUSHS(VAR_CODE("LF",item->data->variable->identifier));
+            break;
+
         case AST_ADD:
             INST_CALL(LABEL("conv%arithmetic"));
             INST_ADDS();
@@ -508,6 +512,18 @@ void genReturn(CODE_GEN_PARAMS) {
 
         case string_t:
             INST_CALL(LABEL("type%check%string"));
+            break;
+
+        case null_int_t:
+            INST_CALL(LABEL("type%check%int%nil"));
+            break;
+
+        case null_float_t:
+            INST_CALL(LABEL("type%check%float%nil"));
+            break;
+
+        case null_string_t:
+            INST_CALL(LABEL("type%check%string%nil"));
             break;
 
         default:
