@@ -23,6 +23,8 @@ void genBuiltIns(ht_table_t *varSymtable) {
     genResolveCondition();
     genImplicitConversions();
     genSemanticTypeCheck();
+    genDataTypeComparisons();
+
     genExitLabels();
 
     // end pregenerated
@@ -164,6 +166,53 @@ void genSemanticTypeCheck(){
     INST_RETURN();
 }
 
+void genDataTypeComparisons(){
+    INST_LABEL(LABEL("type%cmp"));
+
+	INST_POPS(AUX1); // read value of operand
+	INST_PUSHS(AUX1); 
+	INST_POPS(AUX2); // read value of operand
+	INST_PUSHS(AUX2); 
+
+	INST_TYPE(AUX1, AUX1);//get types
+	INST_TYPE(AUX2, AUX2);
+
+	INST_JUMPIFEQ(LABEL("expect%int"), CONST_STRING("int"), AUX1);
+	INST_JUMPIFEQ(LABEL("expect%bool"), CONST_STRING("bool"), AUX1);
+	INST_JUMPIFEQ(LABEL("expect%float"), CONST_STRING("float"), AUX1);
+	INST_JUMPIFEQ(LABEL("expect%string"), CONST_STRING("string"), AUX1);
+	INST_JUMPIFEQ(LABEL("expect%nil"), CONST_STRING("nil"), AUX1);
+
+    //nil || string expected
+    INST_LABEL(LABEL("expect%int"));
+    INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("int"));
+    INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_STRING("int"));
+    INST_RETURN();
+
+    //nil || string expected
+    INST_LABEL(LABEL("expect%bool"));
+    INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("bool"));
+    INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_STRING("bool"));
+    INST_RETURN();
+    //nil || string expected
+    INST_LABEL(LABEL("expect%float"));
+    INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("float"));
+    INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_STRING("float"));
+    INST_RETURN();
+    //nil || string expected
+    INST_LABEL(LABEL("expect%string"));
+    INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("string"));
+    INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_STRING("string"));
+    INST_RETURN();
+
+    INST_LABEL(LABEL("push%false"));
+    INST_PUSHS(CONST_BOOL("false"));
+    INST_RETURN();
+
+    INST_LABEL(LABEL("push%true"));
+    INST_PUSHS(CONST_BOOL("true"));
+    INST_RETURN();
+}
 
 void genVarDefs(ht_table_t *varSymtable, ht_item_t* function) {
     if (varSymtable == NULL) {

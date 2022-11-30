@@ -217,12 +217,13 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 }
 
 void genAssign(CODE_GEN_PARAMS) {
-    AST_item *assignTo = AST_TOP(); //save variable
-    if (assignTo->type != AST_VAR)
-        ERR_INTERNAL(genAssign,"Attempt to assign to a non variable type. Type: %d\n",assignTo->type);
+    char *idenitfier; //save variable name
+    strcpy(idenitfier,AST_TOP()->data->variable->identifier);
+    if (AST_TOP()->type != AST_VAR)
+        ERR_INTERNAL(genAssign,"Attempt to assign to a non variable type.");
     AST_POP(); //pop AST_VAR
     genExpr(ast,ctx);
-    INST_POPS(VAR_CODE("LF",assignTo->data->variable->identifier));//pop value into variable
+    INST_POPS(VAR_CODE("LF",idenitfier));//pop value into variable
 }
 
 void genExpr(CODE_GEN_PARAMS) {
@@ -247,7 +248,7 @@ void genExpr(CODE_GEN_PARAMS) {
             break;
 
         case AST_VAR:
-            CHECK_INIT(VAR_AUX("LF",item->data->variable->identifier));
+            CHECK_INIT(VAR_CODE("LF",item->data->variable->identifier));
             INST_PUSHS(VAR_CODE("LF",item->data->variable->identifier));
             break;
 
@@ -276,6 +277,7 @@ void genExpr(CODE_GEN_PARAMS) {
             break;
 
         case AST_CONCAT:
+            //generate 3AC
             INST_CALL(LABEL("conv%concat"));
             INST_CREATEFRAME();
             INST_PUSHFRAME();
@@ -289,14 +291,24 @@ void genExpr(CODE_GEN_PARAMS) {
             break;
 
         case AST_EQUAL:
-            INST_CALL(LABEL("conv%rel"));
-            INST_EQS();
-            break;
-
         case AST_NOT_EQUAL:
-            INST_CALL(LABEL("conv%rel"));
+            INST_CALL(LABEL("type%cmp"));//2 oprands already on stack
+            INST_POPS(AUX1);//bool result of type%cmp
+
+            //if types are not the same skip evaluation of eq, push false
+	        INST_JUMPIFNEQ(LABEL("incompatible%types"), AUX1, CONST_BOOL("true"));
             INST_EQS();
-            INST_NOTS();
+            INST_JUMP("leave%eq");//skip incompatible types
+
+            INST_LABEL("incompatible%types");
+            INST_POPS(VAR_BLACKHOLE());//pop operand
+            INST_POPS(VAR_BLACKHOLE());//pop operand
+            INST_PUSHS(CONST_BOOL("false"));
+
+            INST_LABEL("leave%eq");
+            if (item->type == AST_NOT_EQUAL)
+                INST_NOTS();//negate the outcome
+                
             break;
 
         case AST_LESS:
@@ -491,20 +503,21 @@ void genString(char *str) {
 void genReturn(CODE_GEN_PARAMS) {
     //main body return
     if (ctx->currentFncDeclaration == NULL){
+        INST_POPS(VAR_BLACKHOLE());//pop AST_RETURN
         INST_CLEARS();
         INST_POPFRAME();
         INST_EXIT(CONST_INT(0));
     }
-
     //function return
-    if (AST_TOP()->type == AST_RETURN_VOID){
+    else if (AST_TOP()->type == AST_RETURN_VOID){
+        INST_POPS(VAR_BLACKHOLE());//pop AST_RETURN
         if (ctx->currentFncDeclaration->fnc_data.returnType != void_t)
             ERR_INTERNAL(genReturn,"This should not have gotten through syn anal.\n");            
         INST_PUSHS(CONST_NIL());//function return void
         INST_RETURN();
     }
     else { //AST_RETURN_EXPR
-        INST_POPS();//pop AST_RETURN
+        INST_POPS(VAR_BLACKHOLE());//pop AST_RETURN
         genExpr(ast,ctx);//gets result of expression on stack
         //compare return type of function vs type of expression
         switch (ctx->currentFncDeclaration->fnc_data.returnType)
