@@ -107,83 +107,60 @@ void genExitLabels() {
 }
 
 void genSemanticTypeCheck(){
-    //REGULAR TYPE
-    INST_LABEL(LABEL("type%check"));
-    
-	INST_POPS(AUX1); // expected
-	INST_POPS(AUX2); // actual
-	INST_PUSHS(AUX2); //keep actual on stack
-
-    INST_TYPE(AUX1, AUX1);
-    INST_TYPE(AUX2,AUX2);
-
-    //get type of actual
-	INST_JUMPIFEQ(LABEL("typeCheck%int"), CONST_STRING("int"), AUX2);
-	INST_JUMPIFEQ(LABEL("typeCheck%bool"), CONST_STRING("bool"), AUX2);
-	INST_JUMPIFEQ(LABEL("typeCheck%float"), CONST_STRING("float"), AUX2);
-	INST_JUMPIFEQ(LABEL("typeCheck%string"), CONST_STRING("string"), AUX2);
-	//nil unexpected in this label
-    INST_DPRINT(CONST_STRING("Expected parameter is not null type\n"));
-    INST_JUMPIFEQ(LABEL("invalid%type"), CONST_STRING("nil"), AUX2);
-    INST_JUMP(LABEL("unknown%type")); //default
-
     //int expected
-    INST_LABEL(LABEL("typeCheck%int"));
-	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("int"), AUX1);
+    INST_LABEL(LABEL("type%check%int"));
+    INST_POPS(AUX1);
+    INST_TYPE(VAR_BLACKHOLE(), AUX1);
+    INST_JUMPIFNEQ(LABEL("invalid%type"), VAR_BLACKHOLE(), CONST_STRING("int"));
+    INST_PUSHS(AUX1);
     INST_RETURN();
 
     //float expected
-    INST_LABEL(LABEL("typeCheck%float"));
-	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("float"), AUX1);
+    INST_LABEL(LABEL("type%check%float"));
+    INST_POPS(AUX1);
+    INST_TYPE(VAR_BLACKHOLE(), AUX1);
+    INST_JUMPIFNEQ(LABEL("invalid%type"), VAR_BLACKHOLE(), CONST_STRING("float"));
+    INST_PUSHS(AUX1);
     INST_RETURN();
 
     //string expected
-    INST_LABEL(LABEL("typeCheck%string"));
-	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("string"), AUX1);
+    INST_LABEL(LABEL("type%check%string"));
+    INST_POPS(AUX1);
+    INST_TYPE(VAR_BLACKHOLE(), AUX1);
+    INST_JUMPIFNEQ(LABEL("invalid%type"), VAR_BLACKHOLE(), CONST_STRING("string"));
+    INST_PUSHS(AUX1);
     INST_RETURN();
 
-    //bool expected
-    INST_LABEL(LABEL("typeCheck%bool"));
-	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("bool"), AUX1);
+    //nil expected
+    INST_LABEL(LABEL("type%check%nil"));
+    INST_POPS(AUX1);
+    INST_TYPE(VAR_BLACKHOLE(), AUX1);
+    INST_JUMPIFNEQ(LABEL("invalid%type"), VAR_BLACKHOLE(), CONST_STRING("nil"));
+    INST_PUSHS(AUX1);
     INST_RETURN();
 
-    //--------
-    //NULLTYPE
-    INST_LABEL(LABEL("nullType%check"));
-    
-	INST_POPS(AUX1); // expected
-	INST_POPS(AUX2); // actual
-	
-    INST_TYPE(AUX1, AUX1);
-    INST_TYPE(AUX2,AUX2);
-
-    //get type of actual
-	INST_JUMPIFEQ(LABEL("nullTypeCheck%int"), CONST_STRING("int"), AUX2);
-	INST_JUMPIFEQ(LABEL("nullTypeCheck%bool"), CONST_STRING("bool"), AUX2);
-	INST_JUMPIFEQ(LABEL("nullTypeCheck%float"), CONST_STRING("float"), AUX2);
-	INST_JUMPIFEQ(LABEL("nullTypeCheck%string"), CONST_STRING("string"), AUX2);
-	//nil expected in this label
-	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("nill"), AUX2);//default
-    INST_RETURN();//nil parameter
-
-    //int expected
-    INST_LABEL(LABEL("nullTypeCheck%int"));
-	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("int"), AUX1);
+    //nil || int expected
+    INST_LABEL(LABEL("type%check%int%nil"));
+    INST_POPS(AUX1);
+    INST_TYPE(VAR_BLACKHOLE(), AUX1);
+    INST_JUMPIFNEQ(LABEL("type%check%nil"), VAR_BLACKHOLE(), CONST_STRING("int"));
+    INST_PUSHS(AUX1);
     INST_RETURN();
 
-    //float expected
-    INST_LABEL(LABEL("nullTypeCheck%float"));
-	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("float"), AUX1);
+    //nil || float expected
+    INST_LABEL(LABEL("type%check%float%nil"));
+    INST_POPS(AUX1);
+    INST_TYPE(VAR_BLACKHOLE(), AUX1);
+    INST_JUMPIFNEQ(LABEL("type%check%nil"), VAR_BLACKHOLE(), CONST_STRING("float"));
+    INST_PUSHS(AUX1);
     INST_RETURN();
 
-    //string expected
-    INST_LABEL(LABEL("nullTypeCheck%string"));
-	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("string"), AUX1);
-    INST_RETURN();
-
-    //bool expected
-    INST_LABEL(LABEL("nullTypeCheck%bool"));
-	INST_JUMPIFNEQ(LABEL("invalid%type"), CONST_STRING("bool"), AUX1);
+    //nil || string expected
+    INST_LABEL(LABEL("type%check%string%nil"));
+    INST_POPS(AUX1);
+    INST_TYPE(VAR_BLACKHOLE(), AUX1);
+    INST_JUMPIFNEQ(LABEL("type%check%nil"), VAR_BLACKHOLE(), CONST_STRING("string"));
+    INST_PUSHS(AUX1);
     INST_RETURN();
 }
 
