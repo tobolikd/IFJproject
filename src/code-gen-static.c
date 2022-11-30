@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 
-void genBuiltIns(ht_table_t *varSymtable) {
+void genBuiltIns() {
     printf(".IFJcode22\n");
 
     // generate global vars
@@ -99,27 +99,43 @@ void genExitLabels() {
 
 }
 
-void genVarDefs(ht_table_t *varSymtable) {
+void genVarDefs(ht_table_t *varSymtable, ht_item_t* function) {
     if (varSymtable == NULL) {
         ERR_INTERNAL(genVarDefs, "symtable is NULL\n");
         return;
     }
 
-    // create TF
-    INST_CREATEFRAME();
+    ht_item_t *tmpVar;
+    param_info_t *firstParam;
+    param_info_t *tmpParam;
+    bool varIsParam;
 
-    ht_item_t *tmp;
-
-    for (int i = 0; i < HT_SIZE; i++) {
-        tmp = varSymtable->items[i];
-        while (tmp != NULL) {
-            INST_DEFVAR(VAR_CODE("TF", tmp->identifier));
-            tmp = tmp->next;
-        }
+    if (function == NULL) {
+        firstParam = NULL;
+    } else {
+        firstParam = function->fnc_data.params;
     }
 
-    // push TF to LF
-    INST_PUSHFRAME();
+    for (int i = 0; i < HT_SIZE; i++) {
+        tmpVar = varSymtable->items[i];
+        while (tmpVar != NULL) {
+            // check if variable isnt predefined parameter
+            varIsParam = false;
+            tmpParam = firstParam;
+            while (tmpParam != NULL) {
+                if (!strcmp(tmpParam->varId, tmpVar->identifier)) {
+                    varIsParam = true;
+                    break;
+                }
+                tmpParam = tmpParam->next;
+            }
+
+            if (!varIsParam) { // dont define parametres
+                INST_DEFVAR(VAR_CODE("LF", tmpVar->identifier));
+            }
+            tmpVar = tmpVar->next;
+        }
+    }
 }
 
 void genImplicitConversions() {
@@ -269,23 +285,23 @@ void genImplicitConversions() {
     INST_POPS(AUX2);
 
     INST_TYPE(VAR_BLACKHOLE(), AUX1);
-    INST_JUMPIFEQ(label("conv%concat%first%string"), VAR_BLACKHOLE(), CONST_STRING("string"));
+    INST_JUMPIFEQ(LABEL("conv%concat%first%string"), VAR_BLACKHOLE(), CONST_STRING("string"));
     INST_JUMPIFEQ(LABEL("conv%concat%first%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 
     // string ?
-    INST_LABEL(label("conv%concat%first%string"));
+    INST_LABEL(LABEL("conv%concat%first%string"));
 
     INST_TYPE(VAR_BLACKHOLE(), AUX2);
-    INST_JUMPIFEQ(label("conv%concat%string%string"), VAR_BLACKHOLE(), CONST_STRING("string"));
+    INST_JUMPIFEQ(LABEL("conv%concat%string%string"), VAR_BLACKHOLE(), CONST_STRING("string"));
     INST_JUMPIFEQ(LABEL("conv%concat%string%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 
     // nil ?
-    INST_LABEL(label("conv%concat%first%nil"));
+    INST_LABEL(LABEL("conv%concat%first%nil"));
 
     INST_TYPE(VAR_BLACKHOLE(), AUX2);
-    INST_JUMPIFEQ(label("conv%concat%nil%string"), VAR_BLACKHOLE(), CONST_STRING("string"));
+    INST_JUMPIFEQ(LABEL("conv%concat%nil%string"), VAR_BLACKHOLE(), CONST_STRING("string"));
     INST_JUMPIFEQ(LABEL("conv%concat%nil%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 
