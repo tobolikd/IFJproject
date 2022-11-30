@@ -181,7 +181,7 @@ bool functionDeclare(TokenList *list, int *index, ht_table_t *table)
                 THROW_ERROR(INTERNAL_ERR, list->TokenArray[*index]->lineNum);
                 return false;
             }
-            stack_ast_push(&stackSyn, ast_item_const(AST_FUNCTION_DECLARE, curFunction));
+            stack_ast_push(&stackSyn, ast_item_const(AST_FUNCTION_DECLARE, fnc_declare_data_const(curFunction, fncDecTable)));
             int counterParam = curFunction->fnc_data.paramCount;
             param_info_t * nextParam = curFunction->fnc_data.params;
             while (counterParam != 0)   // insert params to symtable
