@@ -32,7 +32,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable);
  * stack top - variable, expression
  * output - assign expression result to variable
  */
-void genAssign(CODE_GEN_PARAMS);
+void genAssign(stack_ast_t *ast);
 
 /* genExpr
  *
@@ -45,7 +45,7 @@ void genAssign(CODE_GEN_PARAMS);
  *
  * result will be stored on stack
  */
-void genExpr(CODE_GEN_PARAMS);
+void genExpr(stack_ast_t *ast);
 
 /* genFncCall
  *
@@ -53,7 +53,14 @@ void genExpr(CODE_GEN_PARAMS);
  * output - prepare tmp frame, push it to frame stack
  *        - call function
  */
-void genFncCall(CODE_GEN_PARAMS);
+void genFncCall(stack_ast_t *ast);
+
+/* genWrite
+ *
+ * stack top - write function call
+ * output - write every term
+ */
+void genWrite(stack_ast_t *ast);
 
 /* genCondition
  *
