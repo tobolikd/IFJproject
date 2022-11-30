@@ -41,7 +41,8 @@ void genResolveCondition() {
 	INST_JUMPIFEQ(LABEL("cond%bool"), CONST_STRING("bool"), VAR_BLACKHOLE());
 	INST_JUMPIFEQ(LABEL("cond%float"), CONST_STRING("float"), VAR_BLACKHOLE());
 	INST_JUMPIFEQ(LABEL("cond%string"), CONST_STRING("string"), VAR_BLACKHOLE());
-	INST_JUMPIFEQ(LABEL("cond%nil"), CONST_STRING("nil"), VAR_BLACKHOLE());
+    // nil - always false
+	INST_JUMPIFEQ(LABEL("cond%false"), CONST_STRING("nil"), VAR_BLACKHOLE());
 
 	INST_EXIT(CONST_INT(99)); // variable not initialized
 
@@ -75,10 +76,6 @@ void genResolveCondition() {
 	INST_JUMPIFEQ(LABEL("cond%false"), CONST_STRING("0"), AUX1);
 	INST_JUMPIFEQ(LABEL("cond%false"), CONST_STRING(""), AUX1);
 	INST_JUMP(LABEL("cond%true"));
-
-    // nil - always false
-	INST_LABEL(LABEL("cond%nil"));
-	INST_JUMP(LABEL("cond%false"));
 }
 
 
