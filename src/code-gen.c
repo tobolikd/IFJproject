@@ -138,6 +138,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 			case AST_STRING:
 			case AST_FLOAT:
 			case AST_NULL:
+			case AST_END_EXPRESSION:
                 genExpr(ast, ctx); // generate expression, but throw data away
 				break;
 
