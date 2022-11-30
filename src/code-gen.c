@@ -217,7 +217,6 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 }
 
 void genAssign(CODE_GEN_PARAMS) {
-    AST_POP(); //pop AST_ASSIGN
     AST_item *assignTo = AST_TOP(); //save variable
     if (assignTo->type != AST_VAR)
         ERR_INTERNAL(genAssign,"Attempt to assign to a non variable type. Type: %d\n",assignTo->type);
@@ -248,6 +247,7 @@ void genExpr(CODE_GEN_PARAMS) {
             break;
 
         case AST_VAR:
+            CHECK_INIT(VAR_AUX("LF",item->data->variable->identifier));
             INST_PUSHS(VAR_CODE("LF",item->data->variable->identifier));
             break;
 
@@ -412,7 +412,7 @@ void genFncCall(CODE_GEN_PARAMS) {
     }
     //call function with its relevant frame
     INST_PUSHFRAME();
-    INST_CALL(LABEL(AST_TOP()->data->functionCallData->functionID));
+    INST_CALL(LABEL(AST_TOP()->data->functionCallData->function->identifier));
     INST_POPFRAME();
 }
 
@@ -497,23 +497,18 @@ void genReturn(CODE_GEN_PARAMS) {
     }
 
     //function return
-    if (AST_TOP()->type == AST_RETURN_VOID)
-    {
+    if (AST_TOP()->type == AST_RETURN_VOID){
         if (ctx->currentFncDeclaration->fnc_data.returnType != void_t)
             ERR_INTERNAL(genReturn,"This should not have gotten through syn anal.\n");            
         INST_PUSHS(CONST_NIL());//function return void
         INST_RETURN();
     }
-    else //AST_RETURN_EXPR
-    {
+    else { //AST_RETURN_EXPR
+        INST_POPS();//pop AST_RETURN
         genExpr(ast,ctx);//gets result of expression on stack
         //compare return type of function vs type of expression
         switch (ctx->currentFncDeclaration->fnc_data.returnType)
         {
-        case void_t:
-            INST_CALL(LABEL("type%check%nil"));
-            break;
-
         case int_t:
             INST_CALL(LABEL("type%check%int"));
             break;
@@ -545,7 +540,6 @@ void genReturn(CODE_GEN_PARAMS) {
         //leaves result of expr on stack
         INST_RETURN(); //return from function 
     }
-    AST_POP();//pop AST_RETURN 
 }
 
 
