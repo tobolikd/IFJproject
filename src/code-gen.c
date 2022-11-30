@@ -224,11 +224,13 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 }
 
 void genAssign(CODE_GEN_PARAMS) {
-    char *idenitfier; //save variable name
-    strcpy(idenitfier,AST_TOP()->data->variable->identifier);
     if (AST_TOP()->type != AST_VAR)
         ERR_INTERNAL(genAssign,"Attempt to assign to a non variable type.");
+
+    char *idenitfier; //save variable name
+    strcpy(idenitfier,AST_TOP()->data->variable->identifier);
     AST_POP(); //pop AST_VAR
+
     genExpr(ast,ctx);
     INST_POPS(VAR_CODE("LF",idenitfier));//pop value into variable
 }
@@ -236,7 +238,7 @@ void genAssign(CODE_GEN_PARAMS) {
 void genExpr(CODE_GEN_PARAMS) {
     AST_item *item = AST_TOP();
     if (item->type == AST_END_EXPRESSION) //empty expression
-        debug_log("genExpr - empty expression\n"); 
+        debug_log("genExpr - empty expression\n");
 
     while (item->type != AST_END_EXPRESSION){
         switch (item->type)
@@ -315,7 +317,7 @@ void genExpr(CODE_GEN_PARAMS) {
             INST_LABEL("leave%eq");
             if (item->type == AST_NOT_EQUAL)
                 INST_NOTS();//negate the outcome
-                
+
             break;
 
         case AST_LESS:
@@ -368,17 +370,18 @@ void genFncCall(CODE_GEN_PARAMS) {
 
     AST_fnc_param *param = AST_TOP()->data->functionCallData->params;
     param_info_t *ref = AST_TOP()->data->functionCallData->function->fnc_data.params;
-    while (param != NULL) 
+    while (param != NULL)
     {
         INST_DEFVAR(VAR_CODE("TF",ref->varId)); //declare parameters as variables for in function use
-        
+
         switch (param->type)
         {
         case AST_P_VAR: // check if variable type coresponds to fnc declare
                         // constats are dealt with in sem_analyser
             //push variable to stack
+            CHECK_INIT(VAR_CODE("LF",param->data->variable->identifier));
             INST_PUSHS(VAR_CODE("LF",param->data->variable->identifier));
-            switch (ref->type) 
+            switch (ref->type)
             {
             case int_t:
                 INST_CALL(LABEL("type%check%int"));
@@ -408,9 +411,9 @@ void genFncCall(CODE_GEN_PARAMS) {
                 ERR_INTERNAL(genReturn,"Unexpected return type of function.\n");
                 break;
             }
-            INST_POPS(VAR_CODE("TF",ref->varId)); //pop to variable 
+            INST_POPS(VAR_CODE("TF",ref->varId)); //pop to variable
             break; //case AST_P_VAR
-		
+
         case AST_P_INT:
             INST_MOVE(VAR_CODE("TF",ref->varId),CONST_INT(param->data->intValue));
             break;
@@ -427,7 +430,7 @@ void genFncCall(CODE_GEN_PARAMS) {
         }
         //read next param
         param = param->next;
-        ref = ref->next;   
+        ref = ref->next;
     }
     //call function with its relevant frame
     INST_PUSHFRAME();
@@ -510,7 +513,7 @@ void genReturn(CODE_GEN_PARAMS) {
     else if (AST_TOP()->type == AST_RETURN_VOID){
         AST_POP();//pop AST_RETURN
         if (ctx->currentFncDeclaration->fnc_data.returnType != void_t)
-            ERR_INTERNAL(genReturn,"This should not have gotten through syn anal.\n");            
+            ERR_INTERNAL(genReturn,"This should not have gotten through syn analyzer\n");
         INST_PUSHS(CONST_NIL());//function return void
         INST_RETURN();
     }
@@ -549,7 +552,7 @@ void genReturn(CODE_GEN_PARAMS) {
             break;
         }
         //leaves result of expr on stack
-        INST_RETURN(); //return from function 
+        INST_RETURN(); //return from function
     }
 }
 
