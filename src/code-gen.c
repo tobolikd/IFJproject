@@ -501,21 +501,21 @@ void genString(char *str) {
 void genReturn(CODE_GEN_PARAMS) {
     //main body return
     if (ctx->currentFncDeclaration == NULL){
-        INST_POPS(VAR_BLACKHOLE());//pop AST_RETURN
+        AST_POP();//pop AST_RETURN
         INST_CLEARS();
         INST_POPFRAME();
         INST_EXIT(CONST_INT(0));
     }
     //function return
     else if (AST_TOP()->type == AST_RETURN_VOID){
-        INST_POPS(VAR_BLACKHOLE());//pop AST_RETURN
+        AST_POP();//pop AST_RETURN
         if (ctx->currentFncDeclaration->fnc_data.returnType != void_t)
             ERR_INTERNAL(genReturn,"This should not have gotten through syn anal.\n");            
         INST_PUSHS(CONST_NIL());//function return void
         INST_RETURN();
     }
     else { //AST_RETURN_EXPR
-        INST_POPS(VAR_BLACKHOLE());//pop AST_RETURN
+        AST_POP();//pop AST_RETURN
         genExpr(ast,ctx);//gets result of expression on stack
         //compare return type of function vs type of expression
         switch (ctx->currentFncDeclaration->fnc_data.returnType)
