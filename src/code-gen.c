@@ -182,8 +182,11 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                         break;
 
                     case BLOCK_DECLARE:
-                        INST_RETURN(); // print return for case of void function
-                                       // with no return statement at end of it
+                        if (ctx->currentFncDeclaration->fnc_data.returnType == void_t) {
+                            // generate return for void function
+                            INST_PUSHS(CONST_NIL());
+                            INST_RETURN();
+                        }
                         ctx->currentFncDeclaration = NULL;
                         break;
 
