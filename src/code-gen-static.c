@@ -167,9 +167,9 @@ void genDataTypeComparisons(){
     INST_LABEL(LABEL("type%cmp"));
 
 	INST_POPS(AUX1); // read value of operand
-	INST_PUSHS(AUX1); 
 	INST_POPS(AUX2); // read value of operand
 	INST_PUSHS(AUX2); 
+	INST_PUSHS(AUX1); 
 
 	INST_TYPE(AUX1, AUX1);//get types
 	INST_TYPE(AUX2, AUX2);
