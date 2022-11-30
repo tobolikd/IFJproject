@@ -150,6 +150,10 @@ void printAstItem(AST_item *item) {
             AST_TYPE("while");
             break;
 
+        case AST_END_EXPRESSION:
+            AST_TYPE("expression end");
+            break;
+
         case AST_END_BLOCK:
             AST_TYPE("block end");
             break;
