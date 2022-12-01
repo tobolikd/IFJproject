@@ -29,7 +29,7 @@ ht_table_t *initFncSymtable()
 
     // "strlen"
     ht_item_t *strlenItem = ht_insert(fncSymtable, "strlen", int_t, true);
-    ht_param_append(strlenItem, "s", int_t);
+    ht_param_append(strlenItem, "s", string_t);
 
     // "substring"
     ht_item_t  *substringItem = ht_insert(fncSymtable, "substring", string_t, true);
