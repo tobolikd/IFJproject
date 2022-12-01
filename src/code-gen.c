@@ -435,10 +435,10 @@ void genFncCall(stack_ast_t *ast) {
             INST_MOVE(VAR_CODE("TF",ref->varId),CONST_INT(param->data->intValue));
             break;
         case AST_P_STRING:
-            INST_MOVE(VAR_CODE("TF",ref->varId),CONST_FLOAT(param->data->floatValue));
+            INST_MOVE(VAR_CODE("TF",ref->varId),CONST_STRING(param->data->stringValue));
             break;
         case AST_P_FLOAT:
-            INST_MOVE(VAR_CODE("TF",ref->varId),CONST_STRING(param->data->stringValue));
+            INST_MOVE(VAR_CODE("TF",ref->varId),CONST_FLOAT(param->data->floatValue));
             break;
         case AST_P_NULL: // allways false
             INST_MOVE(VAR_CODE("TF",ref->varId),CONST_NIL());
