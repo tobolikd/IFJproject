@@ -107,10 +107,10 @@ void genExitLabels() {
 
     // missing return
     INST_LABEL(LABEL("no%return"));
-    INST_DPRINT(CONST_STRING("No return from function"));
+    INST_DPRINT(CONST_STRING("No return from function was called\n"));
     INST_CLEARS();
     INST_POPFRAME();
-    INST_EXIT(CONST_INT(SEMANTIC_RUN_RETURN_ERR));
+    INST_EXIT(CONST_INT(SEMANTIC_PARAMETER_ERR));
 }
 
 void genSemanticTypeCheck(){

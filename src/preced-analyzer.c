@@ -332,6 +332,7 @@ Element getIndex(Token *input, ht_table_t* symtable)
             if (ht_search(fncTable,input->data) == NULL) //not in symtable
             {
                 THROW_ERROR(SEMANTIC_FUNCTION_DEFINITION_ERR,input->lineNum);
+                debug_print("not initialized function call on line %d\n", input->lineNum);
                 return UNINITIALISED;
             }
             return DATA;//_FNC
