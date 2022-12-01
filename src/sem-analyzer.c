@@ -139,29 +139,42 @@ bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
                 break;
                 }
             case t_if:
-                while (list->TokenArray[*index]->type != t_lCurl || list->TokenArray[*index]->type != t_EOF)
-                    (*index)++;
+                while (list->TokenArray[*index]->type != t_EOF)
+                {
+                    if (list->TokenArray[*index]->type == t_lCurl)
+                        break;
+                   (*index)++;
+                }
+                debug_log("Going to if ..\n");
                 if (checkReturn(list, index, currFncDeclare) == true)
                     returnFound = true;
+                debug_log("returned from if ..\n");
+                (*index)--;
                 break;
+
             case t_else:
                 (*index)++;
-                if (checkReturn(list, index, currFncDeclare) == true && returnFound == true)
+                debug_log("Going to else ..\n");
+                if (checkReturn(list, index, currFncDeclare) == true && returnFound == true){
+                    debug_log("Found return in both if and else ..\n");
                     return true;
+                }
                 else
                     returnFound = false;
+                debug_log("Did not found in else ..\n");
+
                 break;
             case t_return:
                 // check if void returns nothing
                 if (currFncDeclare->fnc_data.returnType == void_t) {
-                    if (list->TokenArray[*index + 1]->type != t_semicolon) {
-                        errorCode = SEMANTIC_PARAMETER_ERR;
+                    if (list->TokenArray[(*index) + 1]->type != t_semicolon) {
+                        errorCode = SEMANTIC_RETURN_ERR;
                         debug_log("void function has return statement with expression\n");
                         return false;
                     }
                 } else { // check that non void function has return value
-                    if (list->TokenArray[*index + 1]->type == t_semicolon) {
-                        errorCode = SEMANTIC_PARAMETER_ERR;
+                    if (list->TokenArray[(*index) + 1]->type == t_semicolon) {
+                        THROW_ERROR(SEMANTIC_RETURN_ERR,list->TokenArray[(*index) + 1]->lineNum);
                         debug_log("non void function has empty return");
                         return false;
                     }
@@ -173,6 +186,7 @@ bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
         }
         (*index)++;
     }
+    (*index)++;
     return false;
 }
 
@@ -266,12 +280,15 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable) {
                 }
 
                 if (checkReturn(list, &index, currFncDeclare) == false && currFncDeclare->fnc_data.returnType != void_t) {
-                    errorCode = SEMANTIC_RETURN_ERR;
+                    THROW_ERROR(SEMANTIC_PARAMETER_ERR,list->TokenArray[index]->lineNum);
+                    debug_log("check Return fffff \n");
+
                     return NULL;
                 }
                 if (errorCode != SUCCESS) {
                     return NULL;
                 }
+                debug_log("got through return check \n");
             }
         }
         //raising index and going back to loop, where we check if the token is last token
@@ -283,7 +300,11 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable) {
 
 ht_table_t *InitializedHTableFnctionDecs(TokenList *list){
     ht_table_t *table = initFncSymtable();
-    PutFncsDecToHT(list, table);
+    if(PutFncsDecToHT(list, table)==NULL)
+    {
+        debug_log("Check return failed \n");
+        return NULL;
+    }
     if (errorCode != SUCCESS){ return NULL;}
     return table;
 }
