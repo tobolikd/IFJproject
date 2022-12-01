@@ -42,6 +42,7 @@ int main()
     if (SyntaxItem->correct == true) // start syn analyzer
     {
         debug_log("Parser ran successfully\n");
+        //printAstStack(SyntaxItem->stackAST);
         codeGenerator(SyntaxItem->stackAST, SyntaxItem->table);
     }
     // free memory
