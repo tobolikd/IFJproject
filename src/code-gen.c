@@ -73,6 +73,9 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 
     AST_item *tmp = NULL; // prevent looping on error in the code gen
     while (!stack_ast_empty(ast)) {
+
+        COMMENT("NEW EXPRESSION IN CODE GEN");
+
         if (errorCode != SUCCESS)
             break;
 
@@ -85,28 +88,37 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 
         switch (tmp->type) {
             case AST_IF:
+                COMMENT("GENERATING IF");
                 PUSH_IF();
                 POP_AND_CALL(genCondition);
+                COMMENT("IF GENERATED");
                 break;
 
             case AST_WHILE:
+                COMMENT("GENERATING WHILE");
                 PUSH_WHILE();
                 INST_LABEL(LABEL_WHILE_BEGIN());
                 POP_AND_CALL(genCondition);
+                COMMENT("WHILE GENERATED");
                 break;
 
             case AST_ELSE:
+                COMMENT("GENERATING ELSE");
                 PUSH_ELSE();
                 INST_LABEL(LABEL_ELSE());
                 AST_POP();
+                COMMENT("ELSE GENERATED");
                 break;
 
             case AST_ASSIGN:
+                COMMENT("GENERATING ASSIGN");
                 AST_POP();
                 genAssign(ast);
+                COMMENT("ASSIGN GENERATED");
                 break;
 
             case AST_FUNCTION_CALL:
+                COMMENT("GENERATING FUNCTION CALL");
                 genFncCall(ast);
                 INST_POPS(VAR_BLACKHOLE()); // dispose the return value
                 if (AST_TOP()->type != AST_END_EXPRESSION) {
@@ -114,9 +126,11 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                     break;
                 }
                 AST_POP();
+                COMMENT("FUNCTION CALL GENERATED");
                 break;
 
             case AST_FUNCTION_DECLARE:
+                COMMENT("GENERATING FUNCTION DECLARE");
                 PUSH_FNC_DECL();
                 // update ctx
                 ctx->currentFncDeclaration = AST_TOP()->data->functionDeclareData->function;
@@ -128,11 +142,14 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                 // define vars in local frame (frame is created on function call)
                 genVarDefs(AST_TOP()->data->functionDeclareData->varSymtable, AST_TOP()->data->functionDeclareData->function);
                 AST_POP();
+                COMMENT("FUNCTION DECLARE GENERATED");
                 break;
 
             case AST_RETURN_VOID:
             case AST_RETURN_EXPR:
+                COMMENT("GENERATING RETURN");
                 genReturn(ast, ctx);
+                COMMENT("RETURN GENERATED");
                 break;
 
             // expressions are postfix
@@ -157,10 +174,13 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 			case AST_STRING:
 			case AST_FLOAT:
 			case AST_NULL:
+                COMMENT("GENERATING EXPRESSION");
                 genExpr(ast); // generate expression, but do nothing with the data
+                COMMENT("EXPRESSION GENERATED");
 				break;
 
             case AST_END_BLOCK:
+                COMMENT("GENERATING BLOCK END");
                 if (stack_code_block_empty(&ctx->blockStack)) {
                     ERR_INTERNAL(codeGenerator, "block ended, but code block stack is empty\n");
                     break;
@@ -211,6 +231,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 
                 stack_code_block_pop(&ctx->blockStack); // pop current code block
                 AST_POP(); // pop block end item
+                COMMENT("BLOCK END GENERATED");
                 break;
 
                 default:
@@ -321,7 +342,7 @@ void genExpr(stack_ast_t *ast) {
             INST_DEFVAR(VAR_AUX(2));
             INST_POPS(VAR_AUX(1));
             INST_POPS(VAR_AUX(2));
-            INST_CONCAT(VAR_AUX(1),VAR_AUX(1),VAR_AUX(2));
+            INST_CONCAT(VAR_AUX(1),VAR_AUX(2),VAR_AUX(1));
             INST_PUSHS(VAR_AUX(1));
             INST_POPFRAME();
             break;

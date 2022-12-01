@@ -377,7 +377,7 @@ bool freeStack(stack_precedence_t *stack, stack_ast_t *ast, bool returnValue)
         }
     }
     else
-        stack_ast_push(ast,ast_item_const(AST_END_EXPRESSION,NULL)); 
+        stack_ast_push(ast,ast_item_const(AST_END_EXPRESSION,NULL));
     return returnValue;
 }
 
@@ -472,7 +472,7 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
         }//end of switch
 
         (*index)++;
-        if (list->TokenArray[*index]->type != t_comma)//does 
+        if (list->TokenArray[*index]->type != t_comma)//does
             break;//                      |
         //if false, it fals through to    V
     } //end of while cycle
