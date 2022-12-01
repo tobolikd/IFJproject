@@ -187,7 +187,7 @@ void genReturn(CODE_GEN_PARAMS);
 #define AST_TOP() stack_ast_bot(ast)
 
 #if DEBUG == 1
-    #define COMMENT(...) do { printf("# "); printf(__VA_ARGS__); printf("\n"); } while (0)
+    #define COMMENT(...) do { printf("\n\n# "); printf(__VA_ARGS__); printf("\n"); } while (0)
 #else
     #define COMMENT(...)
 #endif
