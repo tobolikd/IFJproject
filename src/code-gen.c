@@ -562,9 +562,13 @@ void genString(char *str) {
 void genReturn(CODE_GEN_PARAMS) {
     //main body return
     if (ctx->currentFncDeclaration == NULL){
-        AST_POP();//pop AST_RETURN
         if(AST_TOP()->type == AST_RETURN_EXPR)
+        {
+            AST_POP();//pop AST_RETURN
             genExpr(ast);
+        }
+        else
+            AST_POP();//pop AST_RETURN
         INST_CLEARS();
         INST_POPFRAME();
         INST_EXIT(CONST_INT(0));
