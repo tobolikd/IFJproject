@@ -456,6 +456,7 @@ void genFncCall(stack_ast_t *ast) {
     INST_PUSHFRAME();
     INST_CALL(LABEL(AST_TOP()->data->functionCallData->function->identifier));
     INST_POPFRAME();
+    AST_POP();
 }
 
 void genWrite(stack_ast_t *ast) {
