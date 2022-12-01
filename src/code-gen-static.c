@@ -186,7 +186,6 @@ void genDataTypeComparisons(){
     INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("int"));
     INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_STRING("int"));
     INST_RETURN();
-
     //bool expected
     INST_LABEL(LABEL("expect%bool"));
     INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("bool"));
@@ -201,6 +200,11 @@ void genDataTypeComparisons(){
     INST_LABEL(LABEL("expect%string"));
     INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("string"));
     INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_STRING("string"));
+    INST_RETURN();
+    //nil expected
+    INST_LABEL(LABEL("expect%nil"));
+    INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_NIL());
+    INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_NIL());
     INST_RETURN();
 
     INST_LABEL(LABEL("push%false"));
