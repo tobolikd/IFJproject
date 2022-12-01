@@ -109,6 +109,11 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
             case AST_FUNCTION_CALL:
                 genFncCall(ast);
                 INST_POPS(VAR_BLACKHOLE()); // dispose the return value
+                if (AST_TOP()->type != AST_END_EXPRESSION) {
+                    ERR_INTERNAL(codeGenerator, "function call must be ended with end expession");
+                    break;
+                }
+                AST_POP();
                 break;
 
             case AST_FUNCTION_DECLARE:
@@ -229,6 +234,10 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
             stack_code_block_pop(&ctx->blockStack);
     }
 
+    if (errorCode == SUCCESS) {
+        INST_EXIT(CONST_INT(0));
+    }
+
     free(ctx);
 }
 
@@ -276,6 +285,11 @@ void genExpr(stack_ast_t *ast) {
 
         case AST_FUNCTION_CALL:
             genFncCall(ast);
+            if (AST_TOP()->type != AST_END_EXPRESSION) {
+                ERR_INTERNAL(codeGenerator, "function call must be ended with end expession");
+                break;
+            }
+            AST_POP();
             break;
 
         case AST_ADD:
