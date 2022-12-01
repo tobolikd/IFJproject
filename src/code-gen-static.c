@@ -469,3 +469,102 @@ void genImplicitConversions() {
     INST_JUMPIFEQ(LABEL("conv%arithm%nil%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 }
+void genBuiltInFcs(){
+    //
+    //readi
+    //
+    //
+    INST_LABEL(LABEL("readi"));
+    INST_READ(VAR_BLACKHOLE(), "int");
+    INST_PUSHS(VAR_BLACKHOLE());
+    INST_RETURN();
+    //
+    //readf
+    //
+    INST_LABEL(LABEL("readf"));
+    INST_READ(VAR_BLACKHOLE(), "float");
+    INST_PUSHS(VAR_BLACKHOLE());
+    INST_RETURN();
+    //
+    //reads
+    //
+    INST_LABEL(LABEL("reads"));
+    INST_READ(VAR_BLACKHOLE(), "string");
+    INST_PUSHS(VAR_BLACKHOLE());
+    INST_RETURN();
+    //
+    //chr
+    //
+    INST_LABEL(LABEL("chr"));
+    INST_LABEL(LABEL("type%ok"));
+    INST_INT2CHAR(VAR_BLACKHOLE(), VAR_CODE("LF", "i"));
+    INST_PUSHS(VAR_BLACKHOLE());//pushing back to stack, where we will compute with this in next step.
+    INST_RETURN();
+    //
+    //ord fction
+    //
+    INST_LABEL(LABEL("ord"));
+    INST_DEFVAR(VAR_CODE("LF","ord%cond"));
+    INST_TYPE(VAR_CODE("LF","ord%cond"), VAR_CODE("LF","c"));
+    INST_JUMPIFNEQ(LABEL("ord%len%not0"),VAR_CODE("LF","c"), CONST_STRING(""));
+    INST_PUSHS(CONST_INT(0));//returns 0 if the list length is 0.
+    INST_RETURN();
+    INST_LABEL(LABEL("ord%len%not0"));
+    INST_STRI2INT(VAR_BLACKHOLE(),VAR_CODE("LF", "c"), CONST_INT(0));
+    INST_PUSHS(VAR_BLACKHOLE());
+    INST_RETURN();
+    //
+    //substr
+    //
+    INST_LABEL(LABEL("substring"));
+    COMMENT("generating substring");
+    INST_DEFVAR(VAR_CODE("LF", "length%of%string"));
+    INST_MOVE(VAR_CODE("LF", "length%of%string"), CONST_NIL()); //init
+    INST_STRLEN(VAR_CODE("LF", "length%of%string"),VAR_CODE("LF", "s"));
+
+    //checking condition
+    INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), CONST_INT(0));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if i < 0,  jump and return null
+    INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), CONST_INT(0));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if j < 0,  jump and return null
+    INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), VAR_CODE("LF", "i"));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if j < i,  jump and return null
+    INST_GT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), VAR_CODE("LF", "length%of%string"));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if strlen(s) < j,  jump and return null
+    INST_GT(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), VAR_CODE("LF", "length%of%string"));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if strlen(s) < i,  jump and return null
+    INST_EQ(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), VAR_CODE("LF", "length%of%string"));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));    //if strlen(s) = i,  jump and return null
+    //now we need to return the substring
+    INST_DEFVAR(VAR_CODE("LF","max%len"));
+    INST_DEFVAR(VAR_CODE("LF","max%index"));
+    INST_DEFVAR(VAR_CODE("LF", "return%string"));
+    INST_MOVE(VAR_CODE("LF", "return%string"), CONST_STRING(""));
+    INST_DEFVAR(VAR_CODE("LF", "start%length"));
+    INST_MOVE(VAR_CODE("LF", "start%length"),VAR_CODE("LF", "i"));
+    INST_SUB(VAR_CODE("LF","max%len"), VAR_CODE("LF", "j"), VAR_CODE("LF", "start%length"));
+    //INST_ADD(VAR_CODE("LF","max%len"), VAR_CODE("LF", "j"),CONST_INT(1));
+    INST_LABEL(LABEL("for%cycle"));
+    INST_JUMPIFEQ(LABEL("for%cycle%end"), VAR_CODE("LF", "j"), VAR_CODE("LF", "start%length"));//is starting index now the same as ending index?
+    INST_GETCHAR(VAR_BLACKHOLE(), VAR_CODE("LF", "s"), VAR_CODE("LF", "start%length"));
+    INST_CONCAT(VAR_CODE("LF", "return%string"), VAR_CODE("LF", "return%string"), VAR_BLACKHOLE());
+    INST_ADD(VAR_CODE("LF", "start%length"),VAR_CODE("LF", "start%length"), CONST_INT(1));
+    INST_JUMP(LABEL("for%cycle"));
+    INST_LABEL(LABEL("for%cycle%end"));
+    INST_PUSHS(VAR_CODE("LF", "return%string"));
+    INST_RETURN();
+
+    INST_LABEL(LABEL("is%lt0"));
+    INST_PUSHS(CONST_NIL());//returns null
+    INST_RETURN();
+    //
+    //write is done at code-gen.c
+    //
+    //
+    //strlen
+    //
+    INST_LABEL(LABEL("strlen"));
+    INST_STRLEN(VAR_BLACKHOLE(),VAR_CODE("LF", "s"));
+    INST_PUSHS(VAR_BLACKHOLE());
+    INST_RETURN();
+}
