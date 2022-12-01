@@ -105,12 +105,81 @@ var_type_t functionTypeForFunDec(TokenList *list, int *index)
     return error;
 }
 
+
+bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
+    bool returnFound = false;
+    if (list->TokenArray[*index]->type != t_lCurl) {
+        errorCode = SYNTAX_ERR;
+        debug_log("not ended block of expressions\n");
+        return false;
+    }
+
+    (*index)++;
+
+    // go to end of function declare
+    while (list->TokenArray[*index]->type != t_rCurl) {
+        switch (list->TokenArray[*index]->type) {
+            case t_EOF:
+                errorCode = SYNTAX_ERR;
+                debug_log("not ended function declare\n");
+                return false;
+            case t_while: {
+                while (list->TokenArray[*index]->type != t_lCurl)
+                    (*index)++;
+
+                int nestLevel = 1;
+                // go to while end
+                while (nestLevel != 0) {
+                    if (list->TokenArray[*index]->type != t_lCurl)
+                        nestLevel++;
+                    if (list->TokenArray[*index]->type != t_rCurl)
+                        nestLevel--;
+                    (*index)++;
+                }
+                break;
+                }
+            case t_if:
+                while (list->TokenArray[*index]->type != t_lCurl || list->TokenArray[*index]->type != t_EOF)
+                    (*index)++;
+                if (checkReturn(list, index, currFncDeclare) == true)
+                    returnFound = true;
+                break;
+            case t_else:
+                (*index)++;
+                if (checkReturn(list, index, currFncDeclare) == true && returnFound == true)
+                    return true;
+                else
+                    returnFound = false;
+                break;
+            case t_return:
+                // check if void returns nothing
+                if (currFncDeclare->fnc_data.returnType == void_t) {
+                    if (list->TokenArray[*index + 1]->type != t_semicolon) {
+                        errorCode = SEMANTIC_RETURN_ERR;
+                        debug_log("void function has return statement with expression\n");
+                        return false;
+                    }
+                } else { // check that non void function has return value
+                    if (list->TokenArray[*index + 1]->type == t_semicolon) {
+                        errorCode = SEMANTIC_RETURN_ERR;
+                        debug_log("non void function has empty return");
+                        return false;
+                    }
+                    return true;
+                }
+                break;
+            default:
+                break;
+        }
+        (*index)++;
+    }
+    return false;
+}
+
 /// ! AUXILIARY FUNCTIONS
 
-ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
+ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable) {
     int index = 0;
-    int nestLevel = 0;
-    bool wasReturned = false;
     ht_item_t *currFncDeclare = NULL;
 
     //going through all tokens
@@ -196,62 +265,11 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
                     (index)++;
                 }
 
-                if (list->TokenArray[index]->type != t_lCurl) {
-                    errorCode = SYNTAX_ERR;
-                    debug_log("after return type expected \"}\"\n");
+                if (checkReturn(list, &index, currFncDeclare) == false && currFncDeclare->fnc_data.returnType != void_t) {
+                    errorCode = SEMANTIC_RETURN_ERR;
                     return NULL;
                 }
-
-                // check presence of return statement
-                nestLevel = 0;
-                if (currFncDeclare->fnc_data.returnType == void_t) {
-                    wasReturned = true;
-                } else {
-                    wasReturned = false;
-                }
-
-                // go to end of function declare
-                while (nestLevel != 0 && list->TokenArray[index]->type != t_rCurl) {
-                    switch (list->TokenArray[index]->type) {
-                        case t_EOF:
-                            errorCode = SYNTAX_ERR;
-                            debug_log("not ended function declare\n");
-                            return NULL;
-                        case t_lCurl:
-                            nestLevel++;
-                            break;
-                        case t_rCurl:
-                            nestLevel--;
-                            break;
-                        case t_return:
-                            // check if void returns nothing
-                            if (currFncDeclare->fnc_data.returnType == void_t) {
-                                if (list->TokenArray[index + 1]->type != t_semicolon) {
-                                    errorCode = SEMANTIC_RETURN_ERR;
-                                    debug_log("void function has return statement with expression\n");
-                                    return NULL;
-                                }
-                            } else { // check that non void function has return value
-                                if (list->TokenArray[index + 1]->type == t_semicolon) {
-                                    errorCode = SEMANTIC_RETURN_ERR;
-                                    debug_log("non void function has empty return");
-                                    return NULL;
-                                }
-                                if (nestLevel == 0) {
-                                    wasReturned = true;
-                                }
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                    index++;
-                }
-
-                // check if function has return statement
-                if (!wasReturned) {
-                    errorCode = SEMANTIC_RETURN_ERR;
-                    debug_log("non void function has noo return statement\n");
+                if (errorCode != SUCCESS) {
                     return NULL;
                 }
             }
