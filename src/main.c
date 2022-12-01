@@ -34,7 +34,7 @@ int main()
     }
 
 #if (DEBUG == 1)
-    printTokenList(list);
+    // printTokenList(list);
 #endif
 
     SyntaxItem *SyntaxItem = synAnalyser(list);

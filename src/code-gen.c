@@ -216,6 +216,8 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                             // generate return for void function
                             INST_PUSHS(CONST_NIL());
                             INST_RETURN();
+                        } else {
+                            INST_JUMP(LABEL("no%return"));
                         }
 
                         // make end function label
