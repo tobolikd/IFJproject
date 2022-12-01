@@ -76,7 +76,7 @@ void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
     switch (item->token->type)
     {
     case t_varId:
-        stack_ast_push(stackAST,ast_item_const(AST_VAR,ht_search(fncTable,stack_precedence_top(stack)->token->data)));
+        stack_ast_push(stackAST,ast_item_const(AST_VAR,ht_search(symtable,stack_precedence_top(stack)->token->data)));
         break;
     case t_functionId://dealt with earlier
         debug_log("PA: E -> i rule something went wrong.\n");
