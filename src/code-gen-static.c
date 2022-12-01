@@ -203,8 +203,10 @@ void genDataTypeComparisons(){
     INST_RETURN();
     //nil expected
     INST_LABEL(LABEL("expect%nil"));
-    INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_NIL());
-    INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_NIL());
+    INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("nil"));
+    INST_POPS(VAR_BLACKHOLE());
+    INST_POPS(VAR_BLACKHOLE());
+    INST_PUSHS(CONST_BOOL("true"));
     INST_RETURN();
 
     INST_LABEL(LABEL("push%false"));
@@ -530,18 +532,19 @@ void genBuiltInFcs(){
     INST_STRLEN(VAR_CODE("LF", "length%of%string"),VAR_CODE("LF", "s"));
 
     //checking condition
+    INST_DPRINT(CONST_STRING("DECIDING\n"));
     INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), CONST_INT(0));
-    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if i < 0,  jump and return null
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), CONST_BOOL("true"));   //if i < 0,  jump and return null
     INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), CONST_INT(0));
-    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if j < 0,  jump and return null
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), CONST_BOOL("true"));   //if j < 0,  jump and return null
     INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), VAR_CODE("LF", "i"));
-    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if j < i,  jump and return null
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), CONST_BOOL("true"));   //if j < i,  jump and return null
     INST_GT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), VAR_CODE("LF", "length%of%string"));
-    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if strlen(s) < j,  jump and return null
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), CONST_BOOL("true"));   //if strlen(s) < j,  jump and return null
     INST_GT(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), VAR_CODE("LF", "length%of%string"));
-    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if strlen(s) < i,  jump and return null
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), CONST_BOOL("true"));   //if strlen(s) < i,  jump and return null
     INST_EQ(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), VAR_CODE("LF", "length%of%string"));
-    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));    //if strlen(s) = i,  jump and return null
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), CONST_BOOL("true"));    //if strlen(s) = i,  jump and return null
     //now we need to return the substring
     INST_DEFVAR(VAR_CODE("LF","max%len"));
     INST_DEFVAR(VAR_CODE("LF","max%index"));
@@ -562,6 +565,7 @@ void genBuiltInFcs(){
     INST_RETURN();
 
     INST_LABEL(LABEL("is%lt0"));
+    INST_DPRINT(CONST_STRING("nilnilnil\n"));
     INST_PUSHS(CONST_NIL());//returns null
     INST_RETURN();
     //
