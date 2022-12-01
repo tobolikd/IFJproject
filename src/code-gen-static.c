@@ -566,4 +566,5 @@ void genBuiltInFcs(){
     INST_LABEL(LABEL("strlen"));
     INST_STRLEN(VAR_BLACKHOLE(),VAR_CODE("LF", "s"));
     INST_PUSHS(VAR_BLACKHOLE());
+    INST_RETURN();
 }
