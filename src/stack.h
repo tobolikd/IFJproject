@@ -64,5 +64,6 @@ STACK_DECLARATION(Token *, token)
 STACK_DECLARATION(char *, string)
 STACK_DECLARATION(code_block *, code_block)
 STACK_DECLARATION(PrecedItem *, precedence)
+STACK_DECLARATION(ht_table_t *, declare)
 
 #endif // IFJ_STACK_H

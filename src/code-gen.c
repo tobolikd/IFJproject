@@ -115,6 +115,10 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                 PUSH_FNC_DECL();
                 // update ctx
                 ctx->currentFncDeclaration = AST_TOP()->data->functionDeclareData->function;
+
+                // jump over function
+                INST_JUMP(LABEL_FNC_DECLARE_END());
+
                 INST_LABEL(LABEL(AST_TOP()->data->functionDeclareData->function->identifier));
                 // define vars in local frame (frame is created on function call)
                 genVarDefs(AST_TOP()->data->functionDeclareData->varSymtable, AST_TOP()->data->functionDeclareData->function);
@@ -188,6 +192,10 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                             INST_PUSHS(CONST_NIL());
                             INST_RETURN();
                         }
+
+                        // make end function label
+                        INST_LABEL(LABEL_FNC_DECLARE_END());
+
                         ctx->currentFncDeclaration = NULL;
                         break;
 
@@ -465,6 +473,7 @@ void genWrite(stack_ast_t *ast) {
                 ERR_INTERNAL(genWrite, "not recognised parameter type");
                 break;
         }
+        tmpParam = tmpParam->next;
     }
 
     // push return value to stack
