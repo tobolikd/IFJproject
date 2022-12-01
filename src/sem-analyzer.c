@@ -155,13 +155,13 @@ bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
                 // check if void returns nothing
                 if (currFncDeclare->fnc_data.returnType == void_t) {
                     if (list->TokenArray[*index + 1]->type != t_semicolon) {
-                        errorCode = SEMANTIC_RETURN_ERR;
+                        errorCode = SEMANTIC_PARAMETER_ERR;
                         debug_log("void function has return statement with expression\n");
                         return false;
                     }
                 } else { // check that non void function has return value
                     if (list->TokenArray[*index + 1]->type == t_semicolon) {
-                        errorCode = SEMANTIC_RETURN_ERR;
+                        errorCode = SEMANTIC_PARAMETER_ERR;
                         debug_log("non void function has empty return");
                         return false;
                     }
