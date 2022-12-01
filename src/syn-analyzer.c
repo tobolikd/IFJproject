@@ -479,22 +479,32 @@ bool statement(SYN_ANALYZER_PARAMS)
 bool seqStats(SYN_ANALYZER_PARAMS)
 {
     // debug_log("SEQ-STAT %i ", *index);
-    bool end;
-    end = statement(list, index, table, stackSyn);
-    if ((*index) == list->length || end == false || list->TokenArray[*index]->type == t_EOF)
+    bool programContinue;   // if program return false, exit to propagate Error
+    programContinue = statement(list, index, table, stackSyn);
+    if ((*index) == list->length || list->TokenArray[*index]->type == t_EOF)
     {
         debug_log("End of program\n");
         return true;
     }
-    end = functionDeclare(list, index, table, stackSyn);
-    if ((*index) == list->length || end == false || list->TokenArray[*index]->type == t_EOF)
+    if (programContinue == false)
+    {
+        debug_log("End of program\n");
+        return false;
+    }
+    programContinue = functionDeclare(list, index, table, stackSyn);
+    if ((*index) == list->length || list->TokenArray[*index]->type == t_EOF)
     {
         debug_log("End of program\n");
         return true;
+    }
+    if (programContinue == false)
+    {
+        debug_log("End of program\n");
+        return false;
     }
     (*index)++;
     debug_log("\nLIST LENGHT: %d\n", list->length);
-    if ((*index) == list->length || end == false || list->TokenArray[*index]->type == t_EOF)
+    if ((*index) == list->length || list->TokenArray[*index]->type == t_EOF)
     {
         debug_log("End of program\n");
         return true;
@@ -551,7 +561,7 @@ SyntaxItem *synAnalyser(TokenList *list)
     if (stackSyn == NULL)
     {
         MALLOC_ERR;
-        return SyntaxItemCtor(NULL, NULL, false);
+        return SyntaxItemCtor(table, stackSyn, false);
     }
     stack_ast_init(stackSyn);
     stack_declare_init(&stackDeclare); // initialize stack for Function Frames
@@ -560,8 +570,7 @@ SyntaxItem *synAnalyser(TokenList *list)
     if (checkSyntax(list, &index, table, stackSyn) == false)
     {
         debug_log("HELLO DEBILKU\n");
-        SyntaxDtor(table, stackSyn);
-        return SyntaxItemCtor(NULL, NULL, false);
+        return SyntaxItemCtor(table, stackSyn, false);
     }
 
     return SyntaxItemCtor(table, stackSyn, true);

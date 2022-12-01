@@ -35,9 +35,10 @@ int main () {
 #endif
 
     SyntaxItem *SyntaxItem = synAnalyser(list);
+    debug_log("BOOL VALUE: %s\n", SyntaxItem->correct ? "true" : "false");
     if (SyntaxItem->correct == true) // start syn analyzer
     {
-        debug_log("TADY NE \n");
+        debug_log("Parser ran successfully\n");
         codeGenerator(SyntaxItem->stackAST, SyntaxItem->table);
     }
     // free memory
