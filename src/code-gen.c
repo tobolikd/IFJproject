@@ -473,6 +473,7 @@ void genWrite(stack_ast_t *ast) {
                 ERR_INTERNAL(genWrite, "not recognised parameter type");
                 break;
         }
+        tmpParam = tmpParam->next;
     }
 
     // push return value to stack
