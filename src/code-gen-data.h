@@ -49,6 +49,12 @@ void genExitLabels();
  */
 void genImplicitConversions();
 
+
+void genDataTypeComparisons();
+
+
+void genSemanticTypeCheck();
+
 #define AUX1 VAR_CODE("GF", "aux%1")
 #define AUX2 VAR_CODE("GF", "aux%2")
 
