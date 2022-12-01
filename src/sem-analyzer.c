@@ -10,6 +10,8 @@
 #include <string.h>
 
 
+/// AUXILIARY FUNCTIONS
+
 ht_table_t *initFncSymtable()
 {
     ht_table_t *fncSymtable = ht_init();
@@ -103,8 +105,14 @@ var_type_t functionTypeForFunDec(TokenList *list, int *index)
     return error;
 }
 
+/// ! AUXILIARY FUNCTIONS
+
 ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
     int index = 0;
+    int nestLevel = 0;
+    bool wasReturned = false;
+    ht_item_t *currFncDeclare = NULL;
+
     //going through all tokens
     while(list->TokenArray[index]->type != t_EOF){
         //finding token with type t_function (declaration of fction)
@@ -114,15 +122,15 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
             if(list->TokenArray[index]->type != t_functionId){errorCode = SYNTAX_ERR; return NULL;}
 
             //creating item with functionID as param, type is just temporary set to void_t, will change it at the end of the while loop
-            ht_item_t *tmp = ht_insert(fncSymtable, list->TokenArray[index]->data, void_t, true);
+            currFncDeclare = ht_insert(fncSymtable, list->TokenArray[index]->data, void_t, true);
 
             //redeclaration of fction happened
-            if(tmp == NULL){
+            if(currFncDeclare == NULL){
                 errorCode = SEMANTIC_FUNCTION_DEFINITION_ERR;
                 debug_log("redeclaration of fction %i", errorCode);
                 return NULL;
             }
-            //debug_log(" item identifier %s\n", tmp->identifier);
+            //debug_log(" item identifier %s\n", currFncDeclare->identifier);
 
             (index)++;
             //checking if next token is lPar
@@ -142,7 +150,7 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
                     if (list->TokenArray[index]->type != t_varId) { errorCode = SYNTAX_ERR;return NULL;}
 
                     //appending first param to our function
-                    ht_param_append(tmp, list->TokenArray[index]->data, tmpParamType);
+                    ht_param_append(currFncDeclare, list->TokenArray[index]->data, tmpParamType);
                     //debug_log("param %s \n", tmp->fnc_data.params->varId);
                     (index)++;
                     //there are more params
@@ -158,8 +166,8 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
                                 (index)++;
                                 if (list->TokenArray[index]->type != t_varId) {errorCode = SYNTAX_ERR;return NULL;}
 
-                                ht_param_append(tmp, list->TokenArray[index]->data, tmpParamType);
-                                //debug_log("another param %s\n", tmp->fnc_data.params->next->varId);
+                                ht_param_append(currFncDeclare, list->TokenArray[index]->data, tmpParamType);
+                                //debug_log("another param %s\n", currFncDeclare->fnc_data.params->next->varId);
                                 (index)++;
                                 //now the token can only be comma or ')'
                                 if (list->TokenArray[index]->type != t_rPar && list->TokenArray[index]->type != t_comma) {errorCode = SYNTAX_ERR; return NULL;}
@@ -183,9 +191,68 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
                     if(errorCode == SYNTAX_ERR){return NULL;}
 
                     //setting return type of our newly declared function
-                    tmp->fnc_data.returnType = functionTypeForFunDec(list, &index);
-                    debug_log("return type %i\n", tmp->fnc_data.returnType);
+                    currFncDeclare->fnc_data.returnType = functionTypeForFunDec(list, &index);
+                    debug_log("return type %i\n", currFncDeclare->fnc_data.returnType);
                     (index)++;
+                }
+
+                if (list->TokenArray[index]->type != t_lCurl) {
+                    errorCode = SYNTAX_ERR;
+                    debug_log("after return type expected \"}\"\n");
+                    return NULL;
+                }
+
+                // check presence of return statement
+                nestLevel = 0;
+                if (currFncDeclare->fnc_data.returnType == void_t) {
+                    wasReturned = true;
+                } else {
+                    wasReturned = false;
+                }
+
+                // go to end of function declare
+                while (nestLevel != 0 && list->TokenArray[index]->type != t_rCurl) {
+                    switch (list->TokenArray[index]->type) {
+                        case t_EOF:
+                            errorCode = SYNTAX_ERR;
+                            debug_log("not ended function declare\n");
+                            return NULL;
+                        case t_lCurl:
+                            nestLevel++;
+                            break;
+                        case t_rCurl:
+                            nestLevel--;
+                            break;
+                        case t_return:
+                            // check if void returns nothing
+                            if (currFncDeclare->fnc_data.returnType == void_t) {
+                                if (list->TokenArray[index + 1]->type != t_semicolon) {
+                                    errorCode = SEMANTIC_RETURN_ERR;
+                                    debug_log("void function has return statement with expression\n");
+                                    return NULL;
+                                }
+                            } else { // check that non void function has return value
+                                if (list->TokenArray[index + 1]->type == t_semicolon) {
+                                    errorCode = SEMANTIC_RETURN_ERR;
+                                    debug_log("non void function has empty return");
+                                    return NULL;
+                                }
+                                if (nestLevel == 0) {
+                                    wasReturned = true;
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    index++;
+                }
+
+                // check if function has return statement
+                if (!wasReturned) {
+                    errorCode = SEMANTIC_RETURN_ERR;
+                    debug_log("non void function has noo return statement\n");
+                    return NULL;
                 }
             }
         }
