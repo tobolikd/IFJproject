@@ -179,6 +179,8 @@ void genReturn(CODE_GEN_PARAMS);
 #define LABEL_WHILE_BEGIN() printf("while_begin%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
 #define LABEL_WHILE_END() printf("while_end%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
 
+// function declare
+#define LABEL_FNC_DECLARE_END() printf("end%%fnc%%%s", ctx->currentFncDeclaration->identifier)
 
 // help functions
 #define AST_POP() stack_ast_pop_b(ast)
