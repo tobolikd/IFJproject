@@ -105,89 +105,60 @@ var_type_t functionTypeForFunDec(TokenList *list, int *index)
     return error;
 }
 
-
 bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
-    bool returnFound = false;
+    int nestedLevel = 1;
+
     if (list->TokenArray[*index]->type != t_lCurl) {
         errorCode = SYNTAX_ERR;
-        debug_log("not ended block of expressions\n");
+        debug_log("block expression doesnt start with \"{\"\n");
         return false;
     }
 
     (*index)++;
 
     // go to end of function declare
-    while (list->TokenArray[*index]->type != t_rCurl) {
+    while (nestedLevel != 0) {
         switch (list->TokenArray[*index]->type) {
             case t_EOF:
                 errorCode = SYNTAX_ERR;
                 debug_log("not ended function declare\n");
                 return false;
-            case t_while: {
-                while (list->TokenArray[*index]->type != t_lCurl)
-                    (*index)++;
-
-                int nestLevel = 1;
-                // go to while end
-                while (nestLevel != 0) {
-                    if (list->TokenArray[*index]->type != t_lCurl)
-                        nestLevel++;
-                    if (list->TokenArray[*index]->type != t_rCurl)
-                        nestLevel--;
-                    (*index)++;
-                }
+            case t_lCurl:
+                nestedLevel++;
                 break;
-                }
-            case t_if:
-                while (list->TokenArray[*index]->type != t_EOF)
-                {
-                    if (list->TokenArray[*index]->type == t_lCurl)
-                        break;
-                   (*index)++;
-                }
-                debug_log("Going to if ..\n");
-                if (checkReturn(list, index, currFncDeclare) == true)
-                    returnFound = true;
-                debug_log("returned from if ..\n");
-                (*index)--;
-                break;
-
-            case t_else:
-                (*index)++;
-                debug_log("Going to else ..\n");
-                if (checkReturn(list, index, currFncDeclare) == true && returnFound == true){
-                    debug_log("Found return in both if and else ..\n");
-                    return true;
-                }
-                else
-                    returnFound = false;
-                debug_log("Did not found in else ..\n");
-
+            case t_rCurl:
+                nestedLevel--;
                 break;
             case t_return:
                 // check if void returns nothing
                 if (currFncDeclare->fnc_data.returnType == void_t) {
                     if (list->TokenArray[(*index) + 1]->type != t_semicolon) {
-                        errorCode = SEMANTIC_RETURN_ERR;
+                        THROW_ERROR(SEMANTIC_RETURN_ERR, list->TokenArray[*index]->lineNum);
                         debug_log("void function has return statement with expression\n");
                         return false;
                     }
                 } else { // check that non void function has return value
                     if (list->TokenArray[(*index) + 1]->type == t_semicolon) {
-                        THROW_ERROR(SEMANTIC_RETURN_ERR,list->TokenArray[(*index) + 1]->lineNum);
-                        debug_log("non void function has empty return");
+                        THROW_ERROR(SEMANTIC_RETURN_ERR,list->TokenArray[*index]->lineNum);
+                        debug_log("non void function has empty return\n");
                         return false;
                     }
-                    return true;
                 }
                 break;
+            case t_function:
+                THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+                debug_log("nested function declaration\n");
+                return false;
             default:
                 break;
         }
         (*index)++;
     }
+
+    // on index is right curly bracket, icrease index to skip it
     (*index)++;
-    return false;
+    // no incompatibility found
+    return true;
 }
 
 /// ! AUXILIARY FUNCTIONS
@@ -279,13 +250,8 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable) {
                     (index)++;
                 }
 
-                if (checkReturn(list, &index, currFncDeclare) == false && currFncDeclare->fnc_data.returnType != void_t) {
-                    THROW_ERROR(SEMANTIC_PARAMETER_ERR,list->TokenArray[index]->lineNum);
-                    debug_log("check Return fffff \n");
-
-                    return NULL;
-                }
-                if (errorCode != SUCCESS) {
+                if(checkReturn(list, &index, currFncDeclare) == false) {
+                    debug_log("checkReturn returned false\n");
                     return NULL;
                 }
                 debug_log("got through return check \n");
