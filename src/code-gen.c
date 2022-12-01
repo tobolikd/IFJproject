@@ -278,6 +278,10 @@ void genExpr(stack_ast_t *ast) {
             INST_PUSHS(CONST_STRING(item->data->stringValue));
             break;
 
+        case AST_NULL:
+            INST_PUSHS(CONST_NIL());
+            break;
+
         case AST_VAR:
             CHECK_INIT(VAR_CODE("LF",item->data->variable->identifier));
             INST_PUSHS(VAR_CODE("LF",item->data->variable->identifier));
@@ -285,7 +289,8 @@ void genExpr(stack_ast_t *ast) {
 
         case AST_FUNCTION_CALL:
             genFncCall(ast);
-            break;
+            item =AST_TOP();//show next
+            continue;
 
         case AST_ADD:
             INST_CALL(LABEL("conv%arithmetic"));

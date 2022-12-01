@@ -795,9 +795,9 @@ void listDtor(TokenList *list)
 void printToken(Token*token)
 {
     if (token->data == NULL)
-        printf("%d %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type]);
+        debug_log("%d %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type]);
     else
-        printf("%d %s %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type], token->data);
+        debug_log("%d %s %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type], token->data);
 }
 
 
