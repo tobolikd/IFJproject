@@ -495,6 +495,7 @@ void genWrite(stack_ast_t *ast) {
                 INST_WRITE(CONST_STRING(""));
                 break;
             case AST_P_VAR:
+                CHECK_INIT(VAR_CODE("LF", tmpParam->data->variable->identifier));
                 INST_WRITE(VAR_CODE("LF", tmpParam->data->variable->identifier));
                 break;
             default:
