@@ -373,10 +373,15 @@ void genExpr(stack_ast_t *ast) {
         }
 
     AST_POP();//pop current
-    item =AST_TOP();//show next
+    item = AST_TOP();//show next
     }
-    AST_POP();//pop AST_END_EXPR
 
+    if (AST_TOP()->type != AST_END_EXPRESSION) {
+        ERR_INTERNAL(genExpr, "wrong end of expression");
+        return;
+    }
+
+    AST_POP();//pop AST_END_EXPR
 }
 
 void genFncCall(stack_ast_t *ast) {

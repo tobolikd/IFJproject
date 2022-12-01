@@ -129,7 +129,7 @@ void genReturn(CODE_GEN_PARAMS);
 #define INST_NOTS() printf("NOTS\n")
 #define INST_INT2FLOAT(var, symb) do { printf("INT2FLOAT "); var; SPACE symb; printf("\n"); } while (0)
 #define INST_FLOAT2INT(var, symb) do { printf("FLOAT2INT "); var; SPACE symb; printf("\n"); } while (0)
-#define INST_INT2CHAR(var, symb) do { printf("INT2CHAR"); var; SPACE symb; printf("\n"); } while (0)
+#define INST_INT2CHAR(var, symb) do { printf("INT2CHAR "); var; SPACE symb; printf("\n"); } while (0)
 #define INST_STRI2INT(var, symb1,symb2) do { printf("STRI2INT"); var; SPACE symb1; SPACE symb2; printf("\n"); } while (0)
 #define INST_INT2FLOATS() printf("INT2FLOATS\n")
 #define INST_FLOAT2INTS() printf("FLOAT2INTS\n")
