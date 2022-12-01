@@ -169,8 +169,8 @@ void genDataTypeComparisons(){
 
 	INST_POPS(AUX1); // read value of operand
 	INST_POPS(AUX2); // read value of operand
-	INST_PUSHS(AUX2); 
-	INST_PUSHS(AUX1); 
+	INST_PUSHS(AUX2);
+	INST_PUSHS(AUX1);
 
 	INST_TYPE(AUX1, AUX1);//get types
 	INST_TYPE(AUX2, AUX2);
@@ -375,6 +375,7 @@ void genImplicitConversions() {
     // aux function - convert stack top to float
     INST_LABEL(LABEL("conv%to%float"));
     INST_POPS(VAR_BLACKHOLE());
+    INST_PUSHS(VAR_BLACKHOLE());
 
     INST_TYPE(VAR_BLACKHOLE(), VAR_BLACKHOLE());
     INST_JUMPIFEQ(LABEL("conv%to%float%int"), VAR_BLACKHOLE(), CONST_STRING("int"));
@@ -382,16 +383,20 @@ void genImplicitConversions() {
     INST_JUMPIFEQ(LABEL("conv%to%float%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 
+    // int on stack
     INST_LABEL(LABEL("conv%to%float%int"));
+    INST_POPS(VAR_BLACKHOLE());
     INST_INT2FLOAT(VAR_BLACKHOLE(), VAR_BLACKHOLE());
     INST_PUSHS(VAR_BLACKHOLE());
     INST_RETURN();
 
+    // float on stack
     INST_LABEL(LABEL("conv%to%float%float"));
-    INST_PUSHS(VAR_BLACKHOLE());
     INST_RETURN();
 
+    // nil on stack
     INST_LABEL(LABEL("conv%to%float%nil"));
+    INST_POPS(VAR_BLACKHOLE());
     INST_PUSHS(CONST_FLOAT((double) 0));
     INST_RETURN();
 
