@@ -110,7 +110,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                 genFncCall(ast);
                 INST_POPS(VAR_BLACKHOLE()); // dispose the return value
                 if (AST_TOP()->type != AST_END_EXPRESSION) {
-                    ERR_INTERNAL(codeGenerator, "function call must be ended with end expession");
+                    ERR_INTERNAL(codeGenerator, "function call must be ended with end expession\n");
                     break;
                 }
                 AST_POP();
@@ -149,7 +149,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
 			case AST_LESS:
 			case AST_LESS_EQUAL:
             case AST_END_EXPRESSION:
-                ERR_INTERNAL(codeGenerator, "empty operation on top of ast");
+                ERR_INTERNAL(codeGenerator, "empty operation on top of ast\n");
                 break;
             // begining of postfix expression
 			case AST_VAR:
@@ -285,11 +285,6 @@ void genExpr(stack_ast_t *ast) {
 
         case AST_FUNCTION_CALL:
             genFncCall(ast);
-            if (AST_TOP()->type != AST_END_EXPRESSION) {
-                ERR_INTERNAL(codeGenerator, "function call must be ended with end expession");
-                break;
-            }
-            AST_POP();
             break;
 
         case AST_ADD:
