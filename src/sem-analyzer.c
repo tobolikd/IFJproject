@@ -109,7 +109,7 @@ bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
     int nestedLevel = 1;
 
     if (list->TokenArray[*index]->type != t_lCurl) {
-        errorCode = SYNTAX_ERR;
+        THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
         debug_log("block expression doesnt start with \"{\"\n");
         return false;
     }
@@ -155,8 +155,8 @@ bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
         (*index)++;
     }
 
-    // on index is right curly bracket, icrease index to skip it
-    (*index)++;
+    // undo getting culry bracket
+    (*index)--;
     // no incompatibility found
     return true;
 }
@@ -177,6 +177,8 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable) {
 
             //creating item with functionID as param, type is just temporary set to void_t, will change it at the end of the while loop
             currFncDeclare = ht_insert(fncSymtable, list->TokenArray[index]->data, void_t, true);
+
+            debug_log("new function found: %s\n", currFncDeclare->identifier);
 
             //redeclaration of fction happened
             if(currFncDeclare == NULL){
@@ -254,7 +256,7 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable) {
                     debug_log("checkReturn returned false\n");
                     return NULL;
                 }
-                debug_log("got through return check \n");
+                debug_log("got through return check ended on line %d\n", list->TokenArray[index]->lineNum);
             }
         }
         //raising index and going back to loop, where we check if the token is last token
