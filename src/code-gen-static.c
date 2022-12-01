@@ -565,7 +565,6 @@ void genBuiltInFcs(){
     INST_RETURN();
 
     INST_LABEL(LABEL("is%lt0"));
-    INST_DPRINT(CONST_STRING("nilnilnil\n"));
     INST_PUSHS(CONST_NIL());//returns null
     INST_RETURN();
     //
