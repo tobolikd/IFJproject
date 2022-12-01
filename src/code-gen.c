@@ -329,19 +329,6 @@ void genExpr(stack_ast_t *ast) {
         case AST_EQUAL:
         case AST_NOT_EQUAL:
             INST_CALL(LABEL("type%cmp"));//2 oprands already on stack
-            INST_POPS(AUX1);//bool result of type%cmp
-
-            //if types are not the same skip evaluation of eq, push false
-	        INST_JUMPIFNEQ(LABEL("incompatible%types"), AUX1, CONST_BOOL("true"));
-            INST_EQS();
-            INST_JUMP(LABEL("leave%eq"));//skip incompatible types
-
-            INST_LABEL(LABEL("incompatible%types"));
-            INST_POPS(VAR_BLACKHOLE());//pop operand
-            INST_POPS(VAR_BLACKHOLE());//pop operand
-            INST_PUSHS(CONST_BOOL("false"));
-
-            INST_LABEL(LABEL("leave%eq"));
             if (item->type == AST_NOT_EQUAL)
                 INST_NOTS();//negate the outcome
 

@@ -208,11 +208,13 @@ void genDataTypeComparisons(){
     INST_RETURN();
 
     INST_LABEL(LABEL("push%false"));
+    INST_POPS(VAR_BLACKHOLE());
+    INST_POPS(VAR_BLACKHOLE());
     INST_PUSHS(CONST_BOOL("false"));
     INST_RETURN();
 
     INST_LABEL(LABEL("push%true"));
-    INST_PUSHS(CONST_BOOL("true"));
+    INST_EQS();
     INST_RETURN();
 }
 
