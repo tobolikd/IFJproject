@@ -49,24 +49,11 @@ void genExitLabels();
  */
 void genImplicitConversions();
 
-/* genCond
- *
- * stack - top relational operation
- * output - generated comparison
- *
- * based on operator convert if needed
- *
- * result (boolean) will be stored on stack
- */
-void genCond(CODE_GEN_PARAMS);
 
-/* genFncDeclare
- *
- * stack top - function declaration item
- * output - generated label and get local frame
- * save declared function to ctx
- */
-void genFncDeclare(CODE_GEN_PARAMS);
+void genDataTypeComparisons();
+
+
+void genSemanticTypeCheck();
 
 #define AUX1 VAR_CODE("GF", "aux%1")
 #define AUX2 VAR_CODE("GF", "aux%2")
