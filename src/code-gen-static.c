@@ -521,7 +521,6 @@ void genBuiltInFcs(){
     INST_DEFVAR(VAR_CODE("LF", "length%of%string"));
     INST_MOVE(VAR_CODE("LF", "length%of%string"), CONST_NIL()); //init
     INST_STRLEN(VAR_CODE("LF", "length%of%string"),VAR_CODE("LF", "s"));
-
     //checking condition
     INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), CONST_INT(0));
     INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if i < 0,  jump and return null
