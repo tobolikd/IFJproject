@@ -312,9 +312,9 @@ Element getIndex(Token *input, ht_table_t* symtable)
             if (!strcmp(input->data,">="))
                 return OPERATOR_GE;
             if (!strcmp(input->data,">"))
-                return OPERATOR_LT;
-            if (!strcmp(input->data,"<"))
                 return OPERATOR_GT;
+            if (!strcmp(input->data,"<"))
+                return OPERATOR_LT;
             return UNINITIALISED;
 
         case t_varId:
