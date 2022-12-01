@@ -522,17 +522,17 @@ void genBuiltInFcs(){
     INST_MOVE(VAR_CODE("LF", "length%of%string"), CONST_NIL()); //init
     INST_STRLEN(VAR_CODE("LF", "length%of%string"),VAR_CODE("LF", "s"));
 
-    //checking conditions
+    //checking condition
     INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), CONST_INT(0));
-    INST_JUMPIFNEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if i < 0,  jump and return null
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if i < 0,  jump and return null
     INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), CONST_INT(0));
-    INST_JUMPIFNEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if j < 0,  jump and return null
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if j < 0,  jump and return null
     INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), VAR_CODE("LF", "i"));
-    INST_JUMPIFNEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if j < i,  jump and return null
-    INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), VAR_CODE("LF", "length%of%string"));
-    INST_JUMPIFNEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if strlen(s) < j,  jump and return null
-    INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), VAR_CODE("LF", "length%of%string"));
-    INST_JUMPIFNEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if strlen(s) < i,  jump and return null
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if j < i,  jump and return null
+    INST_GT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), VAR_CODE("LF", "length%of%string"));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if strlen(s) < j,  jump and return null
+    INST_GT(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), VAR_CODE("LF", "length%of%string"));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));   //if strlen(s) < i,  jump and return null
     INST_EQ(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), VAR_CODE("LF", "length%of%string"));
     INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), printf("bool@true"));    //if strlen(s) = i,  jump and return null
     //now we need to return the substring
@@ -555,7 +555,7 @@ void genBuiltInFcs(){
     INST_RETURN();
 
     INST_LABEL(LABEL("is%lt0"));
-    INST_POPS(CONST_NIL());//returns null
+    INST_PUSHS(CONST_NIL());//returns null
     INST_RETURN();
     //
     //write is done at code-gen.c
