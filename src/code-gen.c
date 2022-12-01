@@ -169,10 +169,10 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                 switch (stack_code_block_top(&ctx->blockStack)->type) {
                     case BLOCK_IF:
 #if DEBUG == 1          // after if block has to be else
-                        if (ast->top->next == NULL) {
+                        if (ast->bottom->previous == NULL) {
                             ERR_INTERNAL(codeGenerator, "if block ended, next item should be else, but is NULL\n");
                         }
-                        else if (ast->top->next->data->type != AST_ELSE) {
+                        else if (ast->bottom->previous->data->type != AST_ELSE) {
                             ERR_INTERNAL(codeGenerator, "if block ended, next item should be else, but is not\n");
                             printAstStack(ast);
                         }
