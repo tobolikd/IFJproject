@@ -24,6 +24,7 @@ void genBuiltIns() {
     genImplicitConversions();
     genSemanticTypeCheck();
     genDataTypeComparisons();
+    genBuiltInFcs();
 
     genExitLabels();
 
