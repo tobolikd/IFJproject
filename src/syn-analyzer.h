@@ -25,13 +25,13 @@ typedef struct
 } SyntaxItem;
 
 SyntaxItem *SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct);
-void SyntaxDtor(ht_table_t *table, stack_ast_t *stackAST);
+void SyntaxDtor(SyntaxItem *SyntaxItem);
 
 bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
 bool param(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
 bool typeCheck(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
 bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
-bool functionDeclare(SYN_ANALYZER_PARAMS);
+bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn);
 bool statList(SYN_ANALYZER_PARAMS);
 bool statement(SYN_ANALYZER_PARAMS);
 bool seqStats(SYN_ANALYZER_PARAMS);

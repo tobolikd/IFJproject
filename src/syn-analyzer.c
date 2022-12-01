@@ -17,7 +17,7 @@
 #include <string.h>
 
 enum ifjErrCode errorCode;
-ht_table_t *fncTable; // extern missing?
+ht_table_t *fncTable;
 
 // list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
@@ -164,7 +164,7 @@ bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 }
 
 // <fnc-decl> -> function functionId ( <param> ) : <fnc-type> { <st-list> }
-bool functionDeclare(SYN_ANALYZER_PARAMS)
+bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
 {
     debug_log("FNC-DECL %i ", *index);
     if (list->TokenArray[*index]->type == t_function)
@@ -491,7 +491,7 @@ bool seqStats(SYN_ANALYZER_PARAMS)
         debug_log("End of program\n");
         return false;
     }
-    programContinue = functionDeclare(list, index, table, stackSyn);
+    programContinue = functionDeclare(list, index, stackSyn);
     if ((*index) == list->length || list->TokenArray[*index]->type == t_EOF)
     {
         debug_log("End of program\n");
@@ -527,20 +527,16 @@ bool checkSyntax(SYN_ANALYZER_PARAMS)
     return true;
 }
 
-void SyntaxDtor(ht_table_t *table, stack_ast_t *stackAST)
+void SyntaxDtor(SyntaxItem *SyntaxItem)
 {
-    ht_delete_all(table);
-    while (!stack_ast_empty(stackAST))
+    ht_delete_all(SyntaxItem->table);
+    while (!stack_ast_empty(SyntaxItem->stackAST))
     {
-        stack_ast_pop(stackAST);
+        stack_ast_pop(SyntaxItem->stackAST);
     }
 
-    while (!stack_declare_empty(&stackDeclare))
-    {
-        stack_declare_pop(&stackDeclare);
-    }
-
-    free(stackAST);
+    free(SyntaxItem->stackAST);
+    free(SyntaxItem);
 }
 
 SyntaxItem *SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct)
@@ -569,7 +565,7 @@ SyntaxItem *synAnalyser(TokenList *list)
     /* RECURSIVE DESCENT */
     if (checkSyntax(list, &index, table, stackSyn) == false)
     {
-        debug_log("HELLO DEBILKU\n");
+        debug_log("Check Syntax returned false\n");
         return SyntaxItemCtor(table, stackSyn, false);
     }
 
