@@ -11,6 +11,7 @@
 #include "syn-analyzer.h"
 #include "error-codes.h"
 #include "symtable.h"
+#include "stack.h"
 
 #define SYN_ANALYZER_PARAMS TokenList *list, int *index, ht_table_t *table, stack_ast_t *stackSyn
 #define SYN_ANALYZER_TYPE_N_PARAM_PARAMS TokenList *list, int *index
