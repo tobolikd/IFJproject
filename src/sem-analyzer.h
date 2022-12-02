@@ -35,4 +35,6 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable);
 ///@return NULL when error with redeclaration of fction or other
 ht_table_t *InitializedHTableFnctionDecs(TokenList *list);
 
+bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare);
+
 #endif // IFJ_SEM_ANALYZER_H

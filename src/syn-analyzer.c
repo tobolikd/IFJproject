@@ -18,6 +18,7 @@
 
 enum ifjErrCode errorCode;
 ht_table_t *fncTable;
+stack_declare_t stackDeclare;
 
 // list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
 // list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
@@ -390,6 +391,11 @@ bool statement(SYN_ANALYZER_PARAMS)
                 if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
                 {
                     return true;
+                }
+                else
+                {
+                    THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+                    return false;
                 }
             }
             else if (list->TokenArray[*index]->type == t_assign) // <r-side> -> = <expr>

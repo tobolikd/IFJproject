@@ -30,7 +30,7 @@ int checkProlog(FILE* fp, int *lineNum)
                             char c = fgetc(fp);
                             ungetc(c,fp); //if end of line i want to catch it in KA
                             //white sign, comment..
-                            if (c=='\n' || c ==EOF || c == ' ' || c == '\t' || c == '/')
+                            if (c=='\n' || c ==EOF || c == ' ' || c == '\t' || c == '/'|| c == '\r')
                                 //check declare type ..
                                 if(!checkDeclare(fp,lineNum))
                                     return 0;
@@ -358,9 +358,9 @@ Token* getToken(FILE* fp,int *lineNum)
         {
         case Start:
             //white signs
-            if (curEdge == ' ' || curEdge == '\t')
+            if (curEdge == ' ' || curEdge == '\t' || curEdge == '\r')
                 break;
-            if (curEdge == '\n')//count number of lines for function foundToken & debug
+            if (curEdge == '\n' )//count number of lines for function foundToken & debug
             {
                 *lineNum = *lineNum +1;
                 break;
@@ -795,9 +795,9 @@ void listDtor(TokenList *list)
 void printToken(Token*token)
 {
     if (token->data == NULL)
-        printf("%d %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type]);
+        debug_log("%d %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type]);
     else
-        printf("%d %s %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type], token->data);
+        debug_log("%d %s %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type], token->data);
 }
 
 

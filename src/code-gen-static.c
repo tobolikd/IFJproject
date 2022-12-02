@@ -24,6 +24,7 @@ void genBuiltIns() {
     genImplicitConversions();
     genSemanticTypeCheck();
     genDataTypeComparisons();
+    genBuiltInFcs();
 
     genExitLabels();
 
@@ -103,6 +104,13 @@ void genExitLabels() {
     INST_CLEARS();
     INST_POPFRAME();
     INST_EXIT(CONST_INT(SEMANTIC_RUN_PARAMETER_ERR));
+
+    // missing return
+    INST_LABEL(LABEL("no%return"));
+    INST_DPRINT(CONST_STRING("No return from function was called\n"));
+    INST_CLEARS();
+    INST_POPFRAME();
+    INST_EXIT(CONST_INT(SEMANTIC_PARAMETER_ERR));
 }
 
 void genSemanticTypeCheck(){
@@ -168,8 +176,8 @@ void genDataTypeComparisons(){
 
 	INST_POPS(AUX1); // read value of operand
 	INST_POPS(AUX2); // read value of operand
-	INST_PUSHS(AUX2); 
-	INST_PUSHS(AUX1); 
+	INST_PUSHS(AUX2);
+	INST_PUSHS(AUX1);
 
 	INST_TYPE(AUX1, AUX1);//get types
 	INST_TYPE(AUX2, AUX2);
@@ -185,7 +193,6 @@ void genDataTypeComparisons(){
     INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("int"));
     INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_STRING("int"));
     INST_RETURN();
-
     //bool expected
     INST_LABEL(LABEL("expect%bool"));
     INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("bool"));
@@ -201,13 +208,22 @@ void genDataTypeComparisons(){
     INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("string"));
     INST_JUMPIFEQ(LABEL("push%true"), AUX2, CONST_STRING("string"));
     INST_RETURN();
+    //nil expected
+    INST_LABEL(LABEL("expect%nil"));
+    INST_JUMPIFNEQ(LABEL("push%false"), AUX2, CONST_STRING("nil"));
+    INST_POPS(VAR_BLACKHOLE());
+    INST_POPS(VAR_BLACKHOLE());
+    INST_PUSHS(CONST_BOOL("true"));
+    INST_RETURN();
 
     INST_LABEL(LABEL("push%false"));
+    INST_POPS(VAR_BLACKHOLE());
+    INST_POPS(VAR_BLACKHOLE());
     INST_PUSHS(CONST_BOOL("false"));
     INST_RETURN();
 
     INST_LABEL(LABEL("push%true"));
-    INST_PUSHS(CONST_BOOL("true"));
+    INST_EQS();
     INST_RETURN();
 }
 
@@ -366,6 +382,7 @@ void genImplicitConversions() {
     // aux function - convert stack top to float
     INST_LABEL(LABEL("conv%to%float"));
     INST_POPS(VAR_BLACKHOLE());
+    INST_PUSHS(VAR_BLACKHOLE());
 
     INST_TYPE(VAR_BLACKHOLE(), VAR_BLACKHOLE());
     INST_JUMPIFEQ(LABEL("conv%to%float%int"), VAR_BLACKHOLE(), CONST_STRING("int"));
@@ -373,16 +390,20 @@ void genImplicitConversions() {
     INST_JUMPIFEQ(LABEL("conv%to%float%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 
+    // int on stack
     INST_LABEL(LABEL("conv%to%float%int"));
+    INST_POPS(VAR_BLACKHOLE());
     INST_INT2FLOAT(VAR_BLACKHOLE(), VAR_BLACKHOLE());
     INST_PUSHS(VAR_BLACKHOLE());
     INST_RETURN();
 
+    // float on stack
     INST_LABEL(LABEL("conv%to%float%float"));
-    INST_PUSHS(VAR_BLACKHOLE());
     INST_RETURN();
 
+    // nil on stack
     INST_LABEL(LABEL("conv%to%float%nil"));
+    INST_POPS(VAR_BLACKHOLE());
     INST_PUSHS(CONST_FLOAT((double) 0));
     INST_RETURN();
 
@@ -468,4 +489,104 @@ void genImplicitConversions() {
     INST_JUMPIFEQ(LABEL("conv%arithm%nil%float"), VAR_BLACKHOLE(), CONST_STRING("float"));
     INST_JUMPIFEQ(LABEL("conv%arithm%nil%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
+}
+void genBuiltInFcs(){
+    //
+    //readi
+    //
+    //
+    INST_LABEL(LABEL("readi"));
+    INST_READ(VAR_BLACKHOLE(), "int");
+    INST_PUSHS(VAR_BLACKHOLE());
+    INST_RETURN();
+    //
+    //readf
+    //
+    INST_LABEL(LABEL("readf"));
+    INST_READ(VAR_BLACKHOLE(), "float");
+    INST_PUSHS(VAR_BLACKHOLE());
+    INST_RETURN();
+    //
+    //reads
+    //
+    INST_LABEL(LABEL("reads"));
+    INST_READ(VAR_BLACKHOLE(), "string");
+    INST_PUSHS(VAR_BLACKHOLE());
+    INST_RETURN();
+    //
+    //chr
+    //
+    INST_LABEL(LABEL("chr"));
+    INST_LABEL(LABEL("type%ok"));
+    INST_INT2CHAR(VAR_BLACKHOLE(), VAR_CODE("LF", "i"));
+    INST_PUSHS(VAR_BLACKHOLE());//pushing back to stack, where we will compute with this in next step.
+    INST_RETURN();
+    //
+    //ord fction
+    //
+    INST_LABEL(LABEL("ord"));
+    INST_DEFVAR(VAR_CODE("LF","ord%cond"));
+    INST_TYPE(VAR_CODE("LF","ord%cond"), VAR_CODE("LF","c"));
+    INST_JUMPIFNEQ(LABEL("ord%len%not0"),VAR_CODE("LF","c"), CONST_STRING(""));
+    INST_PUSHS(CONST_INT(0));//returns 0 if the list length is 0.
+    INST_RETURN();
+    INST_LABEL(LABEL("ord%len%not0"));
+    INST_STRI2INT(VAR_BLACKHOLE(),VAR_CODE("LF", "c"), CONST_INT(0));
+    INST_PUSHS(VAR_BLACKHOLE());
+    INST_RETURN();
+    //
+    //substr
+    //
+    INST_LABEL(LABEL("substring"));
+    COMMENT("generating substring");
+    INST_DEFVAR(VAR_CODE("LF", "length%of%string"));
+    INST_MOVE(VAR_CODE("LF", "length%of%string"), CONST_NIL()); //init
+    INST_STRLEN(VAR_CODE("LF", "length%of%string"),VAR_CODE("LF", "s"));
+
+    //checking condition
+    INST_DPRINT(CONST_STRING("DECIDING\n"));
+    INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), CONST_INT(0));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), CONST_BOOL("true"));   //if i < 0,  jump and return null
+    INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), CONST_INT(0));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), CONST_BOOL("true"));   //if j < 0,  jump and return null
+    INST_LT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), VAR_CODE("LF", "i"));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), CONST_BOOL("true"));   //if j < i,  jump and return null
+    INST_GT(VAR_BLACKHOLE(), VAR_CODE("LF", "j"), VAR_CODE("LF", "length%of%string"));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), CONST_BOOL("true"));   //if strlen(s) < j,  jump and return null
+    INST_GT(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), VAR_CODE("LF", "length%of%string"));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), CONST_BOOL("true"));   //if strlen(s) < i,  jump and return null
+    INST_EQ(VAR_BLACKHOLE(), VAR_CODE("LF", "i"), VAR_CODE("LF", "length%of%string"));
+    INST_JUMPIFEQ(LABEL("is%lt0"),VAR_BLACKHOLE(), CONST_BOOL("true"));    //if strlen(s) = i,  jump and return null
+    //now we need to return the substring
+    INST_DEFVAR(VAR_CODE("LF","max%len"));
+    INST_DEFVAR(VAR_CODE("LF","max%index"));
+    INST_DEFVAR(VAR_CODE("LF", "return%string"));
+    INST_MOVE(VAR_CODE("LF", "return%string"), CONST_STRING(""));
+    INST_DEFVAR(VAR_CODE("LF", "start%length"));
+    INST_MOVE(VAR_CODE("LF", "start%length"),VAR_CODE("LF", "i"));
+    INST_SUB(VAR_CODE("LF","max%len"), VAR_CODE("LF", "j"), VAR_CODE("LF", "start%length"));
+    //INST_ADD(VAR_CODE("LF","max%len"), VAR_CODE("LF", "j"),CONST_INT(1));
+    INST_LABEL(LABEL("for%cycle"));
+    INST_JUMPIFEQ(LABEL("for%cycle%end"), VAR_CODE("LF", "j"), VAR_CODE("LF", "start%length"));//is starting index now the same as ending index?
+    INST_GETCHAR(VAR_BLACKHOLE(), VAR_CODE("LF", "s"), VAR_CODE("LF", "start%length"));
+    INST_CONCAT(VAR_CODE("LF", "return%string"), VAR_CODE("LF", "return%string"), VAR_BLACKHOLE());
+    INST_ADD(VAR_CODE("LF", "start%length"),VAR_CODE("LF", "start%length"), CONST_INT(1));
+    INST_JUMP(LABEL("for%cycle"));
+    INST_LABEL(LABEL("for%cycle%end"));
+    INST_PUSHS(VAR_CODE("LF", "return%string"));
+    INST_RETURN();
+
+    INST_LABEL(LABEL("is%lt0"));
+    INST_PUSHS(CONST_NIL());//returns null
+    INST_RETURN();
+    //
+    //write is done at code-gen.c
+    //
+    //
+    //strlen
+    //
+    INST_LABEL(LABEL("strlen"));
+    INST_STRLEN(VAR_BLACKHOLE(),VAR_CODE("LF", "s"));
+    INST_PUSHS(VAR_BLACKHOLE());
+    INST_RETURN();
 }

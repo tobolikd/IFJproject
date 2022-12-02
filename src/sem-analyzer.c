@@ -10,6 +10,8 @@
 #include <string.h>
 
 
+/// AUXILIARY FUNCTIONS
+
 ht_table_t *initFncSymtable()
 {
     ht_table_t *fncSymtable = ht_init();
@@ -25,11 +27,10 @@ ht_table_t *initFncSymtable()
     ht_insert(fncSymtable, "readf", null_float_t, true);
     // "write"
     ht_insert(fncSymtable, "write", void_t, true);
-    debug_log("%s \n", ht_search(fncSymtable, "write")->identifier);
 
     // "strlen"
     ht_item_t *strlenItem = ht_insert(fncSymtable, "strlen", int_t, true);
-    ht_param_append(strlenItem, "s", int_t);
+    ht_param_append(strlenItem, "s", string_t);
 
     // "substring"
     ht_item_t  *substringItem = ht_insert(fncSymtable, "substring", string_t, true);
@@ -37,8 +38,6 @@ ht_table_t *initFncSymtable()
     ht_param_append(substringItem, "i", int_t);
     ht_param_append(substringItem, "j", int_t);
 
-    debug_log("%s \n", substringItem->identifier);
-    debug_log("%s \n", substringItem->fnc_data.params->varId);
     // "ord"
     ht_item_t  *ordItem = ht_insert(fncSymtable, "ord", int_t, true);
     ht_param_append(ordItem, "c", string_t);
@@ -103,8 +102,68 @@ var_type_t functionTypeForFunDec(TokenList *list, int *index)
     return error;
 }
 
-ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
+bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
+    int nestedLevel = 1;
+
+    if (list->TokenArray[*index]->type != t_lCurl) {
+        THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+        debug_log("block expression doesnt start with \"{\"\n");
+        return false;
+    }
+
+    (*index)++;
+
+    // go to end of function declare
+    while (nestedLevel != 0) {
+        switch (list->TokenArray[*index]->type) {
+            case t_EOF:
+                errorCode = SYNTAX_ERR;
+                debug_log("not ended function declare\n");
+                return false;
+            case t_lCurl:
+                nestedLevel++;
+                break;
+            case t_rCurl:
+                nestedLevel--;
+                break;
+            case t_return:
+                // check if void returns nothing
+                if (currFncDeclare->fnc_data.returnType == void_t) {
+                    if (list->TokenArray[(*index) + 1]->type != t_semicolon) {
+                        THROW_ERROR(SEMANTIC_RETURN_ERR, list->TokenArray[*index]->lineNum);
+                        debug_log("void function has return statement with expression\n");
+                        return false;
+                    }
+                } else { // check that non void function has return value
+                    if (list->TokenArray[(*index) + 1]->type == t_semicolon) {
+                        THROW_ERROR(SEMANTIC_RETURN_ERR,list->TokenArray[*index]->lineNum);
+                        debug_log("non void function has empty return\n");
+                        return false;
+                    }
+                }
+                break;
+            case t_function:
+                THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+                debug_log("nested function declaration\n");
+                return false;
+            default:
+                break;
+        }
+        (*index)++;
+    }
+
+    // undo getting culry bracket
+    (*index)--;
+    // no incompatibility found
+    return true;
+}
+
+/// ! AUXILIARY FUNCTIONS
+
+ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable) {
     int index = 0;
+    ht_item_t *currFncDeclare = NULL;
+
     //going through all tokens
     while(list->TokenArray[index]->type != t_EOF){
         //finding token with type t_function (declaration of fction)
@@ -114,15 +173,15 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
             if(list->TokenArray[index]->type != t_functionId){errorCode = SYNTAX_ERR; return NULL;}
 
             //creating item with functionID as param, type is just temporary set to void_t, will change it at the end of the while loop
-            ht_item_t *tmp = ht_insert(fncSymtable, list->TokenArray[index]->data, void_t, true);
+            currFncDeclare = ht_insert(fncSymtable, list->TokenArray[index]->data, void_t, true);
 
             //redeclaration of fction happened
-            if(tmp == NULL){
+            if(currFncDeclare == NULL){
                 errorCode = SEMANTIC_FUNCTION_DEFINITION_ERR;
                 debug_log("redeclaration of fction %i", errorCode);
                 return NULL;
             }
-            //debug_log(" item identifier %s\n", tmp->identifier);
+            //debug_log(" item identifier %s\n", currFncDeclare->identifier);
 
             (index)++;
             //checking if next token is lPar
@@ -142,7 +201,7 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
                     if (list->TokenArray[index]->type != t_varId) { errorCode = SYNTAX_ERR;return NULL;}
 
                     //appending first param to our function
-                    ht_param_append(tmp, list->TokenArray[index]->data, tmpParamType);
+                    ht_param_append(currFncDeclare, list->TokenArray[index]->data, tmpParamType);
                     //debug_log("param %s \n", tmp->fnc_data.params->varId);
                     (index)++;
                     //there are more params
@@ -158,8 +217,8 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
                                 (index)++;
                                 if (list->TokenArray[index]->type != t_varId) {errorCode = SYNTAX_ERR;return NULL;}
 
-                                ht_param_append(tmp, list->TokenArray[index]->data, tmpParamType);
-                                //debug_log("another param %s\n", tmp->fnc_data.params->next->varId);
+                                ht_param_append(currFncDeclare, list->TokenArray[index]->data, tmpParamType);
+                                //debug_log("another param %s\n", currFncDeclare->fnc_data.params->next->varId);
                                 (index)++;
                                 //now the token can only be comma or ')'
                                 if (list->TokenArray[index]->type != t_rPar && list->TokenArray[index]->type != t_comma) {errorCode = SYNTAX_ERR; return NULL;}
@@ -183,10 +242,16 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
                     if(errorCode == SYNTAX_ERR){return NULL;}
 
                     //setting return type of our newly declared function
-                    tmp->fnc_data.returnType = functionTypeForFunDec(list, &index);
-                    debug_log("return type %i\n", tmp->fnc_data.returnType);
+                    currFncDeclare->fnc_data.returnType = functionTypeForFunDec(list, &index);
+                    debug_log("return type %i\n", currFncDeclare->fnc_data.returnType);
                     (index)++;
                 }
+
+                if(checkReturn(list, &index, currFncDeclare) == false) {
+                    debug_log("checkReturn returned false\n");
+                    return NULL;
+                }
+                debug_log("got through return check ended on line %d\n", list->TokenArray[index]->lineNum);
             }
         }
         //raising index and going back to loop, where we check if the token is last token
@@ -198,7 +263,11 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable){
 
 ht_table_t *InitializedHTableFnctionDecs(TokenList *list){
     ht_table_t *table = initFncSymtable();
-    PutFncsDecToHT(list, table);
+    if(PutFncsDecToHT(list, table)==NULL)
+    {
+        debug_log("Check return failed \n");
+        return NULL;
+    }
     if (errorCode != SUCCESS){ return NULL;}
     return table;
 }

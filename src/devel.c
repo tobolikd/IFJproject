@@ -173,11 +173,11 @@ void printAstStack(stack_ast_t *stack) {
 }
 
 void printCodeBlockStack(stack_code_block_t *stack) {
-    printf("\n\nCODE BLOCK STACK:\n");
+    debug_log("\n\nCODE BLOCK STACK:\n");
     stack_code_block_item_t *tmp = stack->top;
     while (tmp != NULL) {
-        printf(" - type: %d\n", tmp->data->type);
-        printf("  \\labelNum: %d\n", tmp->data->labelNum);
+        debug_log(" - type: %d\n", tmp->data->type);
+        debug_log("  \\labelNum: %d\n", tmp->data->labelNum);
         tmp = tmp->next;
     }
 }
