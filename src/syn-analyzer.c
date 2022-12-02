@@ -88,49 +88,35 @@ bool param(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
     return true;
 }
 
-// <type> -> int || string || float || ?int || ?string || ?float
+bool checkType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
+{
+    if (!strcmp(list->TokenArray[*index]->data, "int"))
+    {
+        return true;
+    }
+    else if (!strcmp(list->TokenArray[*index]->data, "float"))
+    {
+        return true;
+    }
+    else if (!strcmp(list->TokenArray[*index]->data, "string"))
+    {
+        return true;
+    }
+    else
+    {
+        THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+        return false;
+    }
+}
+
 bool typeCheck(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
     switch (list->TokenArray[*index]->type)
     {
     case t_nullType:
-        // debug_log("in NULL TYPE\n");
-        if (!strcmp(list->TokenArray[*index]->data, "int"))
-        {
-            return true;
-        }
-        else if (!strcmp(list->TokenArray[*index]->data, "float"))
-        {
-            return true;
-        }
-        else if (!strcmp(list->TokenArray[*index]->data, "string"))
-        {
-            return true;
-        }
-        else
-        {
-            THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
-            return false;
-        }
+        return checkType(list, index);
     case t_type:
-        // debug_log("in TYPE\n");
-        if (!strcmp(list->TokenArray[*index]->data, "int"))
-        {
-            return true;
-        }
-        else if (!strcmp(list->TokenArray[*index]->data, "float"))
-        {
-            return true;
-        }
-        else if (!strcmp(list->TokenArray[*index]->data, "string"))
-        {
-            return true;
-        }
-        else
-        {
-            THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
-            return false;
-        }
+        return checkType(list, index);
     default:
         THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
         return false;
@@ -152,12 +138,7 @@ bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
     }
     else if (list->TokenArray[*index]->type == t_type || list->TokenArray[*index]->type == t_nullType)
     {
-        // debug_log("in FNC TYPE\n");
-        if (typeCheck(list, index) == false) // call type check
-        {
-            return false;
-        }
-        return true;
+        return typeCheck(list, index); // call type check
     }
     THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
     return false;
@@ -478,35 +459,14 @@ bool statement(SYN_ANALYZER_PARAMS)
 // <seq-stats> -> <stat> <fnc-decl> <seq-stats> || eps
 bool seqStats(SYN_ANALYZER_PARAMS)
 {
-    // debug_log("SEQ-STAT %i ", *index);
-    bool programContinue;   // if program return false, exit to propagate Error
+    bool programContinue; // if program return false, exit to propagate Error
     programContinue = statement(list, index, table, stackSyn);
-    if ((*index) == list->length || list->TokenArray[*index]->type == t_EOF)
-    {
-        debug_log("End of program\n");
-        return true;
-    }
-    if (programContinue == false)
-    {
-        debug_log("End of program\n");
-        return false;
-    }
+    CHECK_END_PROGRAM();
     programContinue = functionDeclare(list, index, stackSyn);
-    if ((*index) == list->length || list->TokenArray[*index]->type == t_EOF)
-    {
-        debug_log("End of program\n");
-        return true;
-    }
-    if (programContinue == false)
-    {
-        debug_log("End of program\n");
-        return false;
-    }
+    CHECK_END_PROGRAM();
     (*index)++;
-    debug_log("\nLIST LENGHT: %d\n", list->length);
     if ((*index) == list->length || list->TokenArray[*index]->type == t_EOF)
     {
-        debug_log("End of program\n");
         return true;
     }
     if (seqStats(list, index, table, stackSyn) == false)

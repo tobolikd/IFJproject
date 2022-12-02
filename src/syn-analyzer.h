@@ -15,6 +15,10 @@
 #define SYN_ANALYZER_PARAMS TokenList *list, int *index, ht_table_t *table, stack_ast_t *stackSyn
 #define SYN_ANALYZER_TYPE_N_PARAM_PARAMS TokenList *list, int *index
 
+#define CHECK_END_PROGRAM() \
+    do { if ((*index) == list->length || list->TokenArray[*index]->type == t_EOF){return true;} \
+         if (programContinue == false){return false;} } while(0)
+
 extern stack_declare_t stackDeclare; // Global variable - stack for Function Frames
 
 typedef struct
@@ -29,7 +33,23 @@ void SyntaxDtor(SyntaxItem *SyntaxItem);
 
 bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
 bool param(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
+
+/**
+ * @brief <type> -> int || string || float
+ * @param list Lexeme List
+ * @param index index in array of Lexemes
+ * @return false if Syntax Error appeared, true if success
+ */
+bool checkType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
+
+/**
+ * @brief <type> -> int || string || float || ?int || ?string || ?float
+ * @param list Lexeme List
+ * @param index index in array of Lexemes
+ * @return false if Syntax Error appeared, true if success
+ */
 bool typeCheck(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
+
 bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
 bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn);
 bool statList(SYN_ANALYZER_PARAMS);
