@@ -27,7 +27,6 @@ ht_table_t *initFncSymtable()
     ht_insert(fncSymtable, "readf", null_float_t, true);
     // "write"
     ht_insert(fncSymtable, "write", void_t, true);
-    debug_log("%s \n", ht_search(fncSymtable, "write")->identifier);
 
     // "strlen"
     ht_item_t *strlenItem = ht_insert(fncSymtable, "strlen", int_t, true);
@@ -39,8 +38,6 @@ ht_table_t *initFncSymtable()
     ht_param_append(substringItem, "i", int_t);
     ht_param_append(substringItem, "j", int_t);
 
-    debug_log("%s \n", substringItem->identifier);
-    debug_log("%s \n", substringItem->fnc_data.params->varId);
     // "ord"
     ht_item_t  *ordItem = ht_insert(fncSymtable, "ord", int_t, true);
     ht_param_append(ordItem, "c", string_t);
@@ -177,8 +174,6 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable) {
 
             //creating item with functionID as param, type is just temporary set to void_t, will change it at the end of the while loop
             currFncDeclare = ht_insert(fncSymtable, list->TokenArray[index]->data, void_t, true);
-
-            debug_log("new function found: %s\n", currFncDeclare->identifier);
 
             //redeclaration of fction happened
             if(currFncDeclare == NULL){
