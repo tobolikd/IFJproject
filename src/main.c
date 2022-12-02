@@ -5,7 +5,6 @@
 #include "sem-analyzer.h"
 #include "devel.h"
 
-
 ht_table_t *fncTable;         // Global variable - symtable for semantic controls with function declares
 stack_declare_t stackDeclare; // Global variable - stack for Function Frames
 
@@ -14,7 +13,6 @@ int main()
     errorCode = SUCCESS;
     /* SCANNER */
     FILE *fp;
-
     fp = stdin;
 
     TokenList *list = lexAnalyser(fp); // get list of tokens
@@ -23,37 +21,39 @@ int main()
         fclose(fp);
         return errorCode;
     }
+    // no more reading wil be done
+    fclose(fp);
 
-    fncTable = InitializedHTableFnctionDecs(list); // first descent
-    if (fncTable == NULL)                          // error in first descent
-    {
-        debug_log("\n Error in first descent. Error code: %i.\n", errorCode);
+    // get all function declarations
+    fncTable = InitializedHTableFnctionDecs(list);
+
+    if (fncTable == NULL) {
+        // error in function definitions
         listDtor(list);
-        fclose(fp);
         return errorCode;
     }
 
-#if (DEBUG == 1)
-    // printTokenList(list);
-#endif
-
+    // syntax analysis
     SyntaxItem *SyntaxItem = synAnalyser(list);
-    debug_log("BOOL VALUE: %s\n", SyntaxItem->correct ? "true" : "false");
-    if (SyntaxItem->correct == true) // start syn analyzer
-    {
-        debug_log("Parser ran successfully\n");
-        //printAstStack(SyntaxItem->stackAST);
+
+    if (SyntaxItem->correct == true) {
+        // syntax is correct, generate code
         codeGenerator(SyntaxItem->stackAST, SyntaxItem->table);
     }
-    // free memory
+
+    // free tokens
     listDtor(list);
+
+    // free syntax context
     SyntaxDtor(SyntaxItem);
-    while (!stack_declare_empty(&stackDeclare))
-    {
+
+    // free symtable stack
+    while (!stack_declare_empty(&stackDeclare)) {
         stack_declare_pop(&stackDeclare);
     }
-    fclose(fp);
 
-    debug_log("PROGRAM RETURNED %i.\n", errorCode);
+    // free function symtable
+    ht_delete_all(fncTable);
+
     return errorCode;
 }
