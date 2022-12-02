@@ -240,124 +240,153 @@ bool statList(SYN_ANALYZER_PARAMS)
     return true;
 }
 
-// <stat> -> if || while || assign || return || eps
-bool statement(SYN_ANALYZER_PARAMS)
+bool statementIf(SYN_ANALYZER_PARAMS)
 {
-    debug_log("STAT %i ", *index);
-    switch (list->TokenArray[*index]->type)
+    stack_ast_push(stackSyn, ast_item_const(AST_IF, NULL));
+    (*index)++;
+    if (list->TokenArray[*index]->type == t_lPar)
     {
-    case t_if: // if ( <expr> ) { <st-list> } else { <st-list> }
-        stack_ast_push(stackSyn, ast_item_const(AST_IF, NULL));
         (*index)++;
-        if (list->TokenArray[*index]->type == t_lPar)
+        if (list->TokenArray[*index]->type == t_rPar)
+        {
+            THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+            return false;
+        }
+        if (parseExpression(list, index, table, stackSyn) == false)
+        {
+            debug_log("\nPREC FALSE: %i \n", errorCode);
+            return false;
+        }
+        debug_log("\nPREC TRUE: %i \n", errorCode);
+        if (list->TokenArray[*index]->type == t_rPar)
         {
             (*index)++;
-            if (list->TokenArray[*index]->type == t_rPar)
-            {
-                THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
-                return false;
-            }
-            if (parseExpression(list, index, table, stackSyn) == false)
-            {
-                debug_log("\nPREC FALSE: %i \n", errorCode);
-                return false;
-            }
-            debug_log("\nPREC TRUE: %i \n", errorCode);
-            if (list->TokenArray[*index]->type == t_rPar)
+            if (list->TokenArray[*index]->type == t_lCurl)
             {
                 (*index)++;
-                if (list->TokenArray[*index]->type == t_lCurl)
+                if (list->TokenArray[*index]->type != t_rCurl)
                 {
-                    (*index)++;
-                    if (list->TokenArray[*index]->type != t_rCurl)
+                    if (statList(list, index, table, stackSyn) == false)
                     {
-                        if (statList(list, index, table, stackSyn) == false)
-                        {
-                            return false;
-                        }
+                        return false;
                     }
-                    if (list->TokenArray[*index]->type == t_rCurl)
+                }
+                if (list->TokenArray[*index]->type == t_rCurl)
+                {
+                    stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
+                    (*index)++;
+                    if (list->TokenArray[*index]->type == t_else)
                     {
-                        stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
+                        stack_ast_push(stackSyn, ast_item_const(AST_ELSE, NULL));
                         (*index)++;
-                        if (list->TokenArray[*index]->type == t_else)
+                        if (list->TokenArray[*index]->type == t_lCurl)
                         {
-                            stack_ast_push(stackSyn, ast_item_const(AST_ELSE, NULL));
                             (*index)++;
-                            if (list->TokenArray[*index]->type == t_lCurl)
+                            if (list->TokenArray[*index]->type != t_rCurl)
                             {
-                                (*index)++;
-                                if (list->TokenArray[*index]->type != t_rCurl)
+                                if (statList(list, index, table, stackSyn) == false)
                                 {
-                                    if (statList(list, index, table, stackSyn) == false)
-                                    {
-                                        return false;
-                                    }
+                                    return false;
                                 }
-                                if (list->TokenArray[*index]->type == t_rCurl)
-                                {
-                                    stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
-                                    return true;
-                                }
+                            }
+                            if (list->TokenArray[*index]->type == t_rCurl)
+                            {
+                                stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
+                                return true;
                             }
                         }
                     }
                 }
             }
         }
-        THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
-        return false;
-    case t_while: // while ( <expr> ) { <st-list> }
-        stack_ast_push(stackSyn, ast_item_const(AST_WHILE, NULL));
+    }
+    THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+    return false;
+}
+
+bool statementWhile(SYN_ANALYZER_PARAMS)
+{
+    stack_ast_push(stackSyn, ast_item_const(AST_WHILE, NULL));
+    (*index)++;
+    if (list->TokenArray[*index]->type == t_lPar)
+    {
         (*index)++;
-        if (list->TokenArray[*index]->type == t_lPar)
+        if (list->TokenArray[*index]->type == t_rPar)
         {
-            (*index)++;
-            if (list->TokenArray[*index]->type == t_rPar)
-            {
-                THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
-                return false;
-            }
-            if (parseExpression(list, index, table, stackSyn) == false)
-            {
-                return false;
-            }
-            if (list->TokenArray[*index]->type == t_rPar)
-            {
-                (*index)++;
-                if (list->TokenArray[*index]->type == t_lCurl)
-                {
-                    (*index)++;
-                    if (list->TokenArray[*index]->type != t_rCurl)
-                    {
-                        if (statList(list, index, table, stackSyn) == false)
-                        {
-                            return false;
-                        }
-                    }
-                    if (list->TokenArray[*index]->type == t_rCurl)
-                    {
-                        stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
-                        return true;
-                    }
-                }
-            }
+            THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+            return false;
         }
-        THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
-        return false;
-    case t_return: // return <expr> ;
-        (*index)++;
-        if (list->TokenArray[*index]->type == t_semicolon) // eps
-        {
-            stack_ast_push(stackSyn, ast_item_const(AST_RETURN_VOID, NULL));
-            return true;
-        }
-        stack_ast_push(stackSyn, ast_item_const(AST_RETURN_EXPR, NULL));
         if (parseExpression(list, index, table, stackSyn) == false)
         {
             return false;
         }
-        if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with semicolon
+        if (list->TokenArray[*index]->type == t_rPar)
+        {
+            (*index)++;
+            if (list->TokenArray[*index]->type == t_lCurl)
+            {
+                (*index)++;
+                if (list->TokenArray[*index]->type != t_rCurl)
+                {
+                    if (statList(list, index, table, stackSyn) == false)
+                    {
+                        return false;
+                    }
+                }
+                if (list->TokenArray[*index]->type == t_rCurl)
+                {
+                    stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
+                    return true;
+                }
+            }
+        }
+    }
+    THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+    return false;
+}
+
+bool statementReturn(SYN_ANALYZER_PARAMS)
+{
+    (*index)++;
+    if (list->TokenArray[*index]->type == t_semicolon) // eps
+    {
+        stack_ast_push(stackSyn, ast_item_const(AST_RETURN_VOID, NULL));
+        return true;
+    }
+    stack_ast_push(stackSyn, ast_item_const(AST_RETURN_EXPR, NULL));
+    if (parseExpression(list, index, table, stackSyn) == false)
+    {
+        return false;
+    }
+    if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with semicolon
+    {
+        return true;
+    }
+    THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+    return false;
+}
+
+bool statementVariable(SYN_ANALYZER_PARAMS)
+{
+    (*index)++;
+    if (list->TokenArray[*index]->type == t_semicolon) // <r-side> -> eps
+    {
+        if (ht_search(table, list->TokenArray[(*index) - 1]->data) == NULL) // SEMANTIC CONTROL if variable was declerated
+        {
+            THROW_ERROR(SEMANTIC_VARIABLE_ERR, list->TokenArray[*index]->lineNum);
+            return false;
+        }
+        // stack_ast_push(&stackSyn, ast_item_const(AST_VAR, ht_insert(table, list->TokenArray[(*index) - 1]->data, void_t, false)));
+        return true;
+    }
+    else if (list->TokenArray[*index]->type != t_assign) // <r-side> -> <expr>
+    {
+        (*index)--;
+        if (parseExpression(list, index, table, stackSyn) == false) // <assign> -> <expr>
+        {
+            return false;
+        }
+        if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
         {
             return true;
         }
@@ -366,97 +395,69 @@ bool statement(SYN_ANALYZER_PARAMS)
             THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
             return false;
         }
-        break;
-    default:
-        if (list->TokenArray[*index]->type == t_varId) // <assign> -> <var> <r-side>
+    }
+    else if (list->TokenArray[*index]->type == t_assign) // <r-side> -> = <expr>
+    {
+        (*index)++;
+        if (list->TokenArray[*index]->type == t_semicolon) // <assign> -> <var> =; => ERROR
         {
-            (*index)++;
-            if (list->TokenArray[*index]->type == t_semicolon) // <r-side> -> eps
-            {
-                if (ht_search(table, list->TokenArray[(*index) - 1]->data) == NULL) // SEMANTIC CONTROL if variable was declerated
-                {
-                    THROW_ERROR(SEMANTIC_VARIABLE_ERR, list->TokenArray[*index]->lineNum);
-                    return false;
-                }
-                // stack_ast_push(&stackSyn, ast_item_const(AST_VAR, ht_insert(table, list->TokenArray[(*index) - 1]->data, void_t, false)));
-                return true;
-            }
-            else if (list->TokenArray[*index]->type != t_assign) // <r-side> -> <expr>
-            {
-                (*index)--;
-                if (parseExpression(list, index, table, stackSyn) == false) // <assign> -> <expr>
-                {
-                    return false;
-                }
-                if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
-                {
-                    return true;
-                }
-                else
-                {
-                    THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
-                    return false;
-                }
-            }
-            else if (list->TokenArray[*index]->type == t_assign) // <r-side> -> = <expr>
-            {
-                (*index)++;
-                if (list->TokenArray[*index]->type == t_semicolon) // <assign> -> <var> =; => ERROR
-                {
-                    THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
-                    return false;
-                }
-                ht_item_t *varItem = ht_insert(table, list->TokenArray[(*index) - 2]->data, void_t, false); // insert variable to symtable
-                stack_ast_push(stackSyn, ast_item_const(AST_ASSIGN, NULL));
-                stack_ast_push(stackSyn, ast_item_const(AST_VAR, varItem));
-                if (parseExpression(list, index, table, stackSyn) == false)
-                {
-                    return false;
-                }
-                if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
-                return false;
-            }
+            THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+            return false;
         }
-        else // <assign> -> <expr> || <stat> -> eps
+        ht_item_t *varItem = ht_insert(table, list->TokenArray[(*index) - 2]->data, void_t, false); // insert variable to symtable
+        stack_ast_push(stackSyn, ast_item_const(AST_ASSIGN, NULL));
+        stack_ast_push(stackSyn, ast_item_const(AST_VAR, varItem));
+        if (parseExpression(list, index, table, stackSyn) == false)
         {
-            debug_log("Token type %s on line %d\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type], list->TokenArray[*index]->lineNum);
-            /* TODO - EPS STAT
-            Teoreticky se to dá vyřešit, že se budu ptát, jestli tady nejsou nějaký klíčový tokeny a podle toho postupovat,
-            třeba t_function mi to shodí return, protože se bude jednat o function declare */
-            if (list->TokenArray[*index]->type == t_function) // <stat> -> eps
-            {
-                return true;
-            }
-            if (list->TokenArray[*index]->type == t_EOF) // <stat> -> eps
-            {
-                return true;
-            }
-            debug_log("Token type %s on line %d\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type], list->TokenArray[*index]->lineNum);
-            if (parseExpression(list, index, table, stackSyn) == false) // <assign> -> <expr>
-            {
-                debug_log("FALSE Token type %s on line %d\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type], list->TokenArray[*index]->lineNum);
-                return false;
-            }
-            else
-            {
-                debug_log("Token type %s on line %d\n", TOKEN_TYPE_STRING[list->TokenArray[*index]->type], list->TokenArray[*index]->lineNum);
-                if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
-                {
-                    return true;
-                }
-                THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
-                return false;
-            }
+            return false;
+        }
+        if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
+        {
+            return true;
+        }
+    }
+    THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+    return false;
+}
 
-            (*index)++; // is this correct/necessary?
+bool statement(SYN_ANALYZER_PARAMS)
+{
+    debug_log("STAT %i ", *index);
+    switch (list->TokenArray[*index]->type)
+    {
+    case t_if: // if ( <expr> ) { <st-list> } else { <st-list> }
+        return statementIf(list, index, table, stackSyn);
+    case t_while: // while ( <expr> ) { <st-list> }
+        return statementWhile(list, index, table, stackSyn);
+    case t_return: // return <expr> ;
+        return statementReturn(list, index, table, stackSyn);
+    case t_varId: // <assign> -> <var> <r-side>
+        return statementVariable(list, index, table, stackSyn);
+    default:                                              // <assign> -> <expr> || <stat> -> eps
+        if (list->TokenArray[*index]->type == t_function) // <stat> -> eps
+        {
+            return true;
         }
+        if (list->TokenArray[*index]->type == t_EOF) // <stat> -> eps
+        {
+            return true;
+        }
+    
+        if (parseExpression(list, index, table, stackSyn) == false) // <assign> -> <expr>
+        {
+            return false;
+        }
+        else
+        {
+            if (list->TokenArray[*index]->type == t_semicolon) // end <expr> with ; [semicolon]
+            {
+                return true;
+            }
+            THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
+            return false;
+        }
+
+        (*index)++; // is this correct/necessary?
         break;
     }
     return true;

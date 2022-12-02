@@ -53,7 +53,18 @@ bool typeCheck(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
 bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
 bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn);
 bool statList(SYN_ANALYZER_PARAMS);
+
+// if ( <expr> ) { <st-list> } else { <st-list> }
+bool statementIf(SYN_ANALYZER_PARAMS);
+// while ( <expr> ) { <st-list> }
+bool statementWhile(SYN_ANALYZER_PARAMS);
+// return <expr> ;
+bool statementReturn(SYN_ANALYZER_PARAMS);
+// <assign> -> <var> <r-side>
+bool statementVariable(SYN_ANALYZER_PARAMS);
+// <stat> -> if || while || return || assign || eps
 bool statement(SYN_ANALYZER_PARAMS);
+
 bool seqStats(SYN_ANALYZER_PARAMS);
 bool checkSyntax(SYN_ANALYZER_PARAMS);
 SyntaxItem *synAnalyser(TokenList *list);
