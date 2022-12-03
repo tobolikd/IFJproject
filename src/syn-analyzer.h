@@ -34,7 +34,9 @@ typedef struct
 SyntaxItem *SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct);
 void SyntaxDtor(SyntaxItem *SyntaxItem);
 
+// <params> -> , <type> <var> <params> || eps
 bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
+// <param> -> <type> <var> <params> || eps
 bool param(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
 
 /**
@@ -53,7 +55,14 @@ bool checkType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
  */
 bool typeCheck(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
 
+/**
+ * @brief check if fuction type is void or t_type (int | float | string) or t_nullType (?int | ?string | ?float)
+ * @param list Lexeme List
+ * @param index index in array of Lexemes
+ * @return false if Syntax Error appeared, true if success 
+ */
 bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS);
+
 bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn);
 bool statList(SYN_ANALYZER_PARAMS);
 

@@ -20,10 +20,6 @@ enum ifjErrCode errorCode;
 ht_table_t *fncTable;
 stack_declare_t stackDeclare;
 
-// list->TokenArray[index]->type == t_string (jeho cislo v enumu) | takhle pristupuju k tokenum a jejich typum
-// list->TokenArray[index]->data == Zadejte cislo pro vypocet faktorialu: | takhle k jejich datum
-
-// <params> -> , <type> <var> <params> || eps
 bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
     if (tokenType == t_rPar) // -> eps
@@ -61,7 +57,6 @@ bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
     return true;
 }
 
-// <param> -> <type> <var> <params> || eps
 bool param(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
     if (tokenType == t_rPar) // -> eps (empty parameter list)
@@ -124,12 +119,10 @@ bool typeCheck(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
     }
 }
 
-// <fnc-type> -> void || int || string || float || ?int || ?string || ?float
 bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
     if (!strcmp(list->TokenArray[*index]->data, "void"))
     {
-        // debug_log("in void\n");
         if (tokenType == t_type) // verify that void is correct Lexeme type
         {
             return true;
@@ -148,11 +141,9 @@ bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 // <fnc-decl> -> function functionId ( <param> ) : <fnc-type> { <st-list> }
 bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
 {
-    debug_log("FNC-DECL %i ", *index);
     if (tokenType == t_function)
     {
         ht_table_t *fncDecTable = ht_init(); // create new symtable for Function Frame
-        debug_log("FNC-DECL FUNCTION FUNCTION %i ", *index);
         (*index)++;
         if (tokenType == t_functionId)
         {
@@ -167,8 +158,8 @@ bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
             param_info_t *nextParam = curFunction->fnc_data.params;
             while (counterParam != 0) // insert params to symtable [Function Frame]
             {
+                debug_log("Inserting parameter %s to symtable\n", nextParam->varId);
                 ht_insert(fncDecTable, nextParam->varId, nextParam->type, false);
-                debug_log("VAR PARAM ID %s\n", nextParam->varId);
                 counterParam--;
                 nextParam = nextParam->next; // move to next parameter
             }
@@ -176,7 +167,6 @@ bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
             if (tokenType == t_lPar)
             {
                 (*index)++;
-                debug_log("FNC-DECL FUNCTION PARAM %i \n", *index);
                 if (param(list, index) == false)
                 {
                     return false;
@@ -252,10 +242,8 @@ bool statementIf(SYN_ANALYZER_PARAMS)
         }
         if (parseExpression(list, index, table, stackSyn) == false)
         {
-            debug_log("\nPREC FALSE: %i \n", errorCode);
             return false;
         }
-        debug_log("\nPREC TRUE: %i \n", errorCode);
         if (tokenType == t_rPar)
         {
             (*index)++;
@@ -374,7 +362,6 @@ bool statementVariable(SYN_ANALYZER_PARAMS)
             THROW_ERROR(SEMANTIC_VARIABLE_ERR, tokenLineNum);
             return false;
         }
-        // stack_ast_push(&stackSyn, ast_item_const(AST_VAR, ht_insert(table, list->TokenArray[(*index) - 1]->data, void_t, false)));
         return true;
     }
     else if (tokenType != t_assign) // <r-side> -> <expr>
@@ -420,7 +407,6 @@ bool statementVariable(SYN_ANALYZER_PARAMS)
 
 bool statement(SYN_ANALYZER_PARAMS)
 {
-    debug_log("STAT %i ", *index);
     switch (tokenType)
     {
     case t_if: // if ( <expr> ) { <st-list> } else { <st-list> }
@@ -431,7 +417,8 @@ bool statement(SYN_ANALYZER_PARAMS)
         return statementReturn(list, index, table, stackSyn);
     case t_varId: // <assign> -> <var> <r-side>
         return statementVariable(list, index, table, stackSyn);
-    default:                                              // <assign> -> <expr> || <stat> -> eps
+    default:
+        // <assign> -> <expr> || <stat> -> eps
         if (tokenType == t_function) // <stat> -> eps
         {
             return true;
@@ -440,7 +427,7 @@ bool statement(SYN_ANALYZER_PARAMS)
         {
             return true;
         }
-    
+
         if (parseExpression(list, index, table, stackSyn) == false) // <assign> -> <expr>
         {
             return false;
@@ -455,7 +442,7 @@ bool statement(SYN_ANALYZER_PARAMS)
             return false;
         }
 
-        (*index)++; // is this correct/necessary?
+        (*index)++;
         break;
     }
     return true;
@@ -484,7 +471,6 @@ bool seqStats(SYN_ANALYZER_PARAMS)
 // <prog> -> <prolog> <seq-stats> <epilog>
 bool checkSyntax(SYN_ANALYZER_PARAMS)
 {
-    debug_log("PROGRAM %i\n", *index);
     if (seqStats(list, index, table, stackSyn) == false)
     {
         return false;
@@ -530,7 +516,7 @@ SyntaxItem *synAnalyser(TokenList *list)
     /* RECURSIVE DESCENT */
     if (checkSyntax(list, &index, table, stackSyn) == false)
     {
-        debug_log("Check Syntax returned false\n");
+        debug_log("Error %d in Parser\n", errorCode);
         return SyntaxItemCtor(table, stackSyn, false);
     }
 
