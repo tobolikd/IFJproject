@@ -15,6 +15,9 @@
 #define SYN_ANALYZER_PARAMS TokenList *list, int *index, ht_table_t *table, stack_ast_t *stackSyn
 #define SYN_ANALYZER_TYPE_N_PARAM_PARAMS TokenList *list, int *index
 
+#define tokenType list->TokenArray[*index]->type
+#define tokenLineNum list->TokenArray[*index]->lineNum
+
 #define CHECK_END_PROGRAM() \
     do { if ((*index) == list->length || list->TokenArray[*index]->type == t_EOF){return true;} \
          if (programContinue == false){return false;} } while(0)
