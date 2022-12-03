@@ -15,8 +15,8 @@
 #define SYN_ANALYZER_PARAMS TokenList *list, int *index, ht_table_t *table, stack_ast_t *stackSyn
 #define SYN_ANALYZER_TYPE_N_PARAM_PARAMS TokenList *list, int *index
 
-#define tokenType list->TokenArray[*index]->type
-#define tokenLineNum list->TokenArray[*index]->lineNum
+#define TOKEN_TYPE list->TokenArray[*index]->type
+#define TOKEN_LINE_NUM list->TokenArray[*index]->lineNum
 
 #define CHECK_END_PROGRAM() \
     do { if ((*index) == list->length || list->TokenArray[*index]->type == t_EOF){return true;} \
@@ -70,7 +70,7 @@ bool statList(SYN_ANALYZER_PARAMS);
 bool statementIf(SYN_ANALYZER_PARAMS);
 // while ( <expr> ) { <st-list> }
 bool statementWhile(SYN_ANALYZER_PARAMS);
-// return <expr> ;
+// return <expr> ; || return;
 bool statementReturn(SYN_ANALYZER_PARAMS);
 // <assign> -> <var> <r-side>
 bool statementVariable(SYN_ANALYZER_PARAMS);

@@ -22,12 +22,12 @@ stack_declare_t stackDeclare;
 
 bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
-    if (tokenType == t_rPar) // -> eps
+    if (TOKEN_TYPE == t_rPar) // -> eps
     {
         return true;
     }
 
-    if (tokenType == t_comma) // -> , [comma]
+    if (TOKEN_TYPE == t_comma) // -> , [comma]
     {
         (*index)++;
         if (typeCheck(list, index) == false) // call type check for syntax check
@@ -35,7 +35,7 @@ bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
             return false;
         }
         (*index)++;
-        if (tokenType == t_varId)
+        if (TOKEN_TYPE == t_varId)
         {
             (*index)++;
             if (params(list, index) == false) // -> <params>
@@ -45,13 +45,13 @@ bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
         }
         else
         {
-            THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+            THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
             return false;
         }
     }
     else
     {
-        THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+        THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
         return false;
     }
     return true;
@@ -59,7 +59,7 @@ bool params(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 
 bool param(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
-    if (tokenType == t_rPar) // -> eps (empty parameter list)
+    if (TOKEN_TYPE == t_rPar) // -> eps (empty parameter list)
     {
         return true;
     }
@@ -68,7 +68,7 @@ bool param(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
         return false;
     }
     (*index)++;
-    if (tokenType == t_varId)
+    if (TOKEN_TYPE == t_varId)
     {
         (*index)++;
         if (params(list, index) == false) // -> <params>
@@ -78,7 +78,7 @@ bool param(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
     }
     else
     {
-        THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+        THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
         return false;
     }
     return true;
@@ -100,21 +100,21 @@ bool checkType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
     }
     else
     {
-        THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+        THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
         return false;
     }
 }
 
 bool typeCheck(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
-    switch (tokenType)
+    switch (TOKEN_TYPE)
     {
     case t_nullType:
         return checkType(list, index);
     case t_type:
         return checkType(list, index);
     default:
-        THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+        THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
         return false;
     }
 }
@@ -123,34 +123,34 @@ bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
     if (!strcmp(list->TokenArray[*index]->data, "void"))
     {
-        if (tokenType == t_type) // verify that void is correct Lexeme type
+        if (TOKEN_TYPE == t_type) // verify that void is correct Lexeme type
         {
             return true;
         }
-        THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+        THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
         return false;
     }
-    else if (tokenType == t_type || tokenType == t_nullType)
+    else if (TOKEN_TYPE == t_type || TOKEN_TYPE == t_nullType)
     {
         return typeCheck(list, index); // call type check
     }
-    THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+    THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
     return false;
 }
 
 // <fnc-decl> -> function functionId ( <param> ) : <fnc-type> { <st-list> }
 bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
 {
-    if (tokenType == t_function)
+    if (TOKEN_TYPE == t_function)
     {
         ht_table_t *fncDecTable = ht_init(); // create new symtable for Function Frame
         (*index)++;
-        if (tokenType == t_functionId)
+        if (TOKEN_TYPE == t_functionId)
         {
             ht_item_t *curFunction = ht_search(fncTable, list->TokenArray[*index]->data); // find fuction declare by fuctionID in symtable, created in first run
             if (curFunction == NULL)
             {
-                THROW_ERROR(INTERNAL_ERR, tokenLineNum);
+                THROW_ERROR(INTERNAL_ERR, TOKEN_LINE_NUM);
                 return false;
             }
             stack_ast_push(stackSyn, ast_item_const(AST_FUNCTION_DECLARE, fnc_declare_data_const(curFunction, fncDecTable)));
@@ -164,17 +164,17 @@ bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
                 nextParam = nextParam->next; // move to next parameter
             }
             (*index)++;
-            if (tokenType == t_lPar)
+            if (TOKEN_TYPE == t_lPar)
             {
                 (*index)++;
                 if (param(list, index) == false)
                 {
                     return false;
                 }
-                if (tokenType == t_rPar)
+                if (TOKEN_TYPE == t_rPar)
                 {
                     (*index)++;
-                    if (tokenType == t_colon)
+                    if (TOKEN_TYPE == t_colon)
                     {
                         (*index)++;
                         if (functionType(list, index) == false)
@@ -182,17 +182,17 @@ bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
                             return false;
                         }
                         (*index)++;
-                        if (tokenType == t_lCurl)
+                        if (TOKEN_TYPE == t_lCurl)
                         {
                             (*index)++;
-                            if (tokenType != t_rCurl)
+                            if (TOKEN_TYPE != t_rCurl)
                             {
                                 if (statList(list, index, fncDecTable, stackSyn) == false)
                                 {
                                     return false;
                                 }
                             }
-                            if (tokenType == t_rCurl)
+                            if (TOKEN_TYPE == t_rCurl)
                             {
                                 stack_declare_push(&stackDeclare, fncDecTable);
                                 stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
@@ -203,7 +203,7 @@ bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
                 }
             }
         }
-        THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+        THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
         return false;
     }
     return true; // -> eps
@@ -217,7 +217,7 @@ bool statList(SYN_ANALYZER_PARAMS)
         return false;
     }
     (*index)++;
-    if (tokenType == t_rCurl) // end of statement with st-list or function declare - DON'T REMOVE!
+    if (TOKEN_TYPE == t_rCurl) // end of statement with st-list or function declare - DON'T REMOVE!
     {
         return true;
     }
@@ -232,53 +232,51 @@ bool statementIf(SYN_ANALYZER_PARAMS)
 {
     stack_ast_push(stackSyn, ast_item_const(AST_IF, NULL));
     (*index)++;
-    if (tokenType == t_lPar)
+    if (TOKEN_TYPE == t_lPar)
     {
         (*index)++;
-        if (tokenType == t_rPar)
+        if (TOKEN_TYPE != t_rPar)
         {
-            THROW_ERROR(SYNTAX_ERR, tokenLineNum);
-            return false;
-        }
-        if (parseExpression(list, index, table, stackSyn) == false)
-        {
-            return false;
-        }
-        if (tokenType == t_rPar)
-        {
-            (*index)++;
-            if (tokenType == t_lCurl)
+            if (parseExpression(list, index, table, stackSyn) == false)
+            {
+                return false;
+            }
+            if (TOKEN_TYPE == t_rPar)
             {
                 (*index)++;
-                if (tokenType != t_rCurl)
+                if (TOKEN_TYPE == t_lCurl)
                 {
-                    if (statList(list, index, table, stackSyn) == false)
-                    {
-                        return false;
-                    }
-                }
-                if (tokenType == t_rCurl)
-                {
-                    stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
                     (*index)++;
-                    if (tokenType == t_else)
+                    if (TOKEN_TYPE != t_rCurl)
                     {
-                        stack_ast_push(stackSyn, ast_item_const(AST_ELSE, NULL));
-                        (*index)++;
-                        if (tokenType == t_lCurl)
+                        if (statList(list, index, table, stackSyn) == false)
                         {
+                            return false;
+                        }
+                    }
+                    if (TOKEN_TYPE == t_rCurl)
+                    {
+                        stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
+                        (*index)++;
+                        if (TOKEN_TYPE == t_else)
+                        {
+                            stack_ast_push(stackSyn, ast_item_const(AST_ELSE, NULL));
                             (*index)++;
-                            if (tokenType != t_rCurl)
+                            if (TOKEN_TYPE == t_lCurl)
                             {
-                                if (statList(list, index, table, stackSyn) == false)
+                                (*index)++;
+                                if (TOKEN_TYPE != t_rCurl)
                                 {
-                                    return false;
+                                    if (statList(list, index, table, stackSyn) == false)
+                                    {
+                                        return false;
+                                    }
                                 }
-                            }
-                            if (tokenType == t_rCurl)
-                            {
-                                stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
-                                return true;
+                                if (TOKEN_TYPE == t_rCurl)
+                                {
+                                    stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -286,7 +284,7 @@ bool statementIf(SYN_ANALYZER_PARAMS)
             }
         }
     }
-    THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+    THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
     return false;
 }
 
@@ -294,47 +292,45 @@ bool statementWhile(SYN_ANALYZER_PARAMS)
 {
     stack_ast_push(stackSyn, ast_item_const(AST_WHILE, NULL));
     (*index)++;
-    if (tokenType == t_lPar)
+    if (TOKEN_TYPE == t_lPar)
     {
         (*index)++;
-        if (tokenType == t_rPar)
+        if (TOKEN_TYPE != t_rPar)
         {
-            THROW_ERROR(SYNTAX_ERR, tokenLineNum);
-            return false;
-        }
-        if (parseExpression(list, index, table, stackSyn) == false)
-        {
-            return false;
-        }
-        if (tokenType == t_rPar)
-        {
-            (*index)++;
-            if (tokenType == t_lCurl)
+            if (parseExpression(list, index, table, stackSyn) == false)
+            {
+                return false;
+            }
+            if (TOKEN_TYPE == t_rPar)
             {
                 (*index)++;
-                if (tokenType != t_rCurl)
+                if (TOKEN_TYPE == t_lCurl)
                 {
-                    if (statList(list, index, table, stackSyn) == false)
+                    (*index)++;
+                    if (TOKEN_TYPE != t_rCurl)
                     {
-                        return false;
+                        if (statList(list, index, table, stackSyn) == false)
+                        {
+                            return false;
+                        }
                     }
-                }
-                if (tokenType == t_rCurl)
-                {
-                    stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
-                    return true;
+                    if (TOKEN_TYPE == t_rCurl)
+                    {
+                        stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
+                        return true;
+                    }
                 }
             }
         }
     }
-    THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+    THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
     return false;
 }
 
 bool statementReturn(SYN_ANALYZER_PARAMS)
 {
     (*index)++;
-    if (tokenType == t_semicolon) // eps
+    if (TOKEN_TYPE == t_semicolon) // <stat> -> return;
     {
         stack_ast_push(stackSyn, ast_item_const(AST_RETURN_VOID, NULL));
         return true;
@@ -344,70 +340,65 @@ bool statementReturn(SYN_ANALYZER_PARAMS)
     {
         return false;
     }
-    if (tokenType == t_semicolon) // end <expr> with semicolon
+    if (TOKEN_TYPE == t_semicolon) // end <expr> with semicolon
     {
         return true;
     }
-    THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+    THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
     return false;
 }
 
 bool statementVariable(SYN_ANALYZER_PARAMS)
 {
     (*index)++;
-    if (tokenType == t_semicolon) // <r-side> -> eps
+    if (TOKEN_TYPE == t_semicolon) // <r-side> -> eps
     {
         if (ht_search(table, list->TokenArray[(*index) - 1]->data) == NULL) // SEMANTIC CONTROL if variable was declerated
         {
-            THROW_ERROR(SEMANTIC_VARIABLE_ERR, tokenLineNum);
+            THROW_ERROR(SEMANTIC_VARIABLE_ERR, TOKEN_LINE_NUM);
             return false;
         }
         return true;
     }
-    else if (tokenType != t_assign) // <r-side> -> <expr>
+    else if (TOKEN_TYPE != t_assign) // <r-side> -> <expr>
     {
         (*index)--;
         if (parseExpression(list, index, table, stackSyn) == false) // <assign> -> <expr>
         {
             return false;
         }
-        if (tokenType == t_semicolon) // end <expr> with ; [semicolon]
+        if (TOKEN_TYPE == t_semicolon) // end <expr> with ; [semicolon]
         {
             return true;
         }
-        else
-        {
-            THROW_ERROR(SYNTAX_ERR, tokenLineNum);
-            return false;
-        }
+        THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
+        return false;
     }
-    else if (tokenType == t_assign) // <r-side> -> = <expr>
+    else if (TOKEN_TYPE == t_assign) // <r-side> -> = <expr>
     {
         (*index)++;
-        if (tokenType == t_semicolon) // <assign> -> <var> =; => ERROR
+        if (TOKEN_TYPE != t_semicolon) // <assign> -> <var> =; => ERROR
         {
-            THROW_ERROR(SYNTAX_ERR, tokenLineNum);
-            return false;
-        }
-        ht_item_t *varItem = ht_insert(table, list->TokenArray[(*index) - 2]->data, void_t, false); // insert variable to symtable
-        stack_ast_push(stackSyn, ast_item_const(AST_ASSIGN, NULL));
-        stack_ast_push(stackSyn, ast_item_const(AST_VAR, varItem));
-        if (parseExpression(list, index, table, stackSyn) == false)
-        {
-            return false;
-        }
-        if (tokenType == t_semicolon) // end <expr> with ; [semicolon]
-        {
-            return true;
+            ht_item_t *varItem = ht_insert(table, list->TokenArray[(*index) - 2]->data, void_t, false); // insert variable to symtable
+            stack_ast_push(stackSyn, ast_item_const(AST_ASSIGN, NULL));
+            stack_ast_push(stackSyn, ast_item_const(AST_VAR, varItem));
+            if (parseExpression(list, index, table, stackSyn) == false)
+            {
+                return false;
+            }
+            if (TOKEN_TYPE == t_semicolon) // end <expr> with ; [semicolon]
+            {
+                return true;
+            }
         }
     }
-    THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+    THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
     return false;
 }
 
 bool statement(SYN_ANALYZER_PARAMS)
 {
-    switch (tokenType)
+    switch (TOKEN_TYPE)
     {
     case t_if: // if ( <expr> ) { <st-list> } else { <st-list> }
         return statementIf(list, index, table, stackSyn);
@@ -419,11 +410,11 @@ bool statement(SYN_ANALYZER_PARAMS)
         return statementVariable(list, index, table, stackSyn);
     default:
         // <assign> -> <expr> || <stat> -> eps
-        if (tokenType == t_function) // <stat> -> eps
+        if (TOKEN_TYPE == t_function) // <stat> -> eps
         {
             return true;
         }
-        if (tokenType == t_EOF) // <stat> -> eps
+        if (TOKEN_TYPE == t_EOF) // <stat> -> eps
         {
             return true;
         }
@@ -434,11 +425,11 @@ bool statement(SYN_ANALYZER_PARAMS)
         }
         else
         {
-            if (tokenType == t_semicolon) // end <expr> with ; [semicolon]
+            if (TOKEN_TYPE == t_semicolon) // end <expr> with ; [semicolon]
             {
                 return true;
             }
-            THROW_ERROR(SYNTAX_ERR, tokenLineNum);
+            THROW_ERROR(SYNTAX_ERR, TOKEN_LINE_NUM);
             return false;
         }
 
@@ -457,7 +448,7 @@ bool seqStats(SYN_ANALYZER_PARAMS)
     programContinue = functionDeclare(list, index, stackSyn);
     CHECK_END_PROGRAM();
     (*index)++;
-    if ((*index) == list->length || tokenType == t_EOF)
+    if ((*index) == list->length || TOKEN_TYPE == t_EOF)
     {
         return true;
     }
@@ -516,7 +507,6 @@ SyntaxItem *synAnalyser(TokenList *list)
     /* RECURSIVE DESCENT */
     if (checkSyntax(list, &index, table, stackSyn) == false)
     {
-        debug_log("Error %d in Parser\n", errorCode);
         return SyntaxItemCtor(table, stackSyn, false);
     }
 
