@@ -33,9 +33,9 @@ const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in 
 //                     <| ===
 //                  READ BACKWARDS
 unsigned const RULES[NUMBER_OF_RULES][RULE_SIZE] = {
-    {DATA, UNINITIALISED, UNINITIALISED},           // 0 E -> i
-    {EXPRESSION, OPERATOR_PLUS, UNINITIALISED},     // 1 E -> +E
-    {EXPRESSION, OPERATOR_MINUS, UNINITIALISED},    // 2 E -> -E
+    {EXPRESSION, OPERATOR_PLUS, UNINITIALISED},     // 0 E -> +E
+    {EXPRESSION, OPERATOR_MINUS, UNINITIALISED},    // 1 E -> -E
+    {DATA, UNINITIALISED, UNINITIALISED},           // 2 E -> i
     {EXPRESSION, OPERATOR_PLUS, EXPRESSION},        // 3 E -> E+E
     {EXPRESSION, OPERATOR_MINUS, EXPRESSION},       // 4 E -> E-E
     {EXPRESSION, OPERATOR_MULTIPLY, EXPRESSION},    // 5 E -> E*E
@@ -162,14 +162,14 @@ void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int rul
 {
     switch (ruleNum)
     {
-    case 0://E -> i
-        Ei(stack,stackAST,symtable);
-        break;
-    case 1://E -> +E
+    case 0://E -> +E --> ERROR
         opE(stack);
         break;
-    case 2://E -> -E
+    case 1://E -> -E --> ERROR
         minusE(stack,stackAST);
+        break;
+    case 2://E -> i
+        Ei(stack,stackAST,symtable);
         break;
     case 3:// E -> E+E
         EopE(stack,stackAST,AST_ADD);
@@ -220,6 +220,7 @@ void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int rul
         break;
 
     default:
+        THROW_ERROR(SYNTAX_ERR,0);
         debug_print("PA: Could not assign rule.\n");
         break;
     }
@@ -259,7 +260,7 @@ bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtab
         item->data->reduction = false; //dealt with ...
 
     //Compare & call rule
-    for (unsigned i = 0; i < NUMBER_OF_RULES ; i++)
+    for (unsigned i = 2; i < NUMBER_OF_RULES ; i++)
         for (unsigned j = 0; j < RULE_SIZE; j++)
         {
             if (curRule[j] != RULES[i][j]) //not this rule
