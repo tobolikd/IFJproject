@@ -79,6 +79,51 @@
                     \end{itemize}
             \end{itemize}
 
+    \section{Popis fungování a struktura překladače}
+
+    \section{Lexikální analýza}
+
+    \section{Syntaktická analýza}
+
+    \subsection{Rekurzivní sestup}
+
+    \subsection{Precedenční analýza}
+
+    \section{Tabulka symbolů}
+
+    \section{Abstraktní syntaktický strom}
+    Abstraktní syntaktický strom (dále ASS) je implementovaný jako zásobník (viz \ref{}), který obsahuje strukturu pro ASS. Ta je tvořena typem a volitelnými daty.
+    \begin{itemize}
+        \item Aritmetické, řetezcový a relační operátory -- každý má svůj typ, nemají data. Na zásobníku předcházejí 2 operandy, nad kterými se má operace provést. Operandem může být konstanta, proměnná nebo další operátor, v tom případě se operace provede nad výsledkem operace, který je dán tímto operátorem.
+        \item Přiřazení -- nemá data, na zásobníku následuje proměnná, do které se přiřazuje a po ní výraz nebo volání funkce, které se má přiřadit.
+        \item Proměnná -- v datech obsahuje ukazatel do tabulky symbolů.
+        \item Konstanty -- každý typ konstanty má svůj typ v ASS (int, string, float, null) a obsahuje, kromě typu null, hodnotu této konstanty.
+        \item Deklarace funkce -- v datech je uložený ukazatel do tabulky symbolů na tuto funkci.
+        \item Volání funkce -- v datech obsahuje ukazatel na strukturu volání funkce, v ní je uložen ukazatel do tabulky symbilů a seznam parametrů. Parametry mají rovněž typ (proměnná nebo konstanta -- int, string, float, null) a svoje data (ukazatel do tabulky symbolů nebo hodnota konstanty).
+        \item Volání return -- typ bez návratové hodnoty nebo s návratovou hodnotou, v tom případě na zásobníku následuje výraz, který se má vrátit.
+        \item Podmínky -- if, else, while -- nemají data, na zásobníku následuje výraz, který je v podmínce.
+        \item Konec výrazu -- značí konec výrazu nebo volání funkce, slouží k rozpoznání konce postfixového zápisu.
+        \item Konec složeného výrazu -- značí konec složeného příkazu ve složených závorkách (if, else, deklarace funkce).
+    \end{itemize}
+    Strom se ukládá od začátku programu, takže při generování kódu se musí zásobník číst odzadu (viz \ref{zasobniky} a \ref{generovani}).
+    \section{Zásobníky} \label{zasobniky}
+    Zásobníky byly potřeba na více místech (ASS, precedenční analýza, generování kódu, \ldots). Implementace zásobníků je tedy obecná pomocí makra, které je možné použít pro libovolný ukazatel. V některých aplikacích je potřeba přístup k zásobníku z obou stran, pro operace push a pop existují tedy 2 varianty -- pro přístup od začátku a od konce. Pro operaci pop je potřeba v makru specifikovat destruktor, který správně uvolní prvek, což je vhodné pro komplexnější strkutury.
+
+    \section{Sémantické kontroly}
+
+    \section{Generování kódu} \label{generovani}
+    Generování kódu zajišťuje funkce \texttt{codeGenerator}, která slouží jako kontroler celého generování. Předává si řízení s funkcemi, které slouží pro generování konkrétních částí, stará se o správu kontextu programu, uvolnění dat apod.
+
+    \subsection{Kontext programu}
+    Funkce \texttt{codeGenerator} vytváří kontext programu a předává ho některým funkcím. Kontext obsahuje čítač podmínek if, while, ukazatel do tabulky symbolů na aktuální deklarovanou funkci, zásobník složených výrazů a proměnnou pro určení čísla návěští else.
+
+    Zásobník složených výrazů obsahuje struktury s typem složeného výrazu (deklarace funkce, if, else, while) a pořadové číslo. Pořadové číslo je určeno čítačem v kontextu programu, u deklarace funkce není potřeba.
+
+    \subsection{Statické funkce a definice proměnných}
+    Před spuštěním veškerého generování kódu je spuštěna funkce pro vygenerování statické části programu a definice proměnných. Statická část obsahuje definici globálních pomocných proměnných, které slouží místo registrů a definici vestavěných funkcí. Tato část je přeskočena instrukcí \texttt{JUMP} až na začátek programu. Na začátku se vytvoří nový lokální rámec a nadefinují se všechny proměnné, které jsou použity v hlavním těle programu (i v podmínkách, takže všude kromě deklarace funkcí).
+
+    \subsection{}
+
     \newpage
 	%bibliography
 	\renewcommand{\refname}{Zdroje}
