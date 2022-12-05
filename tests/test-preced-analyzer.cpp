@@ -4,7 +4,7 @@ extern "C"
 {
     #include "../src/preced_analyzer.c"
     #include "../src/sem-analyzer.c"
-    
+
 }
 
 #include <string>
@@ -203,20 +203,20 @@ class DoubleValue : public CheckDoubleValue {};
 TEST_P(DoubleValue, expectedValue)
 {
     parseExpression(testList,&index,testTableVar,&testStack);
-    EXPECT_DOUBLE_EQ(expectedValue,testStack.top->next->data->data->floatValue) << "Processing input: |" << get<1>(GetParam()) << "| ..." << endl;
+    EXPECT_DOUBLE_EQ(expectedValue,testStack.top->next->data->data->float_value) << "Processing input: |" << get<1>(GetParam()) << "| ..." << endl;
 }
 
 INSTANTIATE_TEST_SUITE_P(CONST_CORRECT_ADVANCED, DoubleValue,
     testing::Values(
-        make_tuple(20, "2e1"),
-        make_tuple(20, "2E1"),
-        make_tuple(0.2, "2e-1"),
-        make_tuple(0.2, "2E-1"),
-        make_tuple(20, "2e+1"),
-        make_tuple(20, "2E+1"),
-        make_tuple(20, "2.0e+1"),
-        make_tuple(0.2, "2.0e-1"),
-        make_tuple(2, "0.00002e5")
+        make_tuple((double)20, "2e1"),
+        make_tuple((double)20, "2E1"),
+        make_tuple((double)0.2, "2e-1"),
+        make_tuple((double)0.2, "2E-1"),
+        make_tuple((double)20, "2e+1"),
+        make_tuple((double)20, "2E+1"),
+        make_tuple((double)20, "2.0e+1"),
+        make_tuple((double)0.2, "2.0e-1"),
+        make_tuple((double)2, "0.00002e5")
     )
 );
 

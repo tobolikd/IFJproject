@@ -3,7 +3,7 @@
 
 #include "ast.h"
 #include "lex_analyzer.h"
-#include "code-gen-data.h"
+#include "code_gen_static.h"
 #include "preced_analyzer_data.h"
 
 #include <stdbool.h>

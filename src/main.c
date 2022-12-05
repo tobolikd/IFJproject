@@ -1,7 +1,7 @@
 #include "lex_analyzer.h"
 #include "syn-analyzer.h"
-#include "code-gen.h"
-#include "error-codes.h"
+#include "code_gen.h"
+#include "error_codes.h"
 #include "sem-analyzer.h"
 #include "devel.h"
 
@@ -10,7 +10,7 @@ stack_declare_t stackDeclare; // Global variable - stack for Function Frames
 
 int main()
 {
-    errorCode = SUCCESS;
+    error_code = SUCCESS;
     /* SCANNER */
     FILE *fp;
     fp = stdin;
@@ -19,9 +19,9 @@ int main()
     if (list == NULL)                  // there was an error in lexAnalyser
     {
         fclose(fp);
-        return errorCode;
+        return error_code;
     }
-    // no more reading wil be done
+    // no more reading will be done
     fclose(fp);
 
     // get all function declarations
@@ -30,8 +30,7 @@ int main()
     if (fncTable == NULL) {
         // error in function definitions
         listDtor(list);
-        ht_deleteAll(fncTable);
-        return errorCode;
+        return error_code;
     }
 
     // syntax analysis
@@ -39,7 +38,7 @@ int main()
 
     if (SyntaxItem->correct == true) {
         // syntax is correct, generate code
-        codeGenerator(SyntaxItem->stackAST, SyntaxItem->table);
+        code_generator(SyntaxItem->stackAST, SyntaxItem->table);
     }
 
     // free tokens
@@ -56,5 +55,5 @@ int main()
     // free function symtable
     ht_deleteAll(fncTable);
 
-    return errorCode;
+    return error_code;
 }

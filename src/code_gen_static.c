@@ -1,10 +1,17 @@
-#include "code-gen-data.h"
-#include "code-gen.h"
+/* @file code_gen_static.c
+ *
+ * @brief implementation of static generation functions and variable definitions
+ *
+ * @author David Tobolik (xtobol06)
+ */
+
+#include "code_gen_static.h"
+#include "code_gen.h"
 #include "symtable.h"
 
 #include <stdio.h>
 
-void genBuiltIns() {
+void gen_static() {
     printf(".IFJcode22\n");
 
     // generate global vars
@@ -19,14 +26,14 @@ void genBuiltIns() {
     INST_JUMP(LABEL("end%pregenerated%end"));
 
     // generate functions (built in and aux)
+    gen_resolve_condition();
+    gen_implicit_conversions();
+    gen_semantic_type_check();
+    gen_data_type_comparisons();
+    gen_built_in_fcs();
 
-    genResolveCondition();
-    genImplicitConversions();
-    genSemanticTypeCheck();
-    genDataTypeComparisons();
-    genBuiltInFcs();
-
-    genExitLabels();
+    // generate exit labels
+    gen_exit_labels();
 
     // end pregenerated
     INST_LABEL(LABEL("end%pregenerated%end"));
@@ -35,7 +42,7 @@ void genBuiltIns() {
     COMMENT("BEGINING OF PROGRAM PART");
 }
 
-void genResolveCondition() {
+void gen_resolve_condition() {
     INST_LABEL(LABEL("resolve%condition"));
 
 	INST_POPS(AUX1); // value in aux1
@@ -50,12 +57,12 @@ void genResolveCondition() {
 
 	INST_EXIT(CONST_INT(99)); // variable not initialized
 
-	// true
+	// return true
 	INST_LABEL(LABEL("cond%true"));
 	INST_PUSHS(CONST_BOOL("true"));
     INST_RETURN();
 
-	// false
+	// return false
 	INST_LABEL(LABEL("cond%false"));
 	INST_PUSHS(CONST_BOOL("false"));
     INST_RETURN();
@@ -83,7 +90,7 @@ void genResolveCondition() {
 }
 
 
-void genExitLabels() {
+void gen_exit_labels() {
     // uninitialized variable
     INST_LABEL(LABEL("not%init"));
     INST_DPRINT(CONST_STRING("use of not initialized var\n"));
@@ -113,7 +120,7 @@ void genExitLabels() {
     INST_EXIT(CONST_INT(SEMANTIC_PARAMETER_ERR));
 }
 
-void genSemanticTypeCheck(){
+void gen_semantic_type_check(){
     //int expected
     INST_LABEL(LABEL("type%check%int"));
     INST_POPS(AUX1);
@@ -171,7 +178,7 @@ void genSemanticTypeCheck(){
     INST_RETURN();
 }
 
-void genDataTypeComparisons(){
+void gen_data_type_comparisons(){
     INST_LABEL(LABEL("type%cmp"));
 
 	INST_POPS(AUX1); // read value of operand
@@ -227,9 +234,9 @@ void genDataTypeComparisons(){
     INST_RETURN();
 }
 
-void genVarDefs(ht_table_t *varSymtable, ht_item_t* function) {
-    if (varSymtable == NULL) {
-        ERR_INTERNAL(genVarDefs, "symtable is NULL\n");
+void gen_var_definitions(ht_table_t *var_symtable, ht_item_t* function) {
+    if (var_symtable == NULL) {
+        ERR_INTERNAL(gen_var_definitions, "symtable is NULL\n");
         return;
     }
 
@@ -245,9 +252,9 @@ void genVarDefs(ht_table_t *varSymtable, ht_item_t* function) {
     }
 
     for (int i = 0; i < HT_SIZE; i++) {
-        tmpVar = varSymtable->items[i];
+        tmpVar = var_symtable->items[i];
         while (tmpVar != NULL) {
-            // check if variable isnt predefined parameter
+            // check if variable is predefined parameter
             varIsParam = false;
             tmpParam = firstParam;
             while (tmpParam != NULL) {
@@ -266,7 +273,7 @@ void genVarDefs(ht_table_t *varSymtable, ht_item_t* function) {
     }
 }
 
-void genImplicitConversions() {
+void gen_implicit_conversions() {
     /* conv 2 values from stack
     * return to stack
     * int int - no change
@@ -490,7 +497,7 @@ void genImplicitConversions() {
     INST_JUMPIFEQ(LABEL("conv%arithm%nil%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 }
-void genBuiltInFcs(){
+void gen_built_in_fcs(){
     //
     //readi
     //

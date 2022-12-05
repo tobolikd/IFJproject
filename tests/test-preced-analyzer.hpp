@@ -97,7 +97,7 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
             ht_paramAppend(ht_insert(fncTable,foo,int_t,true),param,float_t);
             ASSERT_FALSE(ht_search(fncTable,foo) == NULL);
             ASSERT_FALSE(ht_search(fncTable,foo)->fnc_data.params == NULL);
-           
+
             ht_insert(fncTable,poo,int_t,true);
             ASSERT_FALSE(ht_search(fncTable,poo) == NULL);
             ht_paramAppend(ht_search(fncTable,poo),param,float_t);

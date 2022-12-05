@@ -10,8 +10,8 @@ set(PROJECT_FILES
     src/symtable.c
     src/ast.c
     src/stack.c
-    src/code-gen.c
-    src/code-gen-static.c
+    src/code_gen.c
+    src/code_gen_static.c
     src/devel.c
 )
 
@@ -20,7 +20,6 @@ set(UNIT_TESTS
     tests/test-lex-analyzer.cpp
     tests/test-syn-analyzer.cpp
     tests/test-preced-analyzer.cpp
-    tests/test-code-gen.cpp
 )
 
 

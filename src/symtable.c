@@ -1,5 +1,5 @@
 #include "symtable.h"
-#include "error-codes.h"
+#include "error_codes.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -95,7 +95,7 @@ ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool
   {
     if (isFunction) // double declaration - error
     {
-      errorCode = SEMANTIC_FUNCTION_DEFINITION_ERR;
+      error_code = SEMANTIC_FUNCTION_DEFINITION_ERR;
       return NULL; 
     }
     item->referenceCounter++; // increase reference

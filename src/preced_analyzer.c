@@ -3,7 +3,8 @@
 #include "preced_analyzer.h"
 #include "sem-analyzer.h"
 #include "ast.h"
-#include "error-codes.h"
+#include "error_codes.h"
+
 #include <stdlib.h>
 
 //PRECEDENCE TABLE
@@ -139,10 +140,10 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
     switch (item->type)
     {
     case AST_FLOAT:
-        item->data->floatValue *= -1;
+        item->data->float_value *= -1;
         break;
     case AST_INT:
-        item->data->intValue *= -1;
+        item->data->int_value *= -1;
         break;
     case AST_STRING:
         THROW_ERROR(SEMANTIC_RUN_TYPE_ERR,stack->top->data->token->lineNum);
@@ -172,7 +173,7 @@ void EopE(stack_precedence_t *stack, stack_ast_t *stackAST, AST_type op)
 }
 
 /// @brief Executes found rule.
-/// @param ruleNum Rule to be executed. 
+/// @param ruleNum Rule to be executed.
 void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int ruleNum, ht_table_t *symtable)
 {
     switch (ruleNum)
@@ -295,7 +296,7 @@ bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtab
 /// @brief Checks syntax of expression.
 /// @param input Token to be examined.
 /// @param symtable Relevant symtable for current frame.
-/// @return Element that represents input token. 
+/// @return Element that represents input token.
 Element getIndex(Token *input, ht_table_t* symtable)
 {
     if (input == NULL)
@@ -375,7 +376,7 @@ Element getIndex(Token *input, ht_table_t* symtable)
 }
 
 /// @brief Constructor for precence item.
-/// @return Pointer to new precendence item. 
+/// @return Pointer to new precendence item.
 PrecedItem *precedItemCtor(Token *token, Element type)
 {
     PrecedItem *newItem = (PrecedItem*)malloc(sizeof(PrecedItem));
@@ -410,7 +411,7 @@ bool freeStack(stack_precedence_t *stack, stack_ast_t *ast, bool returnValue)
 }
 
 /// @brief Compares TokenType to var_type_t
-/// @return True if they represent the same type. 
+/// @return True if they represent the same type.
 bool cmpTHType(TokenType token, var_type_t type)
 {
     if (token == t_int && type == int_t)
@@ -425,7 +426,7 @@ bool cmpTHType(TokenType token, var_type_t type)
 }
 
 /// @brief Transfer of var_type_t to AST_param_type
-/// @return AST_param_type represented by var_type_t 
+/// @return AST_param_type represented by var_type_t
 AST_param_type HtoAType(var_type_t type)
 {
     if (type == int_t)

@@ -6,8 +6,8 @@
  */
 
 #include "stack.h"
-#include "error-codes.h"
-
+#include "error_codes.h"
+#include "code_gen_static.h"
 #include "lex_analyzer.h"
 #include "ast.h"
 
