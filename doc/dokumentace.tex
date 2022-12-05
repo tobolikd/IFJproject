@@ -71,7 +71,7 @@
                     \end{itemize}
                 \item Jakub Mikyšek (xmikys03)
                     \begin{itemize}
-                        \item gramatika, rekurzivní syntaktická analýza, dokumentace
+                        \item gramatika, rekurzivní syntaktická analýza, sémantické kontroly pro proměnné, dokumentace
                     \end{itemize}
                 \item David Tobolík (xtobol06)
                     \begin{itemize}
@@ -84,6 +84,7 @@
     \section{Lexikální analýza}
 
     \section{Syntaktická analýza}
+    Rekurzivní sestup se volá funkcí \texttt{synAnalyser} a je implementovaný v souborech \texttt{synAnalyzer.c} a \texttt{synAnalyzer.h}. Řídí se podle navrženené gramatiky (viz \ref{}), kde každé pravidlo představuje vlastní funkci. Funkce postupně prochází tokeny získané od lexikální analýzy, kontroluje jestli je vše gramaticky správně, naplňuje tabulku symbolů a tvoří abstraktní syntaktický strom (dále ASS). Při nalezení výrazu volá funkci \texttt{parseExpression}, která spouští precedenční analýzu. Při nalezení chyby se nastaví příslušný \texttt{errorCode} a chyba se v rekurzi propaguje dál, aby program ukončil kontrolu. Funkce vrací vytvořený ASS, naplněnou tabulku symbolů a informaci o tom, jestli rekurze proběhla syntaticky a sémanticky správně či nikoliv.
 
     \subsection{Rekurzivní sestup}
 
@@ -110,7 +111,8 @@
     Zásobníky byly potřeba na více místech (ASS, precedenční analýza, generování kódu, \ldots). Implementace zásobníků je tedy obecná pomocí makra, které je možné použít pro libovolný ukazatel. V některých aplikacích je potřeba přístup k zásobníku z obou stran, pro operace push a pop existují tedy 2 varianty -- pro přístup od začátku a od konce. Pro operaci pop je potřeba v makru specifikovat destruktor, který správně uvolní prvek, což je vhodné pro komplexnější strkutury.
 
     \section{Sémantické kontroly}
-
+    Všechny sémantické kontroly probíhají s pomocí tabulky symbolů. Před spuštěním syntaktické analýzy, proběhne tzv. "první průchod" za pomocí funkce \texttt{fncDeclarationTable}, která kontroluje jen definice funkcí a nahrává je společně s jejich parametry a návratovým typem do tabulky symbolů. V návaznosti na tento první průchod se v precedenční analýze při volání funkcí provádí kontrola typu a počtu parametrů nebo zda byla funkce definována. Sémantické kontroly pro proměnné a jejich (ne)definování se provádějí v syntaktické a precedenční analýze.
+    
     \section{Generování kódu} \label{generovani}
     Generování kódu zajišťuje funkce \texttt{codeGenerator}, která slouží jako kontroler celého generování. Předává si řízení s funkcemi, které slouží pro generování konkrétních částí, stará se o správu kontextu programu, uvolnění dat apod.
 
