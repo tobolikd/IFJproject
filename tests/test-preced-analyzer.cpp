@@ -3,7 +3,7 @@
 extern "C"
 {
     #include "../src/preced_analyzer.c"
-    #include "../src/sem-analyzer.c"
+    #include "../src/sem_analyzer.c"
 
 }
 

@@ -1,8 +1,8 @@
 #include "lex_analyzer.h"
-#include "syn-analyzer.h"
+#include "syn_analyzer.h"
 #include "code_gen.h"
 #include "error_codes.h"
-#include "sem-analyzer.h"
+#include "sem_analyzer.h"
 #include "devel.h"
 
 ht_table_t *fncTable;         // Global variable - symtable for semantic controls with function declares
