@@ -195,7 +195,7 @@ ht_table_t *fncDeclarations(TokenList *list, ht_table_t *fncSymtable) {
 
             if(currFncDeclare == NULL){ //redeclaration of function
                 THROW_ERROR(SEMANTIC_FUNCTION_DEFINITION_ERR,list->TokenArray[index]->lineNum)
-                debug_print("redeclaration of fction %i", errorCode);
+                debug_print("redeclaration of fction %i", error_code);
                 return NULL;
             }
 
@@ -273,7 +273,7 @@ ht_table_t *fncDeclarations(TokenList *list, ht_table_t *fncSymtable) {
             NEXT_TOKEN;
 
             functionTypeForFunDec(list, &index);//sets the errorcode
-            if(errorCode != SUCCESS) {
+            if(error_code != SUCCESS) {
                 return NULL;
             }
             //setting return type of our newly declared function

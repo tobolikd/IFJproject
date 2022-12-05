@@ -29,7 +29,7 @@ TEST_F(testAst, initInt) {
     ASSERT_FALSE(testedItem == NULL) << "Constructor returned NULL" << endl;
     EXPECT_EQ(testedItem->type, AST_INT);
     ASSERT_FALSE(testedItem->data == NULL);
-    EXPECT_EQ(58, testedItem->data->intValue);
+    EXPECT_EQ(58, testedItem->data->int_value);
 }
 
 TEST_F(testAst, initString) {
@@ -39,7 +39,7 @@ TEST_F(testAst, initString) {
     ASSERT_FALSE(testedItem == NULL) << "Constructor returned NULL" << endl;
     EXPECT_EQ(testedItem->type, AST_STRING);
     ASSERT_FALSE(testedItem->data == NULL);
-    EXPECT_EQ(0, strcmp(a, testedItem->data->stringValue));
+    EXPECT_EQ(0, strcmp(a, testedItem->data->string_value));
 }
 
 TEST_F(testAst, initReturn) {
@@ -85,18 +85,18 @@ TEST_F(testAst, fncCall) {
     fnc_call_data_add_param(data, AST_P_INT, &param1);
     AST_fnc_param *tmpParam = data->params;
     EXPECT_EQ(tmpParam->type, AST_P_INT);
-    EXPECT_EQ(123, tmpParam->data->intValue);
+    EXPECT_EQ(123, tmpParam->data->int_value);
 
     fnc_call_data_add_param(data, AST_P_FLOAT, &param2);
     tmpParam = tmpParam->next;
     EXPECT_EQ(tmpParam->type, AST_P_FLOAT);
-    EXPECT_DOUBLE_EQ(1.2345, tmpParam->data->floatValue);
+    EXPECT_DOUBLE_EQ(1.2345, tmpParam->data->float_value);
 
     fnc_call_data_add_param(data, AST_P_STRING, &param3);
     tmpParam = tmpParam->next;
     EXPECT_EQ(tmpParam->type, AST_P_STRING);
-    EXPECT_FALSE(param3 == tmpParam->data->stringValue);
-    EXPECT_EQ(0, strcmp(param3, tmpParam->data->stringValue));
+    EXPECT_FALSE(param3 == tmpParam->data->string_value);
+    EXPECT_EQ(0, strcmp(param3, tmpParam->data->string_value));
 
     fnc_call_data_add_param(data, AST_P_VAR, &param4);
     tmpParam = tmpParam->next;
@@ -114,7 +114,7 @@ TEST_F(testAst, fncCall) {
     testedItem = ast_item_const(AST_FUNCTION_CALL, data);
 
     EXPECT_EQ(AST_FUNCTION_CALL, testedItem->type);
-    EXPECT_TRUE(data == testedItem->data->functionCallData);
+    EXPECT_TRUE(data == testedItem->data->function_call_data);
 
     ht_deleteAll(symtable);
 }

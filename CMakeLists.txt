@@ -20,7 +20,6 @@ set(UNIT_TESTS
     tests/test-lex-analyzer.cpp
     tests/test-syn-analyzer.cpp
     tests/test-preced-analyzer.cpp
-    tests/test-code-gen.cpp
 )
 
 
