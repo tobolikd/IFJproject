@@ -18,7 +18,7 @@ void print_ast_param(AST_fnc_param *param) {
     switch (param->type) {
         case AST_P_INT:
             debug_log("\t\t\t|- Type: |int|\n");
-            debug_log("\t\t\t|- Value: %d\n", param->data->int_value);
+            debug_log("\t\t\t|- Value: %d\n", param->data->intValue);
         	break;
         case AST_P_VAR:
             debug_log("\t\t\t|- Type: |string|\n");
@@ -30,11 +30,11 @@ void print_ast_param(AST_fnc_param *param) {
         	break;
         case AST_P_FLOAT:
             debug_log("\t\t\t|- Type: |float|\n");
-            debug_log("\t\t\t|- Value: %f\n", param->data->float_value);
+            debug_log("\t\t\t|- Value: %f\n", param->data->floatValue);
         	break;
         case AST_P_STRING:
             debug_log("\t\t\t|- Type: |string|\n");
-            debug_log("\t\t\t|- Value: \"%s\"\n", param->data->string_value);
+            debug_log("\t\t\t|- Value: \"%s\"\n", param->data->stringValue);
         	break;
         default:
             debug_log("\t\t\t|-Type: UNKNOWN PARAM TYPE!\n");
@@ -115,16 +115,16 @@ void print_ast_item(AST_item *item) {
         // constants
         case AST_INT:
             AST_TYPE("const int");
-            debug_log("\t|- data: %d\n", item->data->int_value);
-            break;    // data - int int_value
+            debug_log("\t|- data: %d\n", item->data->intValue);
+            break;    // data - int intValue
         case AST_STRING:
             AST_TYPE("const string");
-            AST_DATA(item->data->string_value);
-            break; // data - char *string_value
+            AST_DATA(item->data->stringValue);
+            break; // data - char *stringValue
         case AST_FLOAT:
             AST_TYPE("const float");
-            debug_log("\t|- data: %f\n", item->data->float_value);
-            break;  // data - float float_value
+            debug_log("\t|- data: %f\n", item->data->floatValue);
+            break;  // data - float floatValue
         case AST_NULL:
             AST_TYPE("null");
             break;
@@ -132,14 +132,14 @@ void print_ast_item(AST_item *item) {
         // fnc declaration
         case AST_FUNCTION_DECLARE:
             AST_TYPE("function declaration");
-            AST_DATA(item->data->function_call_data->function->identifier);
+            AST_DATA(item->data->functionCallData->function->identifier);
             break;   // data - ht_item_t *function
 
         // program control (jumps)
         case AST_FUNCTION_CALL:
             AST_TYPE("function call");
-            print_ast_fnc(item->data->function_call_data);
-            break;  // data - AST_function_call_data *function_call_data
+            print_ast_fnc(item->data->functionCallData);
+            break;  // data - AST_function_call_data *functionCallData
         case AST_RETURN_VOID:
             AST_TYPE("return (void)");
             break;

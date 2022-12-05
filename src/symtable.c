@@ -102,7 +102,7 @@ ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool
   {
     if (isFunction) // double declaration - error
     {
-      error_code = SEMANTIC_FUNCTION_DEFINITION_ERR;
+      errorCode = SEMANTIC_FUNCTION_DEFINITION_ERR;
       return NULL; 
     }
     item->referenceCounter++; // increase reference
