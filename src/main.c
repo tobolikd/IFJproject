@@ -25,7 +25,7 @@ int main()
     fclose(fp);
 
     // get all function declarations
-    fncTable = FncDeclarationTable(list);
+    fncTable = fncDeclarationTable(list);
 
     if (fncTable == NULL) {
         // error in function definitions

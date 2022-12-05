@@ -30,14 +30,14 @@ ht_table_t *integratedFncSymtable();
 ///@param fncSymtable table where we want to put all the items
 ///@return pointer to hashtable.
 ///@return NULL when any error occured or if a fction was redeclared
-ht_table_t *FncDeclarations(TokenList *list, ht_table_t *fncSymtable);
+ht_table_t *fncDeclarations(TokenList *list, ht_table_t *fncSymtable);
 
 ///@brief inits all integrated fctions and puts all functions from program to hashtable
 ///@usage ht_table_t *table = InitializedHTableFnctionDecs(list);
 ///@param list List of Tokens
 ///@return Hashtable with all initialized integrated fctions and all program fctions
 ///@return NULL when error with redeclaration of fction or other
-ht_table_t *FncDeclarationTable(TokenList *list);
+ht_table_t *fncDeclarationTable(TokenList *list);
 
 ///@brief checks if the return type of declared function is okay
 ///@param list list of Tokens

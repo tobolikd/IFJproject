@@ -174,7 +174,7 @@ bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
 
 /// ! AUXILIARY FUNCTIONS
 
-ht_table_t *FncDeclarations(TokenList *list, ht_table_t *fncSymtable) {
+ht_table_t *fncDeclarations(TokenList *list, ht_table_t *fncSymtable) {
 
     int index = 0;
     ht_item_t *currFncDeclare = NULL;
@@ -299,9 +299,9 @@ ht_table_t *FncDeclarations(TokenList *list, ht_table_t *fncSymtable) {
     return (fncSymtable);
 }
 
-ht_table_t *FncDeclarationTable(TokenList *list) {
+ht_table_t *fncDeclarationTable(TokenList *list) {
     ht_table_t *table = integratedFncSymtable();
-    if(FncDeclarations(list, table) == NULL) {
+    if(fncDeclarations(list, table) == NULL) {
         debug_log("Check return failed \n");
         return NULL;
     }
