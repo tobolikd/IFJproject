@@ -52,41 +52,15 @@
     \tableofcontents
     \newpage
 
-    \section{Týmová spolupráce}
-        \subsection{Komunikace v týmu}
-            Vzájemná domluva a komunikace probíhala online i offline. A to prostřednictvím Discord serveru - pro převážně obecnější problematiky, pro ty složitější a již více konkrétní nám sloužila funkce GitHub - Issues, kde jsme mohli jednodušše diskutovat o již kontrétní části kódu. K tomu jsme se každý čtvrtek setkávali na schůzích uskutečněných v budově škole, kde jsme řešili ty nejzásadnější problémy a rozhodnutí z hlediska směřování.
-        \subsection{Verzovací systém}
-            Při výběru verzovacího systému pro nás bylo jasnou volbou zvolit populární a osvědčený Git s nahraváním na server GitHub, kde probíhala i již zmíněná vzájemná komunikace.
-        \subsection{Testování}
-            Pro ověření správnosti jsme používali framework GoogleTest v jazyce C++, který nám sloužil k unit testování.
-        \subsection{Rozdělení práce}
-            \begin{itemize}
-                \item Gabriel Biel (xbielg00)
-                    \begin{itemize}
-                        \item architektura compileru, lexikální analýza, precedenční tabulka, precedenční analýza, testy pro precedenční analýzu, rozhraní pro tabulku symbolů, funkce v generátoru kódu
-                    \end{itemize}
-                \item Adam Gabrys (xgabry01)
-                    \begin{itemize}
-                        \item
-                    \end{itemize}
-                \item Jakub Mikyšek (xmikys03)
-                    \begin{itemize}
-                        \item gramatika, rekurzivní syntaktická analýza, sémantické kontroly pro proměnné, dokumentace
-                    \end{itemize}
-                \item David Tobolík (xtobol06)
-                    \begin{itemize}
-                        \item sémantické kontroly pro volání funkce, generování kódu, datové struktury pro ASS, zásobníky, struktura projektu, cmake a struktura testů, testy (lexikální analýza, ASS, zásobníky), code review, makefile, dokumentace
-                    \end{itemize}
-            \end{itemize}
-
     \section{Popis fungování a struktura překladače}
 
     \section{Lexikální analýza}
-
+    Lexikální analýza (dále LA) načítá lexémy ze standartního vstupu pomocí funkce \texttt{getToken()}, ty následně přetváří na tokeny, které postupně naplňují list \texttt{TokenList}, který se po zpracování vstupu předává syntaktické analýze. LA se volá funkcí \texttt{lexAnalyser()} a je implementovaná v souborech \texttt{lex\_analyzer.c} a \texttt{lex\_analyzer.h}. Zpracování lexemů se řídí předem vytvořeným deterministickým konečným automatem (viz \ref{}). Konečný automat je reprezentován v LA  switchem, u kterého každý case zastupuje jeden jeho stav. Při natrefení na konečný stav se spouští funkce \texttt{tokenCtor()} pro vytvoření tokenu a poté \texttt{appendToken()} pro vložení do seznamu tokenů. Funkce vrací délku seznamu, číslo řádku - na kterém se token nalézal, informace o typu tokenu a popřípadě jeho data.
+    
     \section{Syntaktická analýza}
-    Rekurzivní sestup se volá funkcí \texttt{synAnalyser} a je implementovaný v souborech \texttt{synAnalyzer.c} a \texttt{synAnalyzer.h}. Řídí se podle navržené gramatiky (viz \ref{}), kde každé pravidlo představuje vlastní funkci. Funkce postupně prochází tokeny získané od lexikální analýzy, kontroluje jestli je vše gramaticky správně, naplňuje tabulku symbolů a tvoří abstraktní syntaktický strom (dále ASS). Při nalezení výrazu volá funkci \texttt{parseExpression}, která spouští precedenční analýzu. Při nalezení chyby se nastaví příslušný \texttt{errorCode} a chyba se v rekurzi propaguje dál, aby program ukončil kontrolu. Funkce vrací vytvořený ASS, naplněnou tabulku symbolů a informaci o tom, jestli rekurze proběhla syntakticky a sémanticky správně či nikoliv.
-
+    
     \subsection{Rekurzivní sestup} \label{sestup}
+        Rekurzivní sestup se volá funkcí \texttt{synAnalyser()} a je implementovaný v souborech \texttt{syn\_analyzer.c} a \texttt{syn\_analyzer.h}. Řídí se podle navržené gramatiky (viz \ref{}), kde každé pravidlo představuje vlastní funkci. Funkce postupně prochází tokeny získané od lexikální analýzy, kontroluje jestli je vše gramaticky správně, naplňuje tabulku symbolů a tvoří abstraktní syntaktický strom (dále ASS). Při nalezení výrazu volá funkci \texttt{parseExpression}, která spouští precedenční analýzu. Při nalezení chyby se nastaví příslušný \texttt{errorCode} a chyba se v rekurzi propaguje dál, aby program ukončil kontrolu. Funkce vrací vytvořený ASS, naplněnou tabulku symbolů a informaci o tom, jestli rekurze proběhla syntakticky a sémanticky správně či nikoliv.
 
     \subsection{Precedenční analýza}
 
@@ -193,6 +167,33 @@
     \subsubsection{Chybové stavy}
 
     \subsection{Pomocné funkce pro vygenerovaný kód} \label{pomocne}
+
+    \section{Týmová spolupráce}
+    \subsection{Komunikace v týmu}
+        Vzájemná domluva a komunikace probíhala online i offline. A to prostřednictvím Discord serveru - pro převážně obecnější problematiky, pro ty složitější a již více konkrétní nám sloužila funkce GitHub - Issues, kde jsme mohli jednodušše diskutovat o již kontrétní části kódu. K tomu jsme se každý čtvrtek setkávali na schůzích uskutečněných v budově škole, kde jsme řešili ty nejzásadnější problémy a rozhodnutí z hlediska směřování.
+    \subsection{Verzovací systém}
+        Při výběru verzovacího systému pro nás bylo jasnou volbou zvolit populární a osvědčený Git s nahraváním na server GitHub, kde probíhala i již zmíněná vzájemná komunikace.
+    \subsection{Testování}
+        Pro ověření správnosti jsme používali framework GoogleTest v jazyce C++, který nám sloužil k unit testování.
+    \subsection{Rozdělení práce}
+        \begin{itemize}
+            \item Gabriel Biel (xbielg00)
+                \begin{itemize}
+                    \item architektura compileru, lexikální analýza, precedenční tabulka, precedenční analýza, testy pro precedenční analýzu, rozhraní pro tabulku symbolů, funkce v generátoru kódu
+                \end{itemize}
+            \item Adam Gabrys (xgabry01)
+                \begin{itemize}
+                    \item
+                \end{itemize}
+            \item Jakub Mikyšek (xmikys03)
+                \begin{itemize}
+                    \item gramatika, LL tabulka, rekurzivní syntaktická analýza, sémantické kontroly pro proměnné, integrační testování pro parser, dokumentace 
+                \end{itemize}
+            \item David Tobolík (xtobol06)
+                \begin{itemize}
+                    \item sémantické kontroly pro volání funkce, generování kódu, datové struktury pro ASS, zásobníky, struktura projektu, cmake a struktura testů, testy (lexikální analýza, ASS, zásobníky), code review, makefile, dokumentace
+                \end{itemize}
+        \end{itemize}
 
     \newpage
 	%bibliography
