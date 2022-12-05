@@ -10,7 +10,7 @@ stack_declare_t stackDeclare; // Global variable - stack for Function Frames
 
 int main()
 {
-    error_code = SUCCESS;
+    errorCode = SUCCESS;
     /* SCANNER */
     FILE *fp;
     fp = stdin;
@@ -19,7 +19,7 @@ int main()
     if (list == NULL)                  // there was an error in lexAnalyser
     {
         fclose(fp);
-        return error_code;
+        return errorCode;
     }
     // no more reading will be done
     fclose(fp);
@@ -30,7 +30,7 @@ int main()
     if (fncTable == NULL) {
         // error in function definitions
         listDtor(list);
-        return error_code;
+        return errorCode;
     }
 
     // syntax analysis
@@ -38,7 +38,7 @@ int main()
 
     if (SyntaxItem->correct == true) {
         // syntax is correct, generate code
-        code_generator(SyntaxItem->stackAST, SyntaxItem->table);
+        codeGenerator(SyntaxItem->stackAST, SyntaxItem->table);
     }
 
     // free tokens
@@ -55,5 +55,5 @@ int main()
     // free function symtable
     ht_deleteAll(fncTable);
 
-    return error_code;
+    return errorCode;
 }

@@ -22,7 +22,7 @@ typedef struct {
     int label_num;
 } code_block;
 
-/* gen_static
+/* genStatic
  * David Tobolik (xtobol06)
  *
  * this function is called before code generation
@@ -31,17 +31,17 @@ typedef struct {
  *
  * also generate functions for type conversion and type checks
  */
-void gen_static();
+void genStatic();
 
-/* gen_var_definitions
+/* genVarDefinitions
  * David Tobolik (xtobol06)
  *
  * generates variable definitions in IFJcode22 from symtable
  * doesnt generate function parametres (if given)
  */
-void gen_var_definitions(ht_table_t *var_symtable, ht_item_t *function);
+void genVarDefinitions(ht_table_t *varSymtable, ht_item_t *function);
 
-/* gen_resolve_condition
+/* genResolveCondition
  * David Tobolik (xtobol06)
  *
  * generates aux function for condition resolve
@@ -50,16 +50,16 @@ void gen_var_definitions(ht_table_t *var_symtable, ht_item_t *function);
  * false - "", "0", null, 0, 0.0, false
  * true - anything else
  */
-void gen_resolve_condition();
+void genResolveCondition();
 
-/* gen_exit_labels
+/* genExitLabels
  * David Tobolik (xtobol06)
  *
  * generates exit labels for runtime errors
  */
-void gen_exit_labels();
+void genExitLabels();
 
-/* gen_implicit_conversions
+/* genImplicitConversions
  * David Tobolik (xtobol06)
  *
  * generates implicit conversions for arithmetic, string and relational operations
@@ -80,18 +80,18 @@ void gen_exit_labels();
  * {string, {int, float}} - error
  * others - according to arithmetic or string logic
  */
-void gen_implicit_conversions();
+void genImplicitConversions();
 
-/* gen_math_equal
+/* genMathEqual
  * Gabriel Biel (xbielg00)
  *
  * Generates math function equal called with label: math%equal
  * Expects two operands on top of the stack.
  * Result is a boolean value on top of the stack. With operands poped.
  */
-void gen_math_equal();
+void genMathEqual();
 
-/* gen_semantic_type_check
+/* genSemanticTypeCheck
  * Gabriel Biel (xbielg00)
  *
  * Generates comparison operands type. Expects operand on top of the stack. 
@@ -102,9 +102,9 @@ void gen_math_equal();
  * Returns with the operand on top or with thrown error, when types are different.
  * 
  */
-void gen_semantic_type_check();
+void genSemanticTypeCheck();
 
-void gen_built_in_fcs();
+void genBuiltInFcs();
 
 #define AUX1 VAR_CODE("GF", "aux%1")
 #define AUX2 VAR_CODE("GF", "aux%2")

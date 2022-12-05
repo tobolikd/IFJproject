@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 
-void gen_static() {
+void genStatic() {
     printf(".IFJcode22\n");
 
     // generate global vars
@@ -26,14 +26,14 @@ void gen_static() {
     INST_JUMP(LABEL("end%pregenerated%end"));
 
     // generate functions (built in and aux)
-    gen_resolve_condition();
-    gen_implicit_conversions();
-    gen_semantic_type_check();
-    gen_math_equal();
-    gen_built_in_fcs();
+    genResolveCondition();
+    genImplicitConversions();
+    genSemanticTypeCheck();
+    genMathEqual();
+    genBuiltInFcs();
 
     // generate exit labels
-    gen_exit_labels();
+    genExitLabels();
 
     // end pregenerated
     INST_LABEL(LABEL("end%pregenerated%end"));
@@ -42,7 +42,7 @@ void gen_static() {
     COMMENT("BEGINING OF PROGRAM PART");
 }
 
-void gen_resolve_condition() {
+void genResolveCondition() {
     INST_LABEL(LABEL("resolve%condition"));
 
 	INST_POPS(AUX1); // value in aux1
@@ -90,7 +90,7 @@ void gen_resolve_condition() {
 }
 
 
-void gen_exit_labels() {
+void genExitLabels() {
     // uninitialized variable
     INST_LABEL(LABEL("not%init"));
     INST_DPRINT(CONST_STRING("use of not initialized var\n"));
@@ -120,7 +120,7 @@ void gen_exit_labels() {
     INST_EXIT(CONST_INT(SEMANTIC_PARAMETER_ERR));
 }
 
-void gen_semantic_type_check(){
+void genSemanticTypeCheck(){
     //int expected
     INST_LABEL(LABEL("type%check%int"));
     INST_POPS(AUX1);
@@ -178,7 +178,7 @@ void gen_semantic_type_check(){
     INST_RETURN();
 }
 
-void gen_math_equal(){
+void genMathEqual(){
     INST_LABEL(LABEL("math%equal"));
 
 	INST_POPS(AUX1); // read value of operand
@@ -234,9 +234,9 @@ void gen_math_equal(){
     INST_RETURN();
 }
 
-void gen_var_definitions(ht_table_t *var_symtable, ht_item_t* function) {
-    if (var_symtable == NULL) {
-        ERR_INTERNAL(gen_var_definitions, "symtable is NULL\n");
+void genVarDefinitions(ht_table_t *varSymtable, ht_item_t* function) {
+    if (varSymtable == NULL) {
+        ERR_INTERNAL(genVarDefinitions, "symtable is NULL\n");
         return;
     }
 
@@ -252,7 +252,7 @@ void gen_var_definitions(ht_table_t *var_symtable, ht_item_t* function) {
     }
 
     for (int i = 0; i < HT_SIZE; i++) {
-        tmpVar = var_symtable->items[i];
+        tmpVar = varSymtable->items[i];
         while (tmpVar != NULL) {
             // check if variable is predefined parameter
             varIsParam = false;
@@ -273,7 +273,7 @@ void gen_var_definitions(ht_table_t *var_symtable, ht_item_t* function) {
     }
 }
 
-void gen_implicit_conversions() {
+void genImplicitConversions() {
     /* conv 2 values from stack
     * return to stack
     * int int - no change
@@ -497,7 +497,7 @@ void gen_implicit_conversions() {
     INST_JUMPIFEQ(LABEL("conv%arithm%nil%nil"), VAR_BLACKHOLE(), CONST_STRING("nil"));
     INST_JUMP(LABEL("unknown%type"));
 }
-void gen_built_in_fcs(){
+void genBuiltInFcs(){
     //
     //readi
     //

@@ -89,7 +89,7 @@ void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
     switch (item->token->type)
     {
     case t_varId:
-        stack_ast_push_b(stackAST,ast_item_const(AST_VAR,ht_search(symtable,stack_precedence_top(stack)->token->data)));
+        stack_ast_push_b(stackAST,astItemConst(AST_VAR,ht_search(symtable,stack_precedence_top(stack)->token->data)));
         break;
     case t_functionId://dealt with earlier
         debug_log("PA: E -> i rule something went wrong.\n");
@@ -97,20 +97,20 @@ void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
     case t_int:
     {
         int data = atoi(item->token->data);
-        stack_ast_push_b(stackAST,ast_item_const(AST_INT, &data));
+        stack_ast_push_b(stackAST,astItemConst(AST_INT, &data));
         break;
     }
     case t_float:
     {
         double data = atof(item->token->data);
-        stack_ast_push_b(stackAST,ast_item_const(AST_FLOAT, &data));
+        stack_ast_push_b(stackAST,astItemConst(AST_FLOAT, &data));
         break;
     }
     case t_string:
-        stack_ast_push_b(stackAST,ast_item_const(AST_STRING,item->token->data));
+        stack_ast_push_b(stackAST,astItemConst(AST_STRING,item->token->data));
         break;
     case t_null:
-        stack_ast_push_b(stackAST,ast_item_const(AST_NULL,NULL));
+        stack_ast_push_b(stackAST,astItemConst(AST_NULL,NULL));
         break;
     default:
         THROW_ERROR(SEMANTIC_OTHER_ERR, item->token->lineNum);
@@ -148,10 +148,10 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
     switch (item->type)
     {
     case AST_FLOAT:
-        item->data->float_value *= -1;
+        item->data->floatValue *= -1;
         break;
     case AST_INT:
-        item->data->int_value *= -1;
+        item->data->intValue *= -1;
         break;
     case AST_STRING:
         THROW_ERROR(SEMANTIC_RUN_TYPE_ERR,stack->top->data->token->lineNum);
@@ -160,8 +160,8 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
         {
         //push operation * (-1)
         int negative = -1;
-        stack_ast_push_b(stackAST,ast_item_const(AST_INT,&negative));
-        stack_ast_push_b(stackAST,ast_item_const(AST_MULTIPLY,NULL)); //push operation multiply
+        stack_ast_push_b(stackAST,astItemConst(AST_INT,&negative));
+        stack_ast_push_b(stackAST,astItemConst(AST_MULTIPLY,NULL)); //push operation multiply
         break;
         }
     }
@@ -175,7 +175,7 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
 /// @param op Type of operand to execute. {+,-,*,\,.,<,>,<=,>=,===,!==}
 void EopE(stack_precedence_t *stack, stack_ast_t *stackAST, AST_type op)
 {
-    stack_ast_push_b(stackAST,ast_item_const(op, NULL));
+    stack_ast_push_b(stackAST,astItemConst(op, NULL));
     stack_precedence_pop(stack);
     stack_precedence_pop(stack);
 }
@@ -414,7 +414,7 @@ bool freeStack(stack_precedence_t *stack, stack_ast_t *ast, bool returnValue)
         }
     }
     else
-        stack_ast_push_b(ast,ast_item_const(AST_END_EXPRESSION,NULL));
+        stack_ast_push_b(ast,astItemConst(AST_END_EXPRESSION,NULL));
     return returnValue;
 }
 
@@ -468,7 +468,7 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
     }
     // #3  matching data type to declaration
     // #3a create AST FUNCTION CALL ITEM
-    AST_function_call_data *fncCallData = fnc_call_data_const(fncTable,function->identifier);
+    AST_function_call_data *fncCallData = fncCallDataConst(fncTable,function->identifier);
 
     while(1) //check parameter type compared to declaration
     {
@@ -480,34 +480,34 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
         case t_varId:
             if (ht_search(symtable,list->TokenArray[*index]->data) == NULL) //not in symtable
             {
-                fnc_call_data_destr(fncCallData);
+                fncCallDataDestr(fncCallData);
                 THROW_ERROR(SEMANTIC_VARIABLE_ERR,list->TokenArray[*index]->lineNum);
                 return false;
             }
             ht_search(symtable,list->TokenArray[*index]->data)->referenceCounter++; //variable referenced
             //add variable as function parameter
-            fnc_call_data_add_param(fncCallData, AST_P_VAR, ht_search(symtable,list->TokenArray[*index]->data));
+            fncCallDataAddParam(fncCallData, AST_P_VAR, ht_search(symtable,list->TokenArray[*index]->data));
             break;
         case t_int:
             {
                 int intData = atoi(list->TokenArray[*index]->data);
-                fnc_call_data_add_param(fncCallData, AST_P_INT, &intData);
+                fncCallDataAddParam(fncCallData, AST_P_INT, &intData);
             }
             break;
         case t_float:
             {
                 double floatData = atof(list->TokenArray[*index]->data);
-                fnc_call_data_add_param(fncCallData, AST_P_FLOAT, &floatData);
+                fncCallDataAddParam(fncCallData, AST_P_FLOAT, &floatData);
             }
             break;
         case t_string:
-            fnc_call_data_add_param(fncCallData, AST_P_STRING, list->TokenArray[*index]->data);
+            fncCallDataAddParam(fncCallData, AST_P_STRING, list->TokenArray[*index]->data);
             break;
         case t_null:
-            fnc_call_data_add_param(fncCallData, AST_P_NULL, NULL);
+            fncCallDataAddParam(fncCallData, AST_P_NULL, NULL);
             break;
         default:
-            fnc_call_data_destr(fncCallData);
+            fncCallDataDestr(fncCallData);
             THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
             return false;
         }//end of switch
@@ -521,7 +521,7 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
     // #4 )
     if (list->TokenArray[*index]->type != t_rPar || list->TokenArray[*index-1]->type == t_comma)
     {
-        fnc_call_data_destr(fncCallData);
+        fncCallDataDestr(fncCallData);
         THROW_ERROR(SYNTAX_ERR,list->TokenArray[*index]->lineNum);
         return false;
     }
@@ -536,11 +536,11 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
     // #6 push semantic action to ast
     if (checkFncCall(fncCallData) == false)// check if sem correct
     {
-        fnc_call_data_destr(fncCallData);
+        fncCallDataDestr(fncCallData);
         THROW_ERROR(SEMANTIC_RUN_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
         return false;
     }
-    stack_ast_push_b(stackAST,ast_item_const(AST_FUNCTION_CALL,fncCallData));
+    stack_ast_push_b(stackAST,astItemConst(AST_FUNCTION_CALL,fncCallData));
     return true;//success
 }
 

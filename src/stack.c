@@ -67,7 +67,7 @@
         return stack->top == NULL;                                              \
     }
 
-STACK_DEFINITION(AST_item *, ast, ast_item_destr)
+STACK_DEFINITION(AST_item *, ast, astItemDestr)
 STACK_DEFINITION(Token *, token, tokenDtor)
 STACK_DEFINITION(char *, string, free)
 STACK_DEFINITION(code_block *, code_block, free)
