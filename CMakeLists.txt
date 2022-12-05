@@ -10,8 +10,8 @@ set(PROJECT_FILES
     src/symtable.c
     src/ast.c
     src/stack.c
-    src/code-gen.c
-    src/code-gen-static.c
+    src/code_gen.c
+    src/code_gen_static.c
     src/devel.c
 )
 

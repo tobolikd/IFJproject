@@ -1,7 +1,7 @@
-#include "code-gen.h"
+#include "code_gen.h"
 #include "error-codes.h"
 #include "symtable.h"
-#include "code-gen-data.h"
+#include "code_gen_static.h"
 #include <stdlib.h>
 
 enum ifjErrCode errorCode;

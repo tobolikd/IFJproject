@@ -1,7 +1,6 @@
 #include "devel.h"
 #include "error-codes.h"
 #include "ast.h"
-#include "code-gen-data.h"
 
 #define AST_TYPE(TYPE) debug_log("\t|- type: |%s|\n", TYPE)
 #define AST_DATA(DATA) debug_log("\t|- data: %s\n", DATA)

@@ -3,7 +3,7 @@
 
 #include "ast.h"
 #include "stack.h"
-#include "code-gen-data.h"
+#include "code_gen_static.h"
 #include "symtable.h"
 #include "error-codes.h"
 

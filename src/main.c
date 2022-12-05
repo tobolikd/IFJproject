@@ -1,6 +1,6 @@
 #include "lex_analyzer.h"
 #include "syn-analyzer.h"
-#include "code-gen.h"
+#include "code_gen.h"
 #include "error-codes.h"
 #include "sem-analyzer.h"
 #include "devel.h"
