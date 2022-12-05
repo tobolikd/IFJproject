@@ -2,7 +2,7 @@
 #define IFJ_SEM_ANALYZER_H
 
 #include "symtable.h"
-#include "lex-analyzer.h"
+#include "lex_analyzer.h"
 #include "ast.h"
 
 extern ht_table_t *fncTable;

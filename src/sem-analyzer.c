@@ -1,4 +1,4 @@
-#include "lex-analyzer.h"
+#include "lex_analyzer.h"
 #include "sem-analyzer.h"
 #include "error-codes.h"
 #include "symtable.h"
@@ -30,21 +30,21 @@ ht_table_t *initFncSymtable()
 
     // "strlen"
     ht_item_t *strlenItem = ht_insert(fncSymtable, "strlen", int_t, true);
-    ht_param_append(strlenItem, "s", string_t);
+    ht_paramAppend(strlenItem, "s", string_t);
 
     // "substring"
     ht_item_t  *substringItem = ht_insert(fncSymtable, "substring", string_t, true);
-    ht_param_append(substringItem, "s", string_t);
-    ht_param_append(substringItem, "i", int_t);
-    ht_param_append(substringItem, "j", int_t);
+    ht_paramAppend(substringItem, "s", string_t);
+    ht_paramAppend(substringItem, "i", int_t);
+    ht_paramAppend(substringItem, "j", int_t);
 
     // "ord"
     ht_item_t  *ordItem = ht_insert(fncSymtable, "ord", int_t, true);
-    ht_param_append(ordItem, "c", string_t);
+    ht_paramAppend(ordItem, "c", string_t);
 
     // "chr"
     ht_item_t  *chrItem = ht_insert(fncSymtable, "chr", string_t, true);
-    ht_param_append(chrItem, "i", int_t);
+    ht_paramAppend(chrItem, "i", int_t);
     return (fncSymtable);
 }
 
@@ -201,7 +201,7 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable) {
                     if (list->TokenArray[index]->type != t_varId) { errorCode = SYNTAX_ERR;return NULL;}
 
                     //appending first param to our function
-                    ht_param_append(currFncDeclare, list->TokenArray[index]->data, tmpParamType);
+                    ht_paramAppend(currFncDeclare, list->TokenArray[index]->data, tmpParamType);
                     //debug_log("param %s \n", tmp->fnc_data.params->varId);
                     (index)++;
                     //there are more params
@@ -217,7 +217,7 @@ ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable) {
                                 (index)++;
                                 if (list->TokenArray[index]->type != t_varId) {errorCode = SYNTAX_ERR;return NULL;}
 
-                                ht_param_append(currFncDeclare, list->TokenArray[index]->data, tmpParamType);
+                                ht_paramAppend(currFncDeclare, list->TokenArray[index]->data, tmpParamType);
                                 //debug_log("another param %s\n", currFncDeclare->fnc_data.params->next->varId);
                                 (index)++;
                                 //now the token can only be comma or ')'

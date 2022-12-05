@@ -6,7 +6,7 @@
 int HT_SIZE = MAX_HT_SIZE;
 
 /* SUPPORT FUNCTIONS */
-int get_hash(char *key) 
+int ht_hash(char *key) 
 {
   int result = 1;
   int length = strlen(key);
@@ -17,7 +17,7 @@ int get_hash(char *key)
 }
 
 
-void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
+void ht_paramAppend(ht_item_t *appendTo, char *name, var_type_t type)
 {
   param_info_t *new = malloc(sizeof(param_info_t)); //create new
   CHECK_MALLOC(new);
@@ -44,7 +44,7 @@ void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type)
   return;
 }
 
-ht_item_t *ht_item_ctor(char* identifier, var_type_t type, bool isFunction)
+ht_item_t *ht_itemCtor(char* identifier, var_type_t type, bool isFunction)
 {
   ht_item_t *new = malloc(sizeof(ht_item_t));
   CHECK_MALLOC_PTR(new);
@@ -77,7 +77,7 @@ ht_table_t *ht_init()
 
 ht_item_t *ht_search(ht_table_t *table, char *key) 
 {
-  int hash = get_hash(key);
+  int hash = ht_hash(key);
   ht_item_t *item = table->items[hash]; 
   while (item != NULL)
   {
@@ -102,8 +102,8 @@ ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool
   }
   else //item does not exists in the symtable
   {
-    int hash = get_hash(identifier); 
-    item = ht_item_ctor(identifier,type,isFunction);  //create new item
+    int hash = ht_hash(identifier); 
+    item = ht_itemCtor(identifier,type,isFunction);  //create new item
     
     item->next=table->items[hash]; // link with aliases
     table->items[hash] = item; // insert first
@@ -112,7 +112,7 @@ ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool
   return item;
 }
 
-void ht_item_dtor(ht_item_t *item)
+void ht_itemDtor(ht_item_t *item)
 {
   if (item->isfnc)
   {
@@ -131,7 +131,7 @@ void ht_item_dtor(ht_item_t *item)
 }
 
 void ht_delete(ht_table_t *table, char *key) {
-  int hash = get_hash(key);
+  int hash = ht_hash(key);
   ht_item_t *item = table->items[hash];
   ht_item_t *prev = table->items[hash];
   
@@ -142,13 +142,13 @@ void ht_delete(ht_table_t *table, char *key) {
       if (prev == item) // meaning the very first - it must be attached to the table
       {
         table->items[hash] = item->next; //reattach the rest of the list
-        ht_item_dtor(item);
+        ht_itemDtor(item);
         return;
       }
       else  // every other
       {
         prev->next = item->next; //reattach the rest of the list
-        ht_item_dtor(item);
+        ht_itemDtor(item);
         return;
       }
     }
@@ -157,7 +157,7 @@ void ht_delete(ht_table_t *table, char *key) {
   }
 }
 
-void ht_delete_all(ht_table_t *table) {
+void ht_deleteAll(ht_table_t *table) {
   if(table == NULL)
     return;
   ht_item_t *cur = table->items[0];
@@ -169,7 +169,7 @@ void ht_delete_all(ht_table_t *table) {
     {
       tmp = cur; // attach to destroy later
       cur = cur->next;
-      ht_item_dtor(tmp);
+      ht_itemDtor(tmp);
     }
     table->items[i] = NULL; //to init state
   }
