@@ -1,3 +1,12 @@
+/* @file lex_alyzer.c
+ *
+ * @brief Scanner module. 
+ * @brief Module to read and sort input file into tokens, which allows
+ *        other modules to work efficiently.
+ *
+ * @author Gabriel Biel(xbielg00)
+ */
+
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>

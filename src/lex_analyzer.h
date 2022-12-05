@@ -1,3 +1,10 @@
+/* @file lex_alyzer.h
+ *
+ * @brief Data structures and functions for scanner module. 
+ *
+ * @author Gabriel Biel(xbielg00)
+ */
+
 #ifndef LEX_ANALYZER_H
 #define LEX_ANALYZER_H 1
 

@@ -1,3 +1,10 @@
+/* @file preced_analyzer.h
+ *
+ * @brief Library for bottom-up parser module. 
+ *
+ * @author Gabriel Biel(xbielg00)
+ */
+
 #ifndef IFJ_PRECED_ANALYZER_H
 #define IFJ_PRECED_ANALYZER_H 1
 

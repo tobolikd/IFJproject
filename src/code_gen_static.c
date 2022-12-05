@@ -29,7 +29,7 @@ void gen_static() {
     gen_resolve_condition();
     gen_implicit_conversions();
     gen_semantic_type_check();
-    gen_data_type_comparisons();
+    gen_math_equal();
     gen_built_in_fcs();
 
     // generate exit labels
@@ -178,8 +178,8 @@ void gen_semantic_type_check(){
     INST_RETURN();
 }
 
-void gen_data_type_comparisons(){
-    INST_LABEL(LABEL("type%cmp"));
+void gen_math_equal(){
+    INST_LABEL(LABEL("math%equal"));
 
 	INST_POPS(AUX1); // read value of operand
 	INST_POPS(AUX2); // read value of operand

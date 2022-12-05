@@ -1,9 +1,16 @@
+/* @file symtable.h
+ *
+ * @brief Data structures and functions representing symtable's interface. 
+ *
+ * @author Gabriel Biel(xbielg00)
+ */
+
 #ifndef IFJ_SYM_TABLE_H
 #define IFJ_SYM_TABLE_H 1
 
 #include <stdbool.h>
 
-#define MAX_HT_SIZE 251 // highest prime number < 256
+#define MAX_HT_SIZE 4999 // highest prime number < 5000
 
 extern int HT_SIZE;
 

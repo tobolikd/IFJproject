@@ -1,3 +1,11 @@
+/* @file preced_analyzer.c
+ *
+ * @brief Bottom-up parser module. Contains precedence table, precedence rules 
+ *        and functions to parse expressions. 
+ *
+ * @author Gabriel Biel(xbielg00)
+ */
+
 #include "symtable.h"
 #include "preced_analyzer_data.h"
 #include "preced_analyzer.h"

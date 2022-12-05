@@ -82,8 +82,26 @@ void gen_exit_labels();
  */
 void gen_implicit_conversions();
 
-void gen_data_type_comparisons();
+/* gen_math_equal
+ * Gabriel Biel (xbielg00)
+ *
+ * Generates math function equal called with label: math%equal
+ * Expects two operands on top of the stack.
+ * Result is a boolean value on top of the stack. With operands poped.
+ */
+void gen_math_equal();
 
+/* gen_semantic_type_check
+ * Gabriel Biel (xbielg00)
+ *
+ * Generates comparison operands type. Expects operand on top of the stack. 
+ * Possible label call:
+ * {type%check%int},{type%check%float},{type%check%string},{type%check%nil}
+ * {type%check%int%nil},{type%check%float%nil},{type%check%string%nil}
+ * 
+ * Returns with the operand on top or with thrown error, when types are different.
+ * 
+ */
 void gen_semantic_type_check();
 
 void gen_built_in_fcs();
