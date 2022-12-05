@@ -75,7 +75,7 @@
                     \end{itemize}
                 \item David Tobolík (xtobol06)
                     \begin{itemize}
-                        \item sémantické kontroly pro volání funkce, datové struktury pro ASS, zásobníky, struktura projektu, cmake a struktura testů, testy (lexikální analýza, AST, zásobníky), code review, makefile, dokumentace
+                        \item sémantické kontroly pro volání funkce, generování kódu, datové struktury pro ASS, zásobníky, struktura projektu, cmake a struktura testů, testy (lexikální analýza, ASS, zásobníky), code review, makefile, dokumentace
                     \end{itemize}
             \end{itemize}
 
@@ -84,9 +84,9 @@
     \section{Lexikální analýza}
 
     \section{Syntaktická analýza}
-    Rekurzivní sestup se volá funkcí \texttt{synAnalyser} a je implementovaný v souborech \texttt{synAnalyzer.c} a \texttt{synAnalyzer.h}. Řídí se podle navrženené gramatiky (viz \ref{}), kde každé pravidlo představuje vlastní funkci. Funkce postupně prochází tokeny získané od lexikální analýzy, kontroluje jestli je vše gramaticky správně, naplňuje tabulku symbolů a tvoří abstraktní syntaktický strom (dále ASS). Při nalezení výrazu volá funkci \texttt{parseExpression}, která spouští precedenční analýzu. Při nalezení chyby se nastaví příslušný \texttt{errorCode} a chyba se v rekurzi propaguje dál, aby program ukončil kontrolu. Funkce vrací vytvořený ASS, naplněnou tabulku symbolů a informaci o tom, jestli rekurze proběhla syntaticky a sémanticky správně či nikoliv.
+    Rekurzivní sestup se volá funkcí \texttt{synAnalyser} a je implementovaný v souborech \texttt{synAnalyzer.c} a \texttt{synAnalyzer.h}. Řídí se podle navržené gramatiky (viz \ref{}), kde každé pravidlo představuje vlastní funkci. Funkce postupně prochází tokeny získané od lexikální analýzy, kontroluje jestli je vše gramaticky správně, naplňuje tabulku symbolů a tvoří abstraktní syntaktický strom (dále ASS). Při nalezení výrazu volá funkci \texttt{parseExpression}, která spouští precedenční analýzu. Při nalezení chyby se nastaví příslušný \texttt{errorCode} a chyba se v rekurzi propaguje dál, aby program ukončil kontrolu. Funkce vrací vytvořený ASS, naplněnou tabulku symbolů a informaci o tom, jestli rekurze proběhla syntakticky a sémanticky správně či nikoliv.
 
-    \subsection{Rekurzivní sestup}
+    \subsection{Rekurzivní sestup} \label{sestup}
 
     \subsection{Precedenční analýza}
 
@@ -135,38 +135,64 @@
     \section{Tabulka symbolů}
 
     \section{Abstraktní syntaktický strom}
-    Abstraktní syntaktický strom (dále ASS) je implementovaný jako zásobník (viz \ref{}), který obsahuje strukturu pro ASS. Ta je tvořena typem a volitelnými daty.
+    Soubory \texttt{ast.c}, \texttt{ast.h}
+    
+    Abstraktní syntaktický strom (dále ASS) je implementovaný jako zásobník (viz \ref{zasobniky}), který obsahuje strukturu pro ASS. Ta je tvořena typem a volitelnými daty.
     \begin{itemize}
-        \item Aritmetické, řetezcový a relační operátory -- každý má svůj typ, nemají data. Na zásobníku předcházejí 2 operandy, nad kterými se má operace provést. Operandem může být konstanta, proměnná nebo další operátor, v tom případě se operace provede nad výsledkem operace, který je dán tímto operátorem.
+        \item Aritmetické, řetězcový a relační operátory -- každý má svůj typ, nemají data, na zásobníku předcházejí 2 operandy.
         \item Přiřazení -- nemá data, na zásobníku následuje proměnná, do které se přiřazuje a po ní výraz nebo volání funkce, které se má přiřadit.
         \item Proměnná -- v datech obsahuje ukazatel do tabulky symbolů.
         \item Konstanty -- každý typ konstanty má svůj typ v ASS (int, string, float, null) a obsahuje, kromě typu null, hodnotu této konstanty.
         \item Deklarace funkce -- v datech je uložený ukazatel do tabulky symbolů na tuto funkci.
-        \item Volání funkce -- v datech obsahuje ukazatel na strukturu volání funkce, v ní je uložen ukazatel do tabulky symbilů a seznam parametrů. Parametry mají rovněž typ (proměnná nebo konstanta -- int, string, float, null) a svoje data (ukazatel do tabulky symbolů nebo hodnota konstanty).
+        \item Volání funkce -- v datech obsahuje ukazatel na strukturu volání funkce, v ní je uložen ukazatel do tabulky symbolů a seznam parametrů. Parametry mají rovněž typ (proměnná nebo konstanta -- int, string, float, null) a svoje data (ukazatel do tabulky symbolů nebo hodnota konstanty).
         \item Volání return -- typ bez návratové hodnoty nebo s návratovou hodnotou, v tom případě na zásobníku následuje výraz, který se má vrátit.
         \item Podmínky -- if, else, while -- nemají data, na zásobníku následuje výraz, který je v podmínce.
         \item Konec výrazu -- značí konec výrazu nebo volání funkce, slouží k rozpoznání konce postfixového zápisu.
         \item Konec složeného výrazu -- značí konec složeného příkazu ve složených závorkách (if, else, deklarace funkce).
     \end{itemize}
-    Strom se ukládá od začátku programu, takže při generování kódu se musí zásobník číst odzadu (viz \ref{zasobniky} a \ref{generovani}).
+    Řídící struktury jsou uloženy prefixově, výrazy postfixově, toho se s výhodou využívá v generování kódu (viz \ref{generovani}).
     \section{Zásobníky} \label{zasobniky}
-    Zásobníky byly potřeba na více místech (ASS, precedenční analýza, generování kódu, \ldots). Implementace zásobníků je tedy obecná pomocí makra, které je možné použít pro libovolný ukazatel. V některých aplikacích je potřeba přístup k zásobníku z obou stran, pro operace push a pop existují tedy 2 varianty -- pro přístup od začátku a od konce. Pro operaci pop je potřeba v makru specifikovat destruktor, který správně uvolní prvek, což je vhodné pro komplexnější strkutury.
+    Soubory \texttt{stack.c}, \texttt{stack.h}
+    
+    Zásobníky byly potřeba na více místech (ASS, precedenční analýza, generování kódu, \ldots). Implementace zásobníků je tedy obecná pomocí makra, které je možné použít pro libovolný ukazatel. Pro operaci pop je potřeba v makru specifikovat destruktor, který správně uvolní prvek, což je vhodné především pro komplexnější struktury. Při tvorbě ASS je potřeba, aby byl začátek programu na vrcholu zásobníku, proto je zásobník rozšířen o funkci, která umožňuje vložení prvku na konec zásobníku, aby se ASS do zásobníku mohl vkládat sekvenčně.
 
     \section{Sémantické kontroly}
     Všechny sémantické kontroly probíhají s pomocí tabulky symbolů. Před spuštěním syntaktické analýzy, proběhne tzv. "první průchod" za pomocí funkce \texttt{fncDeclarationTable}, která kontroluje jen definice funkcí a nahrává je společně s jejich parametry a návratovým typem do tabulky symbolů. V návaznosti na tento první průchod se v precedenční analýze při volání funkcí provádí kontrola typu a počtu parametrů nebo zda byla funkce definována. Sémantické kontroly pro proměnné a jejich (ne)definování se provádějí v syntaktické a precedenční analýze.
-    
+
     \section{Generování kódu} \label{generovani}
+    Soubory \texttt{code\_gen.c}, \texttt{code\_gen.h}, \texttt{code\_gen\_static.c}, \texttt{code\_gen\_static.h}
+    
     Generování kódu zajišťuje funkce \texttt{codeGenerator}, která slouží jako kontroler celého generování. Předává si řízení s funkcemi, které slouží pro generování konkrétních částí, stará se o správu kontextu programu, uvolnění dat apod.
 
-    \subsection{Kontext programu}
-    Funkce \texttt{codeGenerator} vytváří kontext programu a předává ho některým funkcím. Kontext obsahuje čítač podmínek if, while, ukazatel do tabulky symbolů na aktuální deklarovanou funkci, zásobník složených výrazů a proměnnou pro určení čísla návěští else.
+    Byly domluveny konvence předávání hodnot volání funkcí, pomocných funkcí (viz \ref{pomocne}) a vyhodnocených výrazů. Parametry vestavěných funkcí a funkcí definovaných uživatelem (kromě funkce write, která se generuje přímo) se předávají v předdefinovaných proměnných ve vytvořeném lokálním rámci. Lokální rámec připravuje a uklízí vždy volající. Pomocné funkce očekávávají parametry vždy na zásobníku, toto řešení jsme zvolili pro omezení vytváření rámců, s ohledem na malý počet parametrů těchto funkcí, které berou 1 nebo 2 parametry. Návratová hodnota se u všech funkcí a u výrazů předává na zásobníku.
 
-    Zásobník složených výrazů obsahuje struktury s typem složeného výrazu (deklarace funkce, if, else, while) a pořadové číslo. Pořadové číslo je určeno čítačem v kontextu programu, u deklarace funkce není potřeba.
+    \subsection{Kontext programu}
+    Funkce \texttt{codeGenerator} vytváří a aktualizuje kontext programu a předává ho některým funkcím. Kontext obsahuje čítače návěští, zásobník zanoření a ukazatel na aktuálně deklarovanou funkci. Zásobník zanoření obsahuje prvky, které identifikují typ a pořadí složených příkazů.
 
     \subsection{Statické funkce a definice proměnných}
-    Před spuštěním veškerého generování kódu je spuštěna funkce pro vygenerování statické části programu a definice proměnných. Statická část obsahuje definici globálních pomocných proměnných, které slouží místo registrů a definici vestavěných funkcí. Tato část je přeskočena instrukcí \texttt{JUMP} až na začátek programu. Na začátku se vytvoří nový lokální rámec a nadefinují se všechny proměnné, které jsou použity v hlavním těle programu (i v podmínkách, takže všude kromě deklarace funkcí).
+    Před spuštěním veškerého generování kódu jsou vygenerovány statické části programu a definice proměnných. Statická část obsahuje definici globálních pomocných proměnných, které slouží místo registrů a definici vestavěných a pomocných funkcí. Tato část je přeskočena instrukcí \texttt{JUMP} až na začátek programu. Na začátku se vytvoří nový lokální rámec a nadefinují se všechny proměnné, které jsou použity v hlavním těle programu (i v podmínkách a cyklech, tudíž všude kromě deklarace funkcí).
 
-    \subsection{}
+    \subsubsection{Podmínky -- \texttt{if else, while}}
+    Podmínka \texttt{if} se na začátku vyhodnotí a v případě nepravdivosti výrazu v podmínce se skočí na návěští \texttt{else} doplněné pořadovým číslem z kontextu. Před návěští \texttt{else} se vygeneruje skok za složený příkaz. U cyklu \texttt{while} se vygeneruje návěští začátku cyklu (opět doplněné o pořadové číslo z kontextu), při neplatnosti podmínky skočí až za konec cyklu. Návěští konce složených příkazů \texttt{else} a \texttt{while} jsou generovány na konci složeného příkazu (viz \ref{konec slozeneho}).
+
+    \subsubsection{Přiřazení}
+    \subsubsection{Volání funkce}
+    \subsubsection{Deklarace funkce}
+    \subsubsection{Volání return}
+    \subsubsection{Výrazy}
+    \subsubsection{Konec složeného příkazu} \label{konec slozeneho}
+    Když je na vrcholu zásobníku ASS konec složeného výrazu, vyhodnotí se následující akce podle typu složeného výrazu v kontextu.
+    \begin{itemize}
+        \item \texttt{if} -- vygeneruje skok na konec složeného příkazu \texttt{else}.
+        \item \texttt{else} -- generuje návěští značící konec příkazu \texttt{else}.
+        \item \texttt{while} -- generuje skok na začátek cyklu a návěští konce cyklu.
+        \item deklarace funkce -- vygeneruje kontrolu návratu z funkce. Podle kontextu určí návratový typ funkce, pro \texttt{void} funkci vygeneruje navrácení hodnoty \texttt{null} na zásobník a instrukci \texttt{RETURN}, pro případ, že se ve funkci volání \texttt{return} nezavolá (pokud se volá, tento kód se nevykoná). Pro ostatní návratové typy generuje skok na návěští, které obstará výpis chybové hlášky o chybějícím volání \texttt{return} a navrácení chybového kódu. Potom nastaví v kontextu ukazatel na aktuální deklarovanou funkci na \texttt{NULL}.
+    \end{itemize}
+
+    Nakonec odstraní ze zásobníku v kontextu aktuální prvek, který byl právě koncem složeného příkazu ukončen.
+    \subsubsection{Chybové stavy}
+
+    \subsection{Pomocné funkce pro vygenerovaný kód} \label{pomocne}
 
     \newpage
 	%bibliography
