@@ -17,13 +17,13 @@
  *  |- data
  *      |- one of:
  *      variable - pointer to var in symtable
- *      functionDeclareData
+ *      function_declare_data
  *          |- function - pointer to fnc in symtable
- *          |- varSymtable - local symtable for function declaration
- *      intValue - integer constant
+ *          |- var_symtable - local symtable for function declaration
+ *      int_value - integer constant
  *      stringvalue - string constant
- *      floatValue - float constant
- *      functionCallData - structure with fnc call attribs
+ *      float_value - float constant
+ *      function_call_data - structure with fnc call attribs
  *          |- functionID - id of called function - only for debug
  *          |- function - pointer to fnc in symtable
  *          |- params - list of parametres
@@ -31,9 +31,9 @@
  *              |- data - data of the parameter
  *                  |- one of:
  *                  variable - pointer to var in symtable
- *                  intValue - integer constant
+ *                  int_value - integer constant
  *                  stringvalue - string constant
- *                  floatValue - float constant
+ *                  float_value - float constant
  *                  NULL - in case of AST_P_NULL
  *              |- next - pointer to next parameter
  */
@@ -68,16 +68,16 @@ typedef enum
     AST_VAR,    // data - ht_item_t *variable
 
     // constants
-    AST_INT = 40,    // data - int intValue
-    AST_STRING, // data - char *stringValue
-    AST_FLOAT,  // data - double floatValue
+    AST_INT = 40,    // data - int int_value
+    AST_STRING, // data - char *string_value
+    AST_FLOAT,  // data - double float_value
     AST_NULL,
 
     // fnc declaration
     AST_FUNCTION_DECLARE = 50,   // data - ht_item_t *function
 
     // program control (jumps)
-    AST_FUNCTION_CALL = 60,  // data - AST_function_call_data *functionCallData
+    AST_FUNCTION_CALL = 60,  // data - AST_function_call_data *function_call_data
     AST_RETURN_VOID,
     AST_RETURN_EXPR,
     AST_IF,
@@ -108,9 +108,9 @@ typedef enum
 typedef union ast_param_data
 {
     ht_item_t *variable;
-    int intValue;
-    char *stringValue;
-    double floatValue;
+    int int_value;
+    char *string_value;
+    double float_value;
 } AST_param_data;
 
 typedef struct ast_fnc_param
@@ -137,12 +137,12 @@ typedef struct
 /* function declare data
  *
  * function - pointer to symtable
- * varSymtable - local symtable for function declare
+ * var_symtable - local symtable for function declare
  */
 typedef struct
 {
     ht_item_t *function;
-    ht_table_t *varSymtable;
+    ht_table_t *var_symtable;
 } AST_function_declare_data;
 
 /* AST_item->data for AST_TYPES
@@ -152,11 +152,11 @@ typedef struct
 typedef union
 {
     ht_item_t *variable;    // for AST_VAR
-    int intValue;           // AST_INT
-    char *stringValue;      // AST_STRING
-    double floatValue;       // AST_FLOAT
-    AST_function_call_data *functionCallData;   // AST_FUNCTION_CALL
-    AST_function_declare_data *functionDeclareData; //AST_FUNCTION_DECLARE
+    int int_value;           // AST_INT
+    char *string_value;      // AST_STRING
+    double float_value;       // AST_FLOAT
+    AST_function_call_data *function_call_data;   // AST_FUNCTION_CALL
+    AST_function_declare_data *function_declare_data; //AST_FUNCTION_DECLARE
 } AST_data;
 
 /* AST_item - items in the AST
@@ -187,9 +187,9 @@ void ast_item_destr(AST_item *deleted);
 /* fnc_declare_data_const
  *  - allocate fnc declare data and fill with data
  *  function - pointer to declared function in symtable
- *  varSymtable - local variable symtable for declared function
+ *  var_symtable - local variable symtable for declared function
  */
-AST_function_declare_data *fnc_declare_data_const(ht_item_t *function, ht_table_t *varSymtable);
+AST_function_declare_data *fnc_declare_data_const(ht_item_t *function, ht_table_t *var_symtable);
 
 /* fnc_call_data_const
  *  - allocate and initialize function call data structure

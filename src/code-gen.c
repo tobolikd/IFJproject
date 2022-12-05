@@ -49,7 +49,7 @@ code_block *codeBlockConst(code_block_type type, codeGenCtx *ctx) {
 #define PUSH_ELSE() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_ELSE, ctx))
 #define PUSH_WHILE() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_WHILE, ctx))
 
-void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
+void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
     if (stack_ast_empty(ast)) return;
     // generate built in functions
     genBuiltIns();
@@ -57,7 +57,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
     // generate variable definitions in local frame for whole program
     INST_CREATEFRAME();
     INST_PUSHFRAME();
-    genVarDefs(varSymtable, NULL);
+    genVarDefs(var_symtable, NULL);
 
     // allocate code context
     codeGenCtx *ctx = (codeGenCtx *) malloc(sizeof(codeGenCtx));
@@ -133,14 +133,14 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable) {
                 COMMENT("GENERATING FUNCTION DECLARE");
                 PUSH_FNC_DECL();
                 // update ctx
-                ctx->currentFncDeclaration = AST_TOP()->data->functionDeclareData->function;
+                ctx->currentFncDeclaration = AST_TOP()->data->function_declare_data->function;
 
                 // jump over function
                 INST_JUMP(LABEL_FNC_DECLARE_END());
 
-                INST_LABEL(LABEL(AST_TOP()->data->functionDeclareData->function->identifier));
+                INST_LABEL(LABEL(AST_TOP()->data->function_declare_data->function->identifier));
                 // define vars in local frame (frame is created on function call)
-                genVarDefs(AST_TOP()->data->functionDeclareData->varSymtable, AST_TOP()->data->functionDeclareData->function);
+                genVarDefs(AST_TOP()->data->function_declare_data->var_symtable, AST_TOP()->data->function_declare_data->function);
                 AST_POP();
                 COMMENT("FUNCTION DECLARE GENERATED");
                 break;
@@ -290,15 +290,15 @@ void genExpr(stack_ast_t *ast) {
         {
         // <literals>
         case AST_INT:
-            INST_PUSHS(CONST_INT(item->data->intValue));
+            INST_PUSHS(CONST_INT(item->data->int_value));
             break;
 
         case AST_FLOAT:
-            INST_PUSHS(CONST_FLOAT(item->data->floatValue));
+            INST_PUSHS(CONST_FLOAT(item->data->float_value));
             break;
 
         case AST_STRING:
-            INST_PUSHS(CONST_STRING(item->data->stringValue));
+            INST_PUSHS(CONST_STRING(item->data->string_value));
             break;
 
         case AST_NULL:
@@ -401,15 +401,15 @@ void genExpr(stack_ast_t *ast) {
 
 void genFncCall(stack_ast_t *ast) {
     // check for write
-    if (!strcmp(AST_TOP()->data->functionCallData->function->identifier, "write")) {
+    if (!strcmp(AST_TOP()->data->function_call_data->function->identifier, "write")) {
         genWrite(ast);
         return;
     }
 
     INST_CREATEFRAME(); // new TF frame for function
 
-    AST_fnc_param *param = AST_TOP()->data->functionCallData->params;
-    param_info_t *ref = AST_TOP()->data->functionCallData->function->fnc_data.params;
+    AST_fnc_param *param = AST_TOP()->data->function_call_data->params;
+    param_info_t *ref = AST_TOP()->data->function_call_data->function->fnc_data.params;
     while (param != NULL)
     {
         INST_DEFVAR(VAR_CODE("TF",ref->varId)); //declare parameters as variables for in function use
@@ -455,13 +455,13 @@ void genFncCall(stack_ast_t *ast) {
             break; //case AST_P_VAR
 
         case AST_P_INT:
-            INST_MOVE(VAR_CODE("TF",ref->varId),CONST_INT(param->data->intValue));
+            INST_MOVE(VAR_CODE("TF",ref->varId),CONST_INT(param->data->int_value));
             break;
         case AST_P_STRING:
-            INST_MOVE(VAR_CODE("TF",ref->varId),CONST_STRING(param->data->stringValue));
+            INST_MOVE(VAR_CODE("TF",ref->varId),CONST_STRING(param->data->string_value));
             break;
         case AST_P_FLOAT:
-            INST_MOVE(VAR_CODE("TF",ref->varId),CONST_FLOAT(param->data->floatValue));
+            INST_MOVE(VAR_CODE("TF",ref->varId),CONST_FLOAT(param->data->float_value));
             break;
         case AST_P_NULL: // allways false
             INST_MOVE(VAR_CODE("TF",ref->varId),CONST_NIL());
@@ -474,24 +474,24 @@ void genFncCall(stack_ast_t *ast) {
     }
     //call function with its relevant frame
     INST_PUSHFRAME();
-    INST_CALL(LABEL(AST_TOP()->data->functionCallData->function->identifier));
+    INST_CALL(LABEL(AST_TOP()->data->function_call_data->function->identifier));
     INST_POPFRAME();
     AST_POP();
 }
 
 void genWrite(stack_ast_t *ast) {
-    AST_fnc_param *tmpParam = AST_TOP()->data->functionCallData->params;
+    AST_fnc_param *tmpParam = AST_TOP()->data->function_call_data->params;
 
     while (tmpParam != NULL) {
         switch (tmpParam->type) {
             case AST_P_INT:
-                INST_WRITE(CONST_INT(tmpParam->data->intValue));
+                INST_WRITE(CONST_INT(tmpParam->data->int_value));
                 break;
             case AST_P_FLOAT:
-                INST_WRITE(CONST_FLOAT(tmpParam->data->floatValue));
+                INST_WRITE(CONST_FLOAT(tmpParam->data->float_value));
                 break;
             case AST_P_STRING:
-                INST_WRITE(CONST_STRING(tmpParam->data->stringValue));
+                INST_WRITE(CONST_STRING(tmpParam->data->string_value));
                 break;
             case AST_P_NULL:
                 INST_WRITE(CONST_STRING(""));
