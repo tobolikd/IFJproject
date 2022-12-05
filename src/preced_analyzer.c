@@ -1,6 +1,6 @@
 #include "symtable.h"
-#include "preced-analyzer-data.h"
-#include "preced-analyzer.h"
+#include "preced_analyzer_data.h"
+#include "preced_analyzer.h"
 #include "sem-analyzer.h"
 #include "ast.h"
 #include "error-codes.h"
@@ -10,23 +10,22 @@
 const char preced_table[EXPRESSION][EXPRESSION] =   //experssion is the last in enum,
                                                     //enum contains one extra element UNINITIALISED
 {
-//      {'!', '*', '/','+', '-', '.', '<', '>','>=','<=','==','!=', '(', ')', 'i', '$'          #priority
-        {'>', '>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // !   #0 = not in specification
-        {'>', '>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // *   #1
-        {'>', '>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // /   #1
-        {'<', '<', '<','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // +   #2
-        {'<', '<', '<','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // -   #2
-        {'<', '<', '<','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // .   #2
-        {'<', '<', '<','<', '<', '<', ' ', ' ', ' ', ' ', '>', '>', '<', '>', '<', '>'}, // >   #3
-        {'<', '<', '<','<', '<', '<', ' ', ' ', ' ', ' ', '>', '>', '<', '>', '<', '>'}, // <   #3
-        {'<', '<', '<','<', '<', '<', ' ', ' ', ' ', ' ', '>', '>', '<', '>', '<', '>'}, // >=  #3
-        {'<', '<', '<','<', '<', '<', ' ', ' ', ' ', ' ', '>', '>', '<', '>', '<', '>'}, // <=  #3
-        {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<', '>', '<', '>'}, // === #4
-        {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<', '>', '<', '>'}, // !== #4
-        {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '<', ' '}, // (
-        {'>', '>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>'}, // )
-        {'>', '>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>'}, // i
-        {'<', '<', '<','<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', ' '}  // $
+//      {'*', '/','+', '-', '.', '<', '>','>=','<=','==','!=', '(', ')', 'i', '$'          #priority
+        {'>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // *   #1
+        {'>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // /   #1
+        {'<', '<','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // +   #2
+        {'<', '<','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // -   #2
+        {'<', '<','>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '>', '<', '>'}, // .   #2
+        {'<', '<','<', '<', '<', ' ', ' ', ' ', ' ', '>', '>', '<', '>', '<', '>'}, // >   #3
+        {'<', '<','<', '<', '<', ' ', ' ', ' ', ' ', '>', '>', '<', '>', '<', '>'}, // <   #3
+        {'<', '<','<', '<', '<', ' ', ' ', ' ', ' ', '>', '>', '<', '>', '<', '>'}, // >=  #3
+        {'<', '<','<', '<', '<', ' ', ' ', ' ', ' ', '>', '>', '<', '>', '<', '>'}, // <=  #3
+        {'<', '<','<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<', '>', '<', '>'}, // === #4
+        {'<', '<','<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<', '>', '<', '>'}, // !== #4
+        {'<', '<','<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '<', ' '}, // (
+        {'>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>'}, // )
+        {'>', '>','>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>'}, // i
+        {'<', '<','<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', ' '}  // $
 };
 
 //RULES
@@ -52,8 +51,9 @@ unsigned const RULES[NUMBER_OF_RULES][RULE_SIZE] = {
 };//possibly more
 
 
-//FUNCTIONS
-
+/// @brief Skips expressions in precedence stack.
+/// @param stack Stack to read from.
+/// @return Pointer to the terminal item that is closest to the top.
 PrecedItem *stack_precedence_top_terminal(stack_precedence_t *stack)
 {
     stack_precedence_item_t *cur = stack->top;
@@ -66,6 +66,10 @@ PrecedItem *stack_precedence_top_terminal(stack_precedence_t *stack)
     return cur->data;
 }
 
+/// @brief Application of precedence rule E -> i
+/// @param stack Precedence stack.
+/// @param stackAST AST stack to push items to.
+/// @param symtable Relevant symtable for current expression.
 void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
 {
     //setup stack_precedence_t
@@ -76,7 +80,7 @@ void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
     switch (item->token->type)
     {
     case t_varId:
-        stack_ast_push(stackAST,ast_item_const(AST_VAR,ht_search(symtable,stack_precedence_top(stack)->token->data)));
+        stack_ast_push_b(stackAST,ast_item_const(AST_VAR,ht_search(symtable,stack_precedence_top(stack)->token->data)));
         break;
     case t_functionId://dealt with earlier
         debug_log("PA: E -> i rule something went wrong.\n");
@@ -84,20 +88,20 @@ void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
     case t_int:
     {
         int data = atoi(item->token->data);
-        stack_ast_push(stackAST,ast_item_const(AST_INT, &data));
+        stack_ast_push_b(stackAST,ast_item_const(AST_INT, &data));
         break;
     }
     case t_float:
     {
         double data = atof(item->token->data);
-        stack_ast_push(stackAST,ast_item_const(AST_FLOAT, &data));
+        stack_ast_push_b(stackAST,ast_item_const(AST_FLOAT, &data));
         break;
     }
     case t_string:
-        stack_ast_push(stackAST,ast_item_const(AST_STRING,item->token->data));
+        stack_ast_push_b(stackAST,ast_item_const(AST_STRING,item->token->data));
         break;
     case t_null:
-        stack_ast_push(stackAST,ast_item_const(AST_NULL,NULL));
+        stack_ast_push_b(stackAST,ast_item_const(AST_NULL,NULL));
         break;
     default:
         THROW_ERROR(SEMANTIC_OTHER_ERR, item->token->lineNum);
@@ -105,6 +109,9 @@ void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
     }
 }
 
+/// @brief Application of precedence rule E -> -+E
+/// @param stack Precedence stack.
+/// @param stackAST AST stack to push items to.
 void opE(stack_precedence_t *stack)
 {
     stack_precedence_item_t *E = stack->top;
@@ -116,6 +123,9 @@ void opE(stack_precedence_t *stack)
 }
 
 
+/// @brief Application of precedence rule E -> -E
+/// @param stack Precedence stack.
+/// @param stackAST AST stack to push items to.
 void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
 {
     //handle semantic action for E -> -E
@@ -141,8 +151,8 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
         {
         //push operation * (-1)
         int negative = -1;
-        stack_ast_push(stackAST,ast_item_const(AST_INT,&negative));
-        stack_ast_push(stackAST,ast_item_const(AST_MULTIPLY,NULL)); //push operation multiply
+        stack_ast_push_b(stackAST,ast_item_const(AST_INT,&negative));
+        stack_ast_push_b(stackAST,ast_item_const(AST_MULTIPLY,NULL)); //push operation multiply
         break;
         }
     }
@@ -150,14 +160,19 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
     opE(stack);
 }
 
+/// @brief Application of precedence rule E -> E {operand} E
+/// @param stack Precedence stack.
+/// @param stackAST AST stack to push items to.
+/// @param op Type of operand to execute. {+,-,*,\,.,<,>,<=,>=,===,!==}
 void EopE(stack_precedence_t *stack, stack_ast_t *stackAST, AST_type op)
 {
-    stack_ast_push(stackAST,ast_item_const(op, NULL));
+    stack_ast_push_b(stackAST,ast_item_const(op, NULL));
     stack_precedence_pop(stack);
     stack_precedence_pop(stack);
 }
 
-
+/// @brief Executes found rule.
+/// @param ruleNum Rule to be executed. 
 void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int ruleNum, ht_table_t *symtable)
 {
     switch (ruleNum)
@@ -230,9 +245,9 @@ void callReductionRule(stack_precedence_t *stack, stack_ast_t *stackAST, int rul
     return;
 }
 
-/// @brief
-/// @param stack
-/// @return TRUE IS CORRECT
+/// @brief Reduces the current expression on precedence stack.
+/// @return True if expression is ruducable.
+/// @return False if rule for expression is nout found.
 bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
 {
     unsigned curRule[RULE_SIZE] = {UNINITIALISED, UNINITIALISED, UNINITIALISED};
@@ -277,6 +292,10 @@ bool reduce(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtab
     return false;
 }
 
+/// @brief Checks syntax of expression.
+/// @param input Token to be examined.
+/// @param symtable Relevant symtable for current frame.
+/// @return Element that represents input token. 
 Element getIndex(Token *input, ht_table_t* symtable)
 {
     if (input == NULL)
@@ -355,6 +374,8 @@ Element getIndex(Token *input, ht_table_t* symtable)
     }
 }
 
+/// @brief Constructor for precence item.
+/// @return Pointer to new precendence item. 
 PrecedItem *precedItemCtor(Token *token, Element type)
 {
     PrecedItem *newItem = (PrecedItem*)malloc(sizeof(PrecedItem));
@@ -365,6 +386,11 @@ PrecedItem *precedItemCtor(Token *token, Element type)
     return newItem;
 }
 
+/// @brief Frees stacks based on return value.
+/// @param stack Precedence stack, to be freed.
+/// @param ast Ast stack that may be freed.
+/// @param returnValue Switch for destructing ast stack.
+/// @return returnValue.
 bool freeStack(stack_precedence_t *stack, stack_ast_t *ast, bool returnValue)
 {
     while (!stack_precedence_empty(stack))
@@ -379,10 +405,12 @@ bool freeStack(stack_precedence_t *stack, stack_ast_t *ast, bool returnValue)
         }
     }
     else
-        stack_ast_push(ast,ast_item_const(AST_END_EXPRESSION,NULL));
+        stack_ast_push_b(ast,ast_item_const(AST_END_EXPRESSION,NULL));
     return returnValue;
 }
 
+/// @brief Compares TokenType to var_type_t
+/// @return True if they represent the same type. 
 bool cmpTHType(TokenType token, var_type_t type)
 {
     if (token == t_int && type == int_t)
@@ -396,6 +424,8 @@ bool cmpTHType(TokenType token, var_type_t type)
     return false;
 }
 
+/// @brief Transfer of var_type_t to AST_param_type
+/// @return AST_param_type represented by var_type_t 
 AST_param_type HtoAType(var_type_t type)
 {
     if (type == int_t)
@@ -404,9 +434,9 @@ AST_param_type HtoAType(var_type_t type)
         return AST_P_FLOAT;
     if (type == string_t)
         return AST_P_STRING;
-/* TODO CHECK nulltype*/
     if (type == void_t)
         return AST_P_NULL;
+    debug_log("Could not match the var_type_t\n");
     return AST_P_NULL;
 }
 
@@ -479,7 +509,6 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
         //if false, it fals through to    V
     } //end of while cycle
 
-
     // #4 )
     if (list->TokenArray[*index]->type != t_rPar || list->TokenArray[*index-1]->type == t_comma)
     {
@@ -502,12 +531,10 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
         THROW_ERROR(SEMANTIC_RUN_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
         return false;
     }
-    stack_ast_push(stackAST,ast_item_const(AST_FUNCTION_CALL,fncCallData));
+    stack_ast_push_b(stackAST,ast_item_const(AST_FUNCTION_CALL,fncCallData));
     return true;//success
 }
 
-
-//for now returns boolean
 bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_ast_t *stackAST)
 {
     // INIT
@@ -588,7 +615,7 @@ bool parseExpression(TokenList *list, int *index, ht_table_t *symtable, stack_as
             }
             /* SYNTAX ERROR */
             THROW_ERROR(SYNTAX_ERR,curInputToken->lineNum);
-            debug_print("PA: Invalid expression. Line: %d.\n",curInputToken->lineNum);
+            debug_print("PA: Invalid expression. Line number: %d.\n",curInputToken->lineNum);
             return freeStack(&stack, stackAST, false);
         }
     }

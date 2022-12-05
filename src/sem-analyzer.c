@@ -1,4 +1,4 @@
-#include "lex-analyzer.h"
+#include "lex_analyzer.h"
 #include "sem-analyzer.h"
 #include "error-codes.h"
 #include "symtable.h"
@@ -30,21 +30,21 @@ ht_table_t *integratedFncSymtable()
 
     // "strlen"
     ht_item_t *strlenItem = ht_insert(fncSymtable, "strlen", int_t, true);
-    ht_param_append(strlenItem, "s", string_t);
+    ht_paramAppend(strlenItem, "s", string_t);
 
     // "substring"
     ht_item_t  *substringItem = ht_insert(fncSymtable, "substring", string_t, true);
-    ht_param_append(substringItem, "s", string_t);
-    ht_param_append(substringItem, "i", int_t);
-    ht_param_append(substringItem, "j", int_t);
+    ht_paramAppend(substringItem, "s", string_t);
+    ht_paramAppend(substringItem, "i", int_t);
+    ht_paramAppend(substringItem, "j", int_t);
 
     // "ord"
     ht_item_t  *ordItem = ht_insert(fncSymtable, "ord", int_t, true);
-    ht_param_append(ordItem, "c", string_t);
+    ht_paramAppend(ordItem, "c", string_t);
 
     // "chr"
     ht_item_t  *chrItem = ht_insert(fncSymtable, "chr", string_t, true);
-    ht_param_append(chrItem, "i", int_t);
+    ht_paramAppend(chrItem, "i", int_t);
 
     return (fncSymtable);
 }
@@ -104,7 +104,6 @@ bool paramRedeclaration(TokenList *list,int *index, ht_item_t *currFncDeclare){
     while (currParam != NULL){
         ht_insert(paramTable, currParam->varId, void_t, false);
         if(currParam->next != NULL) {
-            debug_log("%s\n", currParam->next->varId);
             if(ht_search(paramTable, currParam->next->varId) != NULL){
                 THROW_ERROR(SEMANTIC_PARAMETER_ERR, list->TokenArray[*index]->lineNum)
                 redeclared = true;
@@ -113,7 +112,7 @@ bool paramRedeclaration(TokenList *list,int *index, ht_item_t *currFncDeclare){
         }
         currParam = currParam->next;
     }
-    ht_delete_all(paramTable);
+    ht_deleteAll(paramTable);
     return redeclared;
 }
 
@@ -226,7 +225,7 @@ ht_table_t *FncDeclarations(TokenList *list, ht_table_t *fncSymtable) {
                     return NULL;
                 }
                 //appending first param to our function
-                ht_param_append(currFncDeclare, CURR_FCTION_ID, paramType);
+                ht_paramAppend(currFncDeclare, CURR_FCTION_ID, paramType);
 
                 NEXT_TOKEN;
 
@@ -250,7 +249,7 @@ ht_table_t *FncDeclarations(TokenList *list, ht_table_t *fncSymtable) {
                                 THROW_ERROR(SYNTAX_ERR,list->TokenArray[index]->lineNum);
                                 return NULL;
                             }
-                            ht_param_append(currFncDeclare, CURR_FCTION_ID, paramType);
+                            ht_paramAppend(currFncDeclare, CURR_FCTION_ID, paramType);
 
                             NEXT_TOKEN;
 

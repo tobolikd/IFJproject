@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "lex-analyzer.h"
+#include "lex_analyzer.h"
 #include "error-codes.h"
 
 // init STATE_STRING

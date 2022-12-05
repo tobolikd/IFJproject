@@ -1,4 +1,4 @@
-#include "lex-analyzer.h"
+#include "lex_analyzer.h"
 #include "syn-analyzer.h"
 #include "code-gen.h"
 #include "error-codes.h"
@@ -30,7 +30,7 @@ int main()
     if (fncTable == NULL) {
         // error in function definitions
         listDtor(list);
-        ht_delete_all(fncTable);
+        ht_deleteAll(fncTable);
         return errorCode;
     }
 
@@ -54,7 +54,7 @@ int main()
     }
 
     // free function symtable
-    ht_delete_all(fncTable);
+    ht_deleteAll(fncTable);
 
     return errorCode;
 }

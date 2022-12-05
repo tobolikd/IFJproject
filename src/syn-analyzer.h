@@ -7,7 +7,7 @@
 #ifndef IFJ_SYN_ANALYZER_H
 #define IFJ_SYN_ANALYZER_H 1
 
-#include "lex-analyzer.h"
+#include "lex_analyzer.h"
 #include "error-codes.h"
 #include "symtable.h"
 #include "stack.h"
