@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum ifjErrCode error_code;
+enum ifj_err_code error_code;
 ht_table_t *fncTable;
 stack_declare_t stackDeclare;
 
@@ -498,7 +498,7 @@ SyntaxItem *synAnalyser(TokenList *list)
     stack_ast_t *stackSyn = (stack_ast_t *)malloc(sizeof(stack_ast_t));
     if (stackSyn == NULL)
     {
-        MALLOC_ERR;
+        MALLOC_ERR();
         return SyntaxItemCtor(table, stackSyn, false);
     }
     stack_ast_init(stackSyn);

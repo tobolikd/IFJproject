@@ -347,7 +347,7 @@ bool checkFncCall(AST_function_call_data *data) {
         if (requiredParam == NULL) { // no more required params
             ERR_FNC_PARAM_COUNT(data->function_id);
 #if DEBUG == 1
-            printAstFnc(data);
+            print_ast_fnc(data);
 #endif
             return false;
         }
@@ -355,7 +355,7 @@ bool checkFncCall(AST_function_call_data *data) {
         if (requiredParam->type == void_t) {
             ERR_INTERNAL(checkFncCall, "void parameter type in declared function\n\tfunction: %s\n\tparam: %s", data->function_id, requiredParam->varId);
 #if DEBUG == 1
-            printAstFnc(data);
+            print_ast_fnc(data);
 #endif
             return false;
         }
@@ -364,7 +364,7 @@ bool checkFncCall(AST_function_call_data *data) {
             if (!cmpParamTypes(requiredParam->type, tmpParam->type)) {
                 ERR_FNC_PARAM_TYPE(data->function_id);
 #if DEBUG == 1
-                printAstFnc(data);
+                print_ast_fnc(data);
 #endif
                 return false;
             }
@@ -376,7 +376,7 @@ bool checkFncCall(AST_function_call_data *data) {
     if (requiredParam != NULL) { // more params needed
         ERR_FNC_PARAM_COUNT(data->function_id);
 #if DEBUG == 1
-        printAstFnc(data);
+        print_ast_fnc(data);
 #endif
         return false;
     }

@@ -21,7 +21,7 @@ int main()
         fclose(fp);
         return error_code;
     }
-    // no more reading wil be done
+    // no more reading will be done
     fclose(fp);
 
     // get all function declarations

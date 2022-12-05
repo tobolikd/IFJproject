@@ -1,39 +1,48 @@
+/* @file code_gen.c
+ *
+ * @brief implementation of code generation
+ *
+ * @author David Tobolik (xtobol06)
+ */
+
 #include "code_gen.h"
 #include "error_codes.h"
 #include "symtable.h"
 #include "code_gen_static.h"
 #include <stdlib.h>
 
-enum ifjErrCode error_code;
+enum ifj_err_code error_code;
 
 /// AUXILIARY FUNCTIONS
-
-code_block *codeBlockConst(code_block_type type, code_gen_ctx_t *ctx) {
+// construct code block from type and ctx including mem allocation
+code_block *code_block_const(code_block_type type, code_gen_ctx_t *ctx) {
     code_block *new = (code_block *) malloc(sizeof(code_block));
     CHECK_MALLOC_PTR(new);
 
     new->type = type;
+
+    // assign id number from context and increment it
     switch (type) {
         case BLOCK_IF:
-            new->labelNum = ctx->if_count;
+            new->label_num = ctx->if_count;
             ctx->if_count++;
             break;
 
         case BLOCK_ELSE:
-            new->labelNum = ctx->else_number;
+            new->label_num = ctx->else_number;
             break;
 
         case BLOCK_WHILE:
-            new->labelNum = ctx->while_count;
+            new->label_num = ctx->while_count;
             ctx->while_count++;
             break;
 
-        case BLOCK_DECLARE:
-            new->labelNum = -1;
+        case BLOCK_DECLARE: // not needed for fnc declaration
+            new->label_num = -1;
             break;
 
         default:
-            ERR_INTERNAL(codeBlockConst, "unknown code block type\n");
+            ERR_INTERNAL(code_block_const, "unknown code block type\n");
             break;
     }
 
@@ -42,22 +51,21 @@ code_block *codeBlockConst(code_block_type type, code_gen_ctx_t *ctx) {
 
 /// !AUXILIARY FUNCTIONS
 
-#define POP_AND_CALL(FNC) do { AST_POP(); FNC(ast, ctx); } while (0)
-
-#define PUSH_FNC_DECL() stack_code_block_push(&ctx->block_stack, codeBlockConst(BLOCK_DECLARE, ctx))
-#define PUSH_IF() stack_code_block_push(&ctx->block_stack, codeBlockConst(BLOCK_IF, ctx))
-#define PUSH_ELSE() stack_code_block_push(&ctx->block_stack, codeBlockConst(BLOCK_ELSE, ctx))
-#define PUSH_WHILE() stack_code_block_push(&ctx->block_stack, codeBlockConst(BLOCK_WHILE, ctx))
+// macro shortcuts for constructing and pushing code blocks to nest stack
+#define PUSH_FNC_DECL() stack_code_block_push(&ctx->block_stack, code_block_const(BLOCK_DECLARE, ctx))
+#define PUSH_IF() stack_code_block_push(&ctx->block_stack, code_block_const(BLOCK_IF, ctx))
+#define PUSH_ELSE() stack_code_block_push(&ctx->block_stack, code_block_const(BLOCK_ELSE, ctx))
+#define PUSH_WHILE() stack_code_block_push(&ctx->block_stack, code_block_const(BLOCK_WHILE, ctx))
 
 void code_generator(stack_ast_t *ast, ht_table_t *var_symtable) {
     if (stack_ast_empty(ast)) return;
     // generate built in functions
-    genBuiltIns();
+    gen_static();
 
     // generate variable definitions in local frame for whole program
     INST_CREATEFRAME();
     INST_PUSHFRAME();
-    genVarDefs(var_symtable, NULL);
+    gen_var_definitions(var_symtable, NULL);
 
     // allocate code context
     code_gen_ctx_t *ctx = (code_gen_ctx_t *) malloc(sizeof(code_gen_ctx_t));
@@ -70,11 +78,11 @@ void code_generator(stack_ast_t *ast, ht_table_t *var_symtable) {
     ctx->current_fnc_declaration = NULL;
     stack_code_block_init(&ctx->block_stack);
 
-    AST_item *tmp = NULL; // prevent looping on error in the code gen
+    // prevent looping on error in the code gen
+    AST_item *tmp = NULL;
+
     while (!stack_ast_empty(ast)) {
-
-        COMMENT("NEW EXPRESSION IN CODE GEN");
-
+        // on error end generating
         if (error_code != SUCCESS)
             break;
 
@@ -85,70 +93,59 @@ void code_generator(stack_ast_t *ast, ht_table_t *var_symtable) {
         }
         tmp = AST_TOP();
 
+        // according to ast top type, generate code
         switch (tmp->type) {
             case AST_IF:
-                COMMENT("GENERATING IF");
-                PUSH_IF();
-                POP_AND_CALL(gen_condition);
-                COMMENT("IF GENERATED");
+                PUSH_IF();  // add if to nest stack
+                AST_POP();  // pop if item
+                gen_condition(ast, ctx);    // generate condition
                 break;
 
             case AST_WHILE:
-                COMMENT("GENERATING WHILE");
-                PUSH_WHILE();
-                INST_LABEL(LABEL_WHILE_BEGIN());
-                POP_AND_CALL(gen_condition);
-                COMMENT("WHILE GENERATED");
+                PUSH_WHILE();   // add while to nest stack
+                INST_LABEL(LABEL_WHILE_BEGIN());    // gen while begin label
+                AST_POP();  // pop while item
+                gen_condition(ast, ctx); // generate condition
                 break;
 
             case AST_ELSE:
-                COMMENT("GENERATING ELSE");
-                PUSH_ELSE();
-                INST_LABEL(LABEL_ELSE());
-                AST_POP();
-                COMMENT("ELSE GENERATED");
+                PUSH_ELSE();    // add else to nest stack
+                INST_LABEL(LABEL_ELSE());   // gen else label
+                AST_POP();  // pop else item
                 break;
 
             case AST_ASSIGN:
-                COMMENT("GENERATING ASSIGN");
-                AST_POP();
-                gen_assign(ast);
-                COMMENT("ASSIGN GENERATED");
+                AST_POP();  // pop assign item
+                gen_assign(ast);    // generate assign
                 break;
 
             case AST_FUNCTION_CALL:
-                COMMENT("GENERATING FUNCTION CALL");
-                gen_fnc_call(ast);
+                gen_fnc_call(ast);  // generate function call
                 INST_POPS(VAR_BLACKHOLE()); // dispose the return value
+
                 if (AST_TOP()->type != AST_END_EXPRESSION) {
                     ERR_INTERNAL(code_generator, "function call must be ended with end expession\n");
                     break;
                 }
-                AST_POP();
-                COMMENT("FUNCTION CALL GENERATED");
+
+                AST_POP();  // pop end expression
                 break;
 
             case AST_FUNCTION_DECLARE:
-                COMMENT("GENERATING FUNCTION DECLARE");
-                PUSH_FNC_DECL();
+                PUSH_FNC_DECL(); // add function declaration to nest stack
                 // update ctx
                 ctx->current_fnc_declaration = AST_TOP()->data->function_declare_data->function;
-
-                // jump over function
+                // jump over function if not called
                 INST_JUMP(LABEL_FNC_DECLARE_END());
-
-                INST_LABEL(LABEL(AST_TOP()->data->function_declare_data->function->identifier));
+                INST_LABEL(LABEL(ctx->current_fnc_declaration->identifier));
                 // define vars in local frame (frame is created on function call)
-                genVarDefs(AST_TOP()->data->function_declare_data->var_symtable, AST_TOP()->data->function_declare_data->function);
-                AST_POP();
-                COMMENT("FUNCTION DECLARE GENERATED");
+                gen_var_definitions(AST_TOP()->data->function_declare_data->var_symtable, ctx->current_fnc_declaration);
+                AST_POP();  // pop function declare 
                 break;
 
             case AST_RETURN_VOID:
             case AST_RETURN_EXPR:
-                COMMENT("GENERATING RETURN");
                 gen_return(ast, ctx);
-                COMMENT("RETURN GENERATED");
                 break;
 
             // expressions are postfix
@@ -173,40 +170,32 @@ void code_generator(stack_ast_t *ast, ht_table_t *var_symtable) {
 			case AST_STRING:
 			case AST_FLOAT:
 			case AST_NULL:
-                COMMENT("GENERATING EXPRESSION");
                 gen_expr(ast); // generate expression, but do nothing with the data
-                COMMENT("EXPRESSION GENERATED");
 				break;
 
             case AST_END_BLOCK:
-                COMMENT("GENERATING BLOCK END");
                 if (stack_code_block_empty(&ctx->block_stack)) {
                     ERR_INTERNAL(code_generator, "block ended, but code block stack is empty\n");
                     break;
                 }
-
+                // according to block type, generate end
                 switch (stack_code_block_top(&ctx->block_stack)->type) {
                     case BLOCK_IF:
-#if DEBUG == 1          // after if block has to be else
-                        if (ast->top->next == NULL) {
-                            ERR_INTERNAL(code_generator, "if block ended, next item should be else, but is NULL\n");
-                        }
-                        else if (ast->top->next->data->type != AST_ELSE) {
-                            ERR_INTERNAL(code_generator, "if block ended, next item should be else, but is not\n");
-                            printAstStack(ast);
-                        }
-#endif
+                        // on if block end, skip else block
                         INST_JUMP(LABEL_ENDELSE());
-                        // set else number
-                        ctx->else_number = stack_code_block_top(&ctx->block_stack)->labelNum;
+                        // set else number to be the same as this if number
+                        ctx->else_number = stack_code_block_top(&ctx->block_stack)->label_num;
                         break;
 
                     case BLOCK_ELSE:
+                        // label else end
                         INST_LABEL(LABEL_ENDELSE());
                         break;
 
                     case BLOCK_WHILE:
+                        // on while end, jump to while start
                         INST_JUMP(LABEL_WHILE_BEGIN());
+                        // while end label
                         INST_LABEL(LABEL_WHILE_END());
                         break;
 
@@ -216,12 +205,13 @@ void code_generator(stack_ast_t *ast, ht_table_t *var_symtable) {
                             INST_PUSHS(CONST_NIL());
                             INST_RETURN();
                         } else {
+                            // if function wasnt returned, go to error label
                             INST_JUMP(LABEL("no%return"));
                         }
 
                         // make end function label
                         INST_LABEL(LABEL_FNC_DECLARE_END());
-
+                        // delete curr function pointer
                         ctx->current_fnc_declaration = NULL;
                         break;
 
@@ -229,11 +219,10 @@ void code_generator(stack_ast_t *ast, ht_table_t *var_symtable) {
                         ERR_INTERNAL(code_generator, "unknown code block type\n");
                         break;
                 }
-
                 stack_code_block_pop(&ctx->block_stack); // pop current code block
                 AST_POP(); // pop block end item
-                COMMENT("BLOCK END GENERATED");
                 break;
+                // !AST_END_BLOCK
 
                 default:
                     ERR_INTERNAL(code_generator, "unknown AST type. Type number: %d\n",tmp->type);
@@ -251,7 +240,7 @@ void code_generator(stack_ast_t *ast, ht_table_t *var_symtable) {
 
     if (!stack_code_block_empty(&ctx->block_stack)) {
         ERR_INTERNAL(code_generator, "code block stack not empty\n");
-        printCodeBlockStack(&ctx->block_stack);
+        print_code_block_stack(&ctx->block_stack);
         while (!stack_code_block_empty(&ctx->block_stack))
             stack_code_block_pop(&ctx->block_stack);
     }
@@ -337,15 +326,10 @@ void gen_expr(stack_ast_t *ast) {
         case AST_CONCAT:
             //generate 3AC
             INST_CALL(LABEL("conv%concat"));
-            INST_CREATEFRAME();
-            INST_PUSHFRAME();
-            INST_DEFVAR(VAR_AUX(1));
-            INST_DEFVAR(VAR_AUX(2));
-            INST_POPS(VAR_AUX(1));
-            INST_POPS(VAR_AUX(2));
-            INST_CONCAT(VAR_AUX(1),VAR_AUX(2),VAR_AUX(1));
-            INST_PUSHS(VAR_AUX(1));
-            INST_POPFRAME();
+            INST_POPS(AUX1);
+            INST_POPS(AUX2);
+            INST_CONCAT(AUX1, AUX2, AUX1);
+            INST_PUSHS(AUX1);
             break;
 
         case AST_EQUAL:
@@ -481,6 +465,7 @@ void gen_fnc_call(stack_ast_t *ast) {
 void gen_write(stack_ast_t *ast) {
     AST_fnc_param *tmpParam = AST_TOP()->data->function_call_data->params;
 
+    // go through all params and write them
     while (tmpParam != NULL) {
         switch (tmpParam->type) {
             case AST_P_INT:
@@ -514,8 +499,8 @@ void gen_write(stack_ast_t *ast) {
 
 void gen_condition(CODE_GEN_PARAMS) {
     if (stack_ast_empty(ast)) { ERR_INTERNAL(genIf, "empty if condition\n"); return; }
-    // for non bool expressions push result to stack
-    // relational or null - generate jump directly
+    
+    // generaete expression (if stack is valid)
     switch (AST_TOP()->type) {
         case AST_ADD:
         case AST_SUBTRACT:
@@ -564,8 +549,11 @@ void gen_condition(CODE_GEN_PARAMS) {
 
 void gen_string(char *str) {
     if (str == NULL) {ERR_INTERNAL(gen_string, "NULL string pointer"); return;}
+
     printf("string@");
+
     for (int i = 0; str[i] != '\0'; i++) {
+        // check for every char if it can be printed normally or using escape sequence
         if (str[i] <= 32 || str[i] == 35 || str[i] == 92) {
             printf("\\%03d", str[i]);
         } else {

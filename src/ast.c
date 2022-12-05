@@ -1,6 +1,6 @@
-/* @file ast.h
+/* @file ast.c
  *
- * @brief contains data structures and functions for AST
+ * @brief implementation of ast interface
  *
  * @author David Tobolik (xtobol06)
  */
@@ -49,8 +49,10 @@ void fnc_call_data_destr(AST_function_call_data *data) {
     AST_fnc_param *deleted = data->params;
     AST_fnc_param *next;
 
+    // delete parametres of function
     while (deleted != NULL) {
         next = deleted->next;
+        // if string, free string
         if (deleted->type == AST_P_STRING)
             free(deleted->data->string_value);
         free(deleted->data);
@@ -72,6 +74,7 @@ AST_item *ast_item_const(AST_type type, void *data) {
 
     new->type = type;
 
+    // according to type assign data
     switch (type) {
 
         // arithmetic operations
@@ -107,7 +110,7 @@ AST_item *ast_item_const(AST_type type, void *data) {
             new->data->string_value = (char *) malloc((strlen((char*) data) + 1) * sizeof(char));
             if (new->data->string_value == NULL) {
                 free(new);
-                MALLOC_ERR;
+                MALLOC_ERR();
                 return NULL;
             }
             strcpy(new->data->string_value, (char *) data);
@@ -181,7 +184,7 @@ void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, 
 
         if (new->data == NULL) {
             free(new);
-            MALLOC_ERR;
+            MALLOC_ERR();
             return;
         }
     }
@@ -189,6 +192,7 @@ void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, 
     new->next = NULL;
     new->type = type;
 
+    // copy param to parameter data
     switch (type) {
         case AST_P_INT:
             new->data->int_value = *((int*)param);
@@ -218,6 +222,7 @@ void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, 
             break;
     }
 
+    // add param to end of parameter list
     AST_fnc_param **tmp = &data->params;
     while (*tmp != NULL) {
         tmp = &(*tmp)->next;

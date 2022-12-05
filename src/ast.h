@@ -107,15 +107,20 @@ typedef enum
 
 typedef union ast_param_data
 {
-    ht_item_t *variable;
-    int int_value;
-    char *string_value;
-    double float_value;
+    ht_item_t *variable;// AST_P_VAR
+    int int_value;      // AST_P_INT
+    char *string_value; // AST_P_STRING
+    double float_value; // AST_P_FLOAT
 } AST_param_data;
 
+/* AST_fnc_param
+ * 
+ * type - parameter type
+ * data - AST_P_NULL has NULL data, others according to type
+ */
 typedef struct ast_fnc_param
 {
-    AST_param_type type; // allowed - AST_P_INT, AST_P_FLOAT, AST_P_STRING, AST_P_VAR, AST_P_NULL
+    AST_param_type type; // AST_P_INT, AST_P_FLOAT, AST_P_STRING, AST_P_VAR, AST_P_NULL
     AST_param_data *data;
     struct ast_fnc_param *next;
 } AST_fnc_param;
@@ -131,7 +136,7 @@ typedef struct
 {
     char *function_id;
     ht_item_t *function;
-    AST_fnc_param *params;
+    AST_fnc_param *params; // list of parametres
 } AST_function_call_data;
 
 /* function declare data

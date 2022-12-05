@@ -1,3 +1,10 @@
+/* @file code_gen_static.h
+ *
+ * @brief data structures for code gen and functions generating static parts of program
+ *
+ * @author David Tobolik (xtobol06)
+ */
+
 #ifndef IFJ_CODE_GEN_DATA_H
 #define IFJ_CODE_GEN_DATA_H
 
@@ -12,10 +19,11 @@ typedef enum {
 
 typedef struct {
     code_block_type type;
-    int labelNum;
+    int label_num;
 } code_block;
 
-/* genBuiltIns
+/* gen_static
+ * David Tobolik (xtobol06)
  *
  * this function is called before code generation
  * generate code for built in function
@@ -23,39 +31,62 @@ typedef struct {
  *
  * also generate functions for type conversion and type checks
  */
-void genBuiltIns();
+void gen_static();
 
-/* genVarDefs
+/* gen_var_definitions
+ * David Tobolik (xtobol06)
  *
- * TODO comments
+ * generates variable definitions in IFJcode22 from symtable
+ * doesnt generate function parametres (if given)
  */
-void genVarDefs(ht_table_t *varSymtable, ht_item_t *function);
+void gen_var_definitions(ht_table_t *var_symtable, ht_item_t *function);
 
-/* genResolveCondition
+/* gen_resolve_condition
+ * David Tobolik (xtobol06)
  *
- * TODO comments
+ * generates aux function for condition resolve
+ * gets 1 operand on stack (any type)
+ * returns bool value on stack, which is result of condition
+ * false - "", "0", null, 0, 0.0, false
+ * true - anything else
  */
-void genResolveCondition();
+void gen_resolve_condition();
 
-/* genExitLabels
+/* gen_exit_labels
+ * David Tobolik (xtobol06)
  *
- * TODO comments
+ * generates exit labels for runtime errors
  */
-void genExitLabels();
+void gen_exit_labels();
 
-/* genImplicitConversions
+/* gen_implicit_conversions
+ * David Tobolik (xtobol06)
  *
- * TODO comments
+ * generates implicit conversions for arithmetic, string and relational operations
+ * 
+ * arithmetic
+ * {int, int} {float, float} - same
+ * {int, float} - float
+ * {nil, {int, nil}} - int
+ * {nil, float} - float
+ * others - error
+ * 
+ * string
+ * {string, string} - same
+ * {string, nil} - string
+ * others - error
+ * 
+ * relational
+ * {string, {int, float}} - error
+ * others - according to arithmetic or string logic
  */
-void genImplicitConversions();
+void gen_implicit_conversions();
 
+void gen_data_type_comparisons();
 
-void genDataTypeComparisons();
+void gen_semantic_type_check();
 
-
-void genSemanticTypeCheck();
-
-void genBuiltInFcs();
+void gen_built_in_fcs();
 
 #define AUX1 VAR_CODE("GF", "aux%1")
 #define AUX2 VAR_CODE("GF", "aux%2")
