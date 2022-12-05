@@ -15,17 +15,17 @@ code_block *codeBlockConst(code_block_type type, codeGenCtx *ctx) {
     new->type = type;
     switch (type) {
         case BLOCK_IF:
-            new->labelNum = ctx->ifCount;
-            ctx->ifCount++;
+            new->labelNum = ctx->if_count;
+            ctx->if_count++;
             break;
 
         case BLOCK_ELSE:
-            new->labelNum = ctx->elseNum;
+            new->labelNum = ctx->else_number;
             break;
 
         case BLOCK_WHILE:
-            new->labelNum = ctx->whileCount;
-            ctx->whileCount++;
+            new->labelNum = ctx->while_count;
+            ctx->while_count++;
             break;
 
         case BLOCK_DECLARE:
@@ -44,12 +44,12 @@ code_block *codeBlockConst(code_block_type type, codeGenCtx *ctx) {
 
 #define POP_AND_CALL(FNC) do { AST_POP(); FNC(ast, ctx); } while (0)
 
-#define PUSH_FNC_DECL() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_DECLARE, ctx))
-#define PUSH_IF() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_IF, ctx))
-#define PUSH_ELSE() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_ELSE, ctx))
-#define PUSH_WHILE() stack_code_block_push(&ctx->blockStack, codeBlockConst(BLOCK_WHILE, ctx))
+#define PUSH_FNC_DECL() stack_code_block_push(&ctx->block_stack, codeBlockConst(BLOCK_DECLARE, ctx))
+#define PUSH_IF() stack_code_block_push(&ctx->block_stack, codeBlockConst(BLOCK_IF, ctx))
+#define PUSH_ELSE() stack_code_block_push(&ctx->block_stack, codeBlockConst(BLOCK_ELSE, ctx))
+#define PUSH_WHILE() stack_code_block_push(&ctx->block_stack, codeBlockConst(BLOCK_WHILE, ctx))
 
-void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
+void code_generator(stack_ast_t *ast, ht_table_t *var_symtable) {
     if (stack_ast_empty(ast)) return;
     // generate built in functions
     genBuiltIns();
@@ -64,12 +64,11 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
     CHECK_MALLOC(ctx);
 
     // init ctx
-    ctx->auxCount = 0;
-    ctx->ifCount = 0;
-    ctx->elseNum = 0;
-    ctx->whileCount = 0;
-    ctx->currentFncDeclaration = NULL;
-    stack_code_block_init(&ctx->blockStack);
+    ctx->if_count = 0;
+    ctx->else_number = 0;
+    ctx->while_count = 0;
+    ctx->current_fnc_declaration = NULL;
+    stack_code_block_init(&ctx->block_stack);
 
     AST_item *tmp = NULL; // prevent looping on error in the code gen
     while (!stack_ast_empty(ast)) {
@@ -81,7 +80,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
 
         // check if the item generated properly (is poped) to prevent looping
         if (AST_TOP() == tmp) {
-            ERR_INTERNAL(codeGenerator, "top of AST stack is same as last generated item\n");
+            ERR_INTERNAL(code_generator, "top of AST stack is same as last generated item\n");
             break;
         }
         tmp = AST_TOP();
@@ -90,7 +89,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
             case AST_IF:
                 COMMENT("GENERATING IF");
                 PUSH_IF();
-                POP_AND_CALL(genCondition);
+                POP_AND_CALL(gen_condition);
                 COMMENT("IF GENERATED");
                 break;
 
@@ -98,7 +97,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
                 COMMENT("GENERATING WHILE");
                 PUSH_WHILE();
                 INST_LABEL(LABEL_WHILE_BEGIN());
-                POP_AND_CALL(genCondition);
+                POP_AND_CALL(gen_condition);
                 COMMENT("WHILE GENERATED");
                 break;
 
@@ -113,16 +112,16 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
             case AST_ASSIGN:
                 COMMENT("GENERATING ASSIGN");
                 AST_POP();
-                genAssign(ast);
+                gen_assign(ast);
                 COMMENT("ASSIGN GENERATED");
                 break;
 
             case AST_FUNCTION_CALL:
                 COMMENT("GENERATING FUNCTION CALL");
-                genFncCall(ast);
+                gen_fnc_call(ast);
                 INST_POPS(VAR_BLACKHOLE()); // dispose the return value
                 if (AST_TOP()->type != AST_END_EXPRESSION) {
-                    ERR_INTERNAL(codeGenerator, "function call must be ended with end expession\n");
+                    ERR_INTERNAL(code_generator, "function call must be ended with end expession\n");
                     break;
                 }
                 AST_POP();
@@ -133,7 +132,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
                 COMMENT("GENERATING FUNCTION DECLARE");
                 PUSH_FNC_DECL();
                 // update ctx
-                ctx->currentFncDeclaration = AST_TOP()->data->function_declare_data->function;
+                ctx->current_fnc_declaration = AST_TOP()->data->function_declare_data->function;
 
                 // jump over function
                 INST_JUMP(LABEL_FNC_DECLARE_END());
@@ -148,7 +147,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
             case AST_RETURN_VOID:
             case AST_RETURN_EXPR:
                 COMMENT("GENERATING RETURN");
-                genReturn(ast, ctx);
+                gen_return(ast, ctx);
                 COMMENT("RETURN GENERATED");
                 break;
 
@@ -166,7 +165,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
 			case AST_LESS:
 			case AST_LESS_EQUAL:
             case AST_END_EXPRESSION:
-                ERR_INTERNAL(codeGenerator, "empty operation on top of ast\n");
+                ERR_INTERNAL(code_generator, "empty operation on top of ast\n");
                 break;
             // begining of postfix expression
 			case AST_VAR:
@@ -175,31 +174,31 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
 			case AST_FLOAT:
 			case AST_NULL:
                 COMMENT("GENERATING EXPRESSION");
-                genExpr(ast); // generate expression, but do nothing with the data
+                gen_expr(ast); // generate expression, but do nothing with the data
                 COMMENT("EXPRESSION GENERATED");
 				break;
 
             case AST_END_BLOCK:
                 COMMENT("GENERATING BLOCK END");
-                if (stack_code_block_empty(&ctx->blockStack)) {
-                    ERR_INTERNAL(codeGenerator, "block ended, but code block stack is empty\n");
+                if (stack_code_block_empty(&ctx->block_stack)) {
+                    ERR_INTERNAL(code_generator, "block ended, but code block stack is empty\n");
                     break;
                 }
 
-                switch (stack_code_block_top(&ctx->blockStack)->type) {
+                switch (stack_code_block_top(&ctx->block_stack)->type) {
                     case BLOCK_IF:
 #if DEBUG == 1          // after if block has to be else
                         if (ast->top->next == NULL) {
-                            ERR_INTERNAL(codeGenerator, "if block ended, next item should be else, but is NULL\n");
+                            ERR_INTERNAL(code_generator, "if block ended, next item should be else, but is NULL\n");
                         }
                         else if (ast->top->next->data->type != AST_ELSE) {
-                            ERR_INTERNAL(codeGenerator, "if block ended, next item should be else, but is not\n");
+                            ERR_INTERNAL(code_generator, "if block ended, next item should be else, but is not\n");
                             printAstStack(ast);
                         }
 #endif
                         INST_JUMP(LABEL_ENDELSE());
                         // set else number
-                        ctx->elseNum = stack_code_block_top(&ctx->blockStack)->labelNum;
+                        ctx->else_number = stack_code_block_top(&ctx->block_stack)->labelNum;
                         break;
 
                     case BLOCK_ELSE:
@@ -212,7 +211,7 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
                         break;
 
                     case BLOCK_DECLARE:
-                        if (ctx->currentFncDeclaration->fnc_data.returnType == void_t) {
+                        if (ctx->current_fnc_declaration->fnc_data.returnType == void_t) {
                             // generate return for void function
                             INST_PUSHS(CONST_NIL());
                             INST_RETURN();
@@ -223,21 +222,21 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
                         // make end function label
                         INST_LABEL(LABEL_FNC_DECLARE_END());
 
-                        ctx->currentFncDeclaration = NULL;
+                        ctx->current_fnc_declaration = NULL;
                         break;
 
                     default:
-                        ERR_INTERNAL(codeGenerator, "unknown code block type\n");
+                        ERR_INTERNAL(code_generator, "unknown code block type\n");
                         break;
                 }
 
-                stack_code_block_pop(&ctx->blockStack); // pop current code block
+                stack_code_block_pop(&ctx->block_stack); // pop current code block
                 AST_POP(); // pop block end item
                 COMMENT("BLOCK END GENERATED");
                 break;
 
                 default:
-                    ERR_INTERNAL(codeGenerator, "unknown AST type. Type number: %d\n",tmp->type);
+                    ERR_INTERNAL(code_generator, "unknown AST type. Type number: %d\n",tmp->type);
                     break;
         }
     }
@@ -250,11 +249,11 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
             AST_POP();
     }
 
-    if (!stack_code_block_empty(&ctx->blockStack)) {
-        ERR_INTERNAL(codeGenerator, "code block stack not empty\n");
-        printCodeBlockStack(&ctx->blockStack);
-        while (!stack_code_block_empty(&ctx->blockStack))
-            stack_code_block_pop(&ctx->blockStack);
+    if (!stack_code_block_empty(&ctx->block_stack)) {
+        ERR_INTERNAL(code_generator, "code block stack not empty\n");
+        printCodeBlockStack(&ctx->block_stack);
+        while (!stack_code_block_empty(&ctx->block_stack))
+            stack_code_block_pop(&ctx->block_stack);
     }
 
     if (errorCode == SUCCESS) {
@@ -264,9 +263,9 @@ void codeGenerator(stack_ast_t *ast, ht_table_t *var_symtable) {
     free(ctx);
 }
 
-void genAssign(stack_ast_t *ast) {
+void gen_assign(stack_ast_t *ast) {
     if (AST_TOP()->type != AST_VAR)
-        ERR_INTERNAL(genAssign,"Attempt to assign to a non variable type.");
+        ERR_INTERNAL(gen_assign,"Attempt to assign to a non variable type.");
 
     char *idenitfier = (char *) malloc((strlen(AST_TOP()->data->variable->identifier) + 1) * sizeof(char)); //save variable name
     CHECK_MALLOC(idenitfier);
@@ -274,16 +273,16 @@ void genAssign(stack_ast_t *ast) {
     strcpy(idenitfier,AST_TOP()->data->variable->identifier);
     AST_POP(); //pop AST_VAR
 
-    genExpr(ast);
+    gen_expr(ast);
     INST_POPS(VAR_CODE("LF",idenitfier));//pop value into variable
 
     free(idenitfier);
 }
 
-void genExpr(stack_ast_t *ast) {
+void gen_expr(stack_ast_t *ast) {
     AST_item *item = AST_TOP();
     if (item->type == AST_END_EXPRESSION) //empty expression
-        debug_log("genExpr - empty expression\n");
+        debug_log("gen_expr - empty expression\n");
 
     while (item->type != AST_END_EXPRESSION){
         switch (item->type)
@@ -311,7 +310,7 @@ void genExpr(stack_ast_t *ast) {
             break;
 
         case AST_FUNCTION_CALL:
-            genFncCall(ast);
+            gen_fnc_call(ast);
             item =AST_TOP();//show next
             continue;
 
@@ -383,7 +382,7 @@ void genExpr(stack_ast_t *ast) {
             continue;
 
         default:
-            ERR_INTERNAL(genExpr, "Unexpected item type in expression. Item type: %d\n",item->type);
+            ERR_INTERNAL(gen_expr, "Unexpected item type in expression. Item type: %d\n",item->type);
             return;
         }
 
@@ -392,17 +391,17 @@ void genExpr(stack_ast_t *ast) {
     }
 
     if (AST_TOP()->type != AST_END_EXPRESSION) {
-        ERR_INTERNAL(genExpr, "wrong end of expression");
+        ERR_INTERNAL(gen_expr, "wrong end of expression");
         return;
     }
 
     AST_POP();//pop AST_END_EXPR
 }
 
-void genFncCall(stack_ast_t *ast) {
+void gen_fnc_call(stack_ast_t *ast) {
     // check for write
     if (!strcmp(AST_TOP()->data->function_call_data->function->identifier, "write")) {
-        genWrite(ast);
+        gen_write(ast);
         return;
     }
 
@@ -448,7 +447,7 @@ void genFncCall(stack_ast_t *ast) {
                 break;
 
             default:
-                ERR_INTERNAL(genReturn,"Unexpected return type of function.\n");
+                ERR_INTERNAL(gen_return,"Unexpected return type of function.\n");
                 break;
             }
             INST_POPS(VAR_CODE("TF",ref->varId)); //pop to variable
@@ -479,7 +478,7 @@ void genFncCall(stack_ast_t *ast) {
     AST_POP();
 }
 
-void genWrite(stack_ast_t *ast) {
+void gen_write(stack_ast_t *ast) {
     AST_fnc_param *tmpParam = AST_TOP()->data->function_call_data->params;
 
     while (tmpParam != NULL) {
@@ -501,7 +500,7 @@ void genWrite(stack_ast_t *ast) {
                 INST_WRITE(VAR_CODE("LF", tmpParam->data->variable->identifier));
                 break;
             default:
-                ERR_INTERNAL(genWrite, "not recognised parameter type");
+                ERR_INTERNAL(gen_write, "not recognised parameter type");
                 break;
         }
         tmpParam = tmpParam->next;
@@ -513,7 +512,7 @@ void genWrite(stack_ast_t *ast) {
 }
 
 
-void genCondition(CODE_GEN_PARAMS) {
+void gen_condition(CODE_GEN_PARAMS) {
     if (stack_ast_empty(ast)) { ERR_INTERNAL(genIf, "empty if condition\n"); return; }
     // for non bool expressions push result to stack
     // relational or null - generate jump directly
@@ -530,14 +529,14 @@ void genCondition(CODE_GEN_PARAMS) {
         case AST_LESS:
         case AST_LESS_EQUAL:
         case AST_END_EXPRESSION:
-            ERR_INTERNAL(genCondition, "empty operation on top of ast");
+            ERR_INTERNAL(gen_condition, "empty operation on top of ast");
             break;
 		case AST_VAR:
 		case AST_INT:
 		case AST_STRING:
 		case AST_FLOAT:
 		case AST_NULL:
-            genExpr(ast); // gen expression, result will be on stack
+            gen_expr(ast); // gen expression, result will be on stack
             break;
 
         default:
@@ -550,7 +549,7 @@ void genCondition(CODE_GEN_PARAMS) {
 
     // push true to stack for comparison
     INST_PUSHS(CONST_BOOL("true"));
-    switch (stack_code_block_top(&ctx->blockStack)->type) {
+    switch (stack_code_block_top(&ctx->block_stack)->type) {
         case BLOCK_IF:
             INST_JUMPIFNEQS(LABEL_ELSE()); // if - cond false jump to else
             break;
@@ -558,13 +557,13 @@ void genCondition(CODE_GEN_PARAMS) {
             INST_JUMPIFNEQS(LABEL_WHILE_END()); // while - cond false jump to endwhile
             break;
         default:
-            ERR_INTERNAL(genCondition, "block stack is neither if or while");
+            ERR_INTERNAL(gen_condition, "block stack is neither if or while");
             return;
     }
 }
 
-void genString(char *str) {
-    if (str == NULL) {ERR_INTERNAL(genString, "NULL string pointer"); return;}
+void gen_string(char *str) {
+    if (str == NULL) {ERR_INTERNAL(gen_string, "NULL string pointer"); return;}
     printf("string@");
     for (int i = 0; str[i] != '\0'; i++) {
         if (str[i] <= 32 || str[i] == 35 || str[i] == 92) {
@@ -576,13 +575,13 @@ void genString(char *str) {
 }
 
 
-void genReturn(CODE_GEN_PARAMS) {
+void gen_return(CODE_GEN_PARAMS) {
     //main body return
-    if (ctx->currentFncDeclaration == NULL){
+    if (ctx->current_fnc_declaration == NULL){
         if(AST_TOP()->type == AST_RETURN_EXPR)
         {
             AST_POP();//pop AST_RETURN
-            genExpr(ast);
+            gen_expr(ast);
         }
         else
             AST_POP();//pop AST_RETURN
@@ -593,16 +592,16 @@ void genReturn(CODE_GEN_PARAMS) {
     //function return
     else if (AST_TOP()->type == AST_RETURN_VOID){
         AST_POP();//pop AST_RETURN
-        if (ctx->currentFncDeclaration->fnc_data.returnType != void_t)
-            ERR_INTERNAL(genReturn,"This should not have gotten through syn analyzer\n");
+        if (ctx->current_fnc_declaration->fnc_data.returnType != void_t)
+            ERR_INTERNAL(gen_return,"This should not have gotten through syn analyzer\n");
         INST_PUSHS(CONST_NIL());//function return void
         INST_RETURN();
     }
     else { //AST_RETURN_EXPR
         AST_POP();//pop AST_RETURN
-        genExpr(ast);//gets result of expression on stack
+        gen_expr(ast);//gets result of expression on stack
         //compare return type of function vs type of expression
-        switch (ctx->currentFncDeclaration->fnc_data.returnType)
+        switch (ctx->current_fnc_declaration->fnc_data.returnType)
         {
         case int_t:
             INST_CALL(LABEL("type%check%int"));
@@ -629,7 +628,7 @@ void genReturn(CODE_GEN_PARAMS) {
             break;
 
         default:
-            ERR_INTERNAL(genReturn,"Unexpected return type of function.\n");
+            ERR_INTERNAL(gen_return,"Unexpected return type of function.\n");
             break;
         }
         //leaves result of expr on stack

@@ -9,32 +9,31 @@
 
 typedef struct {
     // counts are used to generate unique labels and auxiliary variable names
-    unsigned auxCount;
-    unsigned ifCount;
-    unsigned elseNum;
-    unsigned whileCount;
-    ht_item_t *currentFncDeclaration; // pointer to fnc symtable
+    unsigned if_count;
+    unsigned else_number;
+    unsigned while_count;
+    ht_item_t *current_fnc_declaration; // pointer to fnc symtable
                                       // NULL - in main body
                                       // ptr - in function declaration
-    stack_code_block_t blockStack;  // stack of code blocks for nested blocks
+    stack_code_block_t block_stack;  // stack of code blocks for nested blocks
 } codeGenCtx;
 
 #define CODE_GEN_PARAMS stack_ast_t *ast, codeGenCtx *ctx
 
-/* codeGenerator
+/* code_generator
  *
  * ast - AST created in syn-sem analysis
  */
-void codeGenerator(stack_ast_t *ast, ht_table_t *varSymtable);
+void code_generator(stack_ast_t *ast, ht_table_t *varSymtable);
 
 /* gen Assign
  *
  * stack top - variable, expression
  * output - assign expression result to variable
  */
-void genAssign(stack_ast_t *ast);
+void gen_assign(stack_ast_t *ast);
 
-/* genExpr
+/* gen_expr
  *
  * stack top - expression (could be variable, constant, or operation)
  * output - generated expression from ast
@@ -45,43 +44,43 @@ void genAssign(stack_ast_t *ast);
  *
  * result will be stored on stack
  */
-void genExpr(stack_ast_t *ast);
+void gen_expr(stack_ast_t *ast);
 
-/* genFncCall
+/* gen_fnc_call
  *
  * stack top - function call
  * output - prepare tmp frame, push it to frame stack
  *        - call function
  */
-void genFncCall(stack_ast_t *ast);
+void gen_fnc_call(stack_ast_t *ast);
 
-/* genWrite
+/* gen_write
  *
  * stack top - write function call
  * output - write every term
  */
-void genWrite(stack_ast_t *ast);
+void gen_write(stack_ast_t *ast);
 
-/* genCondition
+/* gen_condition
  *
  * stack top - condition expression
  * output - process and resolve condition
  *        - jump acording to current block type (if, while)
  */
-void genCondition(CODE_GEN_PARAMS);
+void gen_condition(CODE_GEN_PARAMS);
 
-/* genString
+/* gen_string
  *
  * stack top - string constant
  * output - generate string in appropriate format
  * note: just print, dont pop
  */
-void genString(char *str);
+void gen_string(char *str);
 
-/* genReturn
+/* gen_return
  *
  * stack top - return statement
- * output - in main body (ctx->currentFncDeclaration) == NULL
+ * output - in main body (ctx->current_fnc_declaration) == NULL
  *          - generate exit 0
  *        - in function declaration
  *          - empty statement - return
@@ -90,7 +89,7 @@ void genString(char *str);
  * make sure that returned expression is the same type
  * as current function return value - dynamically
  */
-void genReturn(CODE_GEN_PARAMS);
+void gen_return(CODE_GEN_PARAMS);
 
 
 #define SPACE printf(" ");
@@ -160,7 +159,7 @@ void genReturn(CODE_GEN_PARAMS);
 #define CONST_INT(value) printf("int@%d", value)
 #define CONST_BOOL(value) printf("bool@%s", value)
 #define CONST_NIL() printf("nil@nil")
-#define CONST_STRING(ptr) genString(ptr)
+#define CONST_STRING(ptr) gen_string(ptr)
 
 #define LABEL(label) printf("%s", label)
 // checking initialization
@@ -172,15 +171,15 @@ void genReturn(CODE_GEN_PARAMS);
 // generating condition labels
 
 // if else
-#define LABEL_ELSE() printf("else%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
-#define LABEL_ENDELSE() printf("end_else%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_ELSE() printf("else%%%d", stack_code_block_top(&ctx->block_stack)->labelNum)
+#define LABEL_ENDELSE() printf("end_else%%%d", stack_code_block_top(&ctx->block_stack)->labelNum)
 
 // while
-#define LABEL_WHILE_BEGIN() printf("while_begin%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
-#define LABEL_WHILE_END() printf("while_end%%%d", stack_code_block_top(&ctx->blockStack)->labelNum)
+#define LABEL_WHILE_BEGIN() printf("while_begin%%%d", stack_code_block_top(&ctx->block_stack)->labelNum)
+#define LABEL_WHILE_END() printf("while_end%%%d", stack_code_block_top(&ctx->block_stack)->labelNum)
 
 // function declare
-#define LABEL_FNC_DECLARE_END() printf("end%%fnc%%%s", ctx->currentFncDeclaration->identifier)
+#define LABEL_FNC_DECLARE_END() printf("end%%fnc%%%s", ctx->current_fnc_declaration->identifier)
 
 // help functions
 #define AST_POP() stack_ast_pop(ast)

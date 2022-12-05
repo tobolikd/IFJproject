@@ -39,7 +39,7 @@ int main()
 
     if (SyntaxItem->correct == true) {
         // syntax is correct, generate code
-        codeGenerator(SyntaxItem->stackAST, SyntaxItem->table);
+        code_generator(SyntaxItem->stackAST, SyntaxItem->table);
     }
 
     // free tokens
