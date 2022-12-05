@@ -89,7 +89,7 @@
     Zásobníky byly potřeba na více místech (ASS, precedenční analýza, generování kódu, \ldots). Implementace zásobníků je tedy obecná pomocí makra, které je možné použít pro libovolný ukazatel. Pro operaci pop je potřeba v makru specifikovat destruktor, který správně uvolní prvek, což je vhodné především pro komplexnější struktury. Při tvorbě ASS je potřeba, aby byl začátek programu na vrcholu zásobníku, proto je zásobník rozšířen o funkci, která umožňuje vložení prvku na konec zásobníku, aby se ASS do zásobníku mohl vkládat sekvenčně.
 
     \section{Sémantické kontroly}
-    Všechny sémantické kontroly probíhají s pomocí tabulky symbolů. Před spuštěním syntaktické analýzy, proběhne tzv. "první průchod" za pomocí funkce \texttt{fncDeclarationTable}, která kontroluje jen definice funkcí a nahrává je společně s jejich parametry a návratovým typem do tabulky symbolů. V návaznosti na tento první průchod se v precedenční analýze při volání funkcí provádí kontrola typu a počtu parametrů nebo zda byla funkce definována. Sémantické kontroly pro proměnné a jejich (ne)definování se provádějí v syntaktické a precedenční analýze.
+    Všechny sémantické kontroly probíhají s pomocí tabulky symbolů. Před spuštěním syntaktické analýzy, proběhne tzv. \uv{první průchod} za pomocí funkce \texttt{fncDeclarationTable}, která kontroluje jen definice funkcí a nahrává je společně s jejich parametry a návratovým typem do tabulky symbolů. V návaznosti na tento první průchod se v precedenční analýze při volání funkcí provádí kontrola typu a počtu parametrů nebo zda byla funkce definována. Sémantické kontroly pro proměnné a jejich (ne)definování se provádějí v syntaktické a precedenční analýze.
 
     \section{Generování kódu} \label{generovani}
     Soubory \texttt{code\_gen.c}, \texttt{code\_gen.h}, \texttt{code\_gen\_static.c}, \texttt{code\_gen\_static.h}
@@ -108,29 +108,37 @@
     Podmínka \texttt{if} se na začátku vyhodnotí a v případě nepravdivosti výrazu v podmínce se skočí na návěští \texttt{else} doplněné pořadovým číslem z kontextu. Před návěští \texttt{else} se vygeneruje skok za složený příkaz. U cyklu \texttt{while} se vygeneruje návěští začátku cyklu (opět doplněné o pořadové číslo z kontextu), při neplatnosti podmínky skočí až za konec cyklu. Návěští konce složených příkazů \texttt{else} a \texttt{while} jsou generovány na konci složeného příkazu (viz \ref{konec slozeneho}).
 
     \subsubsection{Přiřazení}
+    Nejdříve se vyhodnotí výraz, který se má přiřadit a potom se přiřadí výsledek ze zásobníku pomocí instrukce \texttt{POPS}.
+    
     \subsubsection{Volání funkce}
+    Před voláním funkce se vytvoří dočasný rámec, ve kterém se nadefinují a inicializují argumenty funkce. Před každým přiřazením proměnné do parametru se zkontroluje její inicializace. Zavolá se funkce, případně se přiřadí hodnota ze zásobníku a uklidí se rámec.
+    
     \subsubsection{Deklarace funkce}
+    Vygeneruje se příslušné návěští a definice lokálních proměnných použitých ve funkci, kromě jejich parametrů (ty jsou definovány při volání funkce). Celá deklarace se přeskočí instrukcí \texttt{JUMP}, aby její obsah nezasahoval do hlavní části programu.
+    
     \subsubsection{Volání return}
+    Podle kontextu se vygeneruje \texttt{EXIT} nebo návrat z funkce. Před navrácením hodnoty se zkontroluje její typ, poté se vloží na zásobník a vygeneruje se \texttt{RETURN}.
+    
     \subsubsection{Výrazy}
+    Výrazy využívají postfixového zápisu v ASS. Jednotlivé operandy se vkládají na zásobník a redukují operacemi na mezivýsledky případných dalších operací. Před každým použitím proměnné, se kontroluje její inicializace.
+    
     \subsubsection{Konec složeného příkazu} \label{konec slozeneho}
     Když je na vrcholu zásobníku ASS konec složeného výrazu, vyhodnotí se následující akce podle typu složeného výrazu v kontextu.
     \begin{itemize}
         \item \texttt{if} -- vygeneruje skok na konec složeného příkazu \texttt{else}.
         \item \texttt{else} -- generuje návěští značící konec příkazu \texttt{else}.
         \item \texttt{while} -- generuje skok na začátek cyklu a návěští konce cyklu.
-        \item deklarace funkce -- vygeneruje kontrolu návratu z funkce. Podle kontextu určí návratový typ funkce, pro \texttt{void} funkci vygeneruje navrácení hodnoty \texttt{null} na zásobník a instrukci \texttt{RETURN}, pro případ, že se ve funkci volání \texttt{return} nezavolá (pokud se volá, tento kód se nevykoná). Pro ostatní návratové typy generuje skok na návěští, které obstará výpis chybové hlášky o chybějícím volání \texttt{return} a navrácení chybového kódu. Potom nastaví v kontextu ukazatel na aktuální deklarovanou funkci na \texttt{NULL}.
+        \item deklarace funkce -- vygeneruje kontrola návratu z funkce, v případě \texttt{void} funkce se vygeneruje navrácení z funkce. Aktualizuje se kontext programu.
     \end{itemize}
 
-    Nakonec odstraní ze zásobníku v kontextu aktuální prvek, který byl právě koncem složeného příkazu ukončen.
-    \subsubsection{Chybové stavy}
-
     \subsection{Pomocné funkce pro vygenerovaný kód} \label{pomocne}
+    Ve statické části se generují pomocné funkce, které se potom volají na příslušných místech v programu. Jedná se o implicitní typové konverze, vyhodnocování podmínek, kontrola typů apod.
 
     \section{Týmová spolupráce}
     \subsection{Komunikace v týmu}
-        Vzájemná domluva a komunikace probíhala online i offline. A to prostřednictvím Discord serveru - pro převážně obecnější problematiky, pro ty složitější a již více konkrétní nám sloužila funkce GitHub - Issues, kde jsme mohli jednodušše diskutovat o již kontrétní části kódu. K tomu jsme se každý čtvrtek setkávali na schůzích uskutečněných v budově škole, kde jsme řešili ty nejzásadnější problémy a rozhodnutí z hlediska směřování.
+        Vzájemná domluva a komunikace probíhala online i offline. A to prostřednictvím Discord serveru - pro převážně obecnější problematiky, pro ty složitější a již více konkrétní nám sloužila funkce GitHub - Issues, kde jsme mohli jednoduše diskutovat o již konkrétní části kódu. K tomu jsme se každý čtvrtek setkávali na schůzích uskutečněných v budově škole, kde jsme řešili ty nejzásadnější problémy a rozhodnutí z hlediska směřování.
     \subsection{Verzovací systém}
-        Při výběru verzovacího systému pro nás bylo jasnou volbou zvolit populární a osvědčený Git s nahraváním na server GitHub, kde probíhala i již zmíněná vzájemná komunikace.
+        Při výběru verzovacího systému pro nás bylo jasnou volbou zvolit populární a osvědčený Git s nahráváním na server GitHub, kde probíhala i již zmíněná vzájemná komunikace.
     \subsection{Testování}
         Pro ověření správnosti jsme používali framework GoogleTest v jazyce C++, který nám sloužil k unit testování.
     \subsection{Rozdělení práce}
@@ -149,7 +157,7 @@
                 \end{itemize}
             \item David Tobolík (xtobol06)
                 \begin{itemize}
-                    \item sémantické kontroly pro volání funkce, generování kódu, datové struktury pro ASS, zásobníky, struktura projektu, cmake a struktura testů, testy (lexikální analýza, ASS, zásobníky), code review, makefile, dokumentace
+                    \item sémantické kontroly pro volání funkce, generování kódu, datové struktury pro ASS, zásobníky, pomocná makra a funkce, struktura projektu, cmake a struktura testů, testy (lexikální analýza, ASS, zásobníky), code review, makefile, dokumentace
                 \end{itemize}
         \end{itemize}
 
