@@ -1,5 +1,5 @@
 #include "code-gen-data.h"
-#include "code-gen.h"
+#include "code_gen.h"
 #include "symtable.h"
 
 #include <stdio.h>
