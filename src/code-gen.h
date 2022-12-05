@@ -183,8 +183,8 @@ void genReturn(CODE_GEN_PARAMS);
 #define LABEL_FNC_DECLARE_END() printf("end%%fnc%%%s", ctx->currentFncDeclaration->identifier)
 
 // help functions
-#define AST_POP() stack_ast_pop_b(ast)
-#define AST_TOP() stack_ast_bot(ast)
+#define AST_POP() stack_ast_pop(ast)
+#define AST_TOP() stack_ast_top(ast)
 
 #if DEBUG == 1
     #define COMMENT(...) do { printf("\n\n# "); printf(__VA_ARGS__); printf("\n"); } while (0)

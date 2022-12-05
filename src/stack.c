@@ -24,11 +24,8 @@
         CHECK_MALLOC(new);                                                      \
         new->data = item;                                                       \
         new->next = stack->top;                                                 \
-        new->previous = NULL;                                                   \
         if (stack->top == NULL)                                                 \
             stack->bottom = new;                                                \
-        else                                                                    \
-            stack->top->previous = new;                                         \
         stack->top = new;                                                       \
     }                                                                           \
                                                                                 \
@@ -38,9 +35,7 @@
             return;                                                             \
                                                                                 \
         stack->top = deleted->next;                                             \
-        if (stack->top != NULL)                                                 \
-            stack->top->previous = NULL;                                        \
-        else                                                                    \
+        if (stack->top == NULL)                                                 \
             stack->bottom = NULL;                                               \
         DESTRUCTOR(deleted->data);                                              \
         free(deleted);                                                          \
@@ -51,7 +46,6 @@
         CHECK_MALLOC(new);                                                      \
         new->data = item;                                                       \
         new->next = NULL;                                                       \
-        new->previous = stack->bottom;                                          \
         if (stack->top == NULL)                                                 \
             stack->top = new;                                                   \
         else                                                                    \
@@ -62,20 +56,6 @@
     TYPE stack_##NAME##_top(stack_##NAME##_t *stack) {                          \
         if (stack->top == NULL) { return NULL; }                                \
         return stack->top->data;                                                \
-    }                                                                           \
-                                                                                \
-    void stack_##NAME##_pop_b(stack_##NAME##_t *stack) {                        \
-        stack_##NAME##_item_t *deleted = stack->bottom;                         \
-        if (deleted == NULL)                                                    \
-            return;                                                             \
-                                                                                \
-        stack->bottom = deleted->previous;                                      \
-        if (stack->bottom != NULL)                                              \
-            stack->bottom->next = NULL;                                         \
-        else                                                                    \
-            stack->top = NULL;                                                  \
-        DESTRUCTOR(deleted->data);                                              \
-        free(deleted);                                                          \
     }                                                                           \
                                                                                 \
     TYPE stack_##NAME##_bot(stack_##NAME##_t *stack) {                          \

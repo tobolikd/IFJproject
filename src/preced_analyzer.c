@@ -80,7 +80,7 @@ void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
     switch (item->token->type)
     {
     case t_varId:
-        stack_ast_push(stackAST,ast_item_const(AST_VAR,ht_search(symtable,stack_precedence_top(stack)->token->data)));
+        stack_ast_push_b(stackAST,ast_item_const(AST_VAR,ht_search(symtable,stack_precedence_top(stack)->token->data)));
         break;
     case t_functionId://dealt with earlier
         debug_log("PA: E -> i rule something went wrong.\n");
@@ -88,20 +88,20 @@ void Ei(stack_precedence_t *stack, stack_ast_t *stackAST, ht_table_t *symtable)
     case t_int:
     {
         int data = atoi(item->token->data);
-        stack_ast_push(stackAST,ast_item_const(AST_INT, &data));
+        stack_ast_push_b(stackAST,ast_item_const(AST_INT, &data));
         break;
     }
     case t_float:
     {
         double data = atof(item->token->data);
-        stack_ast_push(stackAST,ast_item_const(AST_FLOAT, &data));
+        stack_ast_push_b(stackAST,ast_item_const(AST_FLOAT, &data));
         break;
     }
     case t_string:
-        stack_ast_push(stackAST,ast_item_const(AST_STRING,item->token->data));
+        stack_ast_push_b(stackAST,ast_item_const(AST_STRING,item->token->data));
         break;
     case t_null:
-        stack_ast_push(stackAST,ast_item_const(AST_NULL,NULL));
+        stack_ast_push_b(stackAST,ast_item_const(AST_NULL,NULL));
         break;
     default:
         THROW_ERROR(SEMANTIC_OTHER_ERR, item->token->lineNum);
@@ -151,8 +151,8 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
         {
         //push operation * (-1)
         int negative = -1;
-        stack_ast_push(stackAST,ast_item_const(AST_INT,&negative));
-        stack_ast_push(stackAST,ast_item_const(AST_MULTIPLY,NULL)); //push operation multiply
+        stack_ast_push_b(stackAST,ast_item_const(AST_INT,&negative));
+        stack_ast_push_b(stackAST,ast_item_const(AST_MULTIPLY,NULL)); //push operation multiply
         break;
         }
     }
@@ -166,7 +166,7 @@ void minusE(stack_precedence_t *stack, stack_ast_t *stackAST)
 /// @param op Type of operand to execute. {+,-,*,\,.,<,>,<=,>=,===,!==}
 void EopE(stack_precedence_t *stack, stack_ast_t *stackAST, AST_type op)
 {
-    stack_ast_push(stackAST,ast_item_const(op, NULL));
+    stack_ast_push_b(stackAST,ast_item_const(op, NULL));
     stack_precedence_pop(stack);
     stack_precedence_pop(stack);
 }
@@ -405,7 +405,7 @@ bool freeStack(stack_precedence_t *stack, stack_ast_t *ast, bool returnValue)
         }
     }
     else
-        stack_ast_push(ast,ast_item_const(AST_END_EXPRESSION,NULL));
+        stack_ast_push_b(ast,ast_item_const(AST_END_EXPRESSION,NULL));
     return returnValue;
 }
 
@@ -531,7 +531,7 @@ bool parseFunctionCall(TokenList *list, int *index,stack_precedence_t *stack, st
         THROW_ERROR(SEMANTIC_RUN_PARAMETER_ERR,list->TokenArray[*index]->lineNum);
         return false;
     }
-    stack_ast_push(stackAST,ast_item_const(AST_FUNCTION_CALL,fncCallData));
+    stack_ast_push_b(stackAST,ast_item_const(AST_FUNCTION_CALL,fncCallData));
     return true;//success
 }
 

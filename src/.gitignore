@@ -1,6 +1,0 @@
-*.txt
-*.out
-code-gen
-ic22int
-test.c
-Makefile
