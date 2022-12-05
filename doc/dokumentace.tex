@@ -55,7 +55,7 @@
     \section{Popis fungování a struktura překladače}
 
     \section{Lexikální analýza}
-    Lexikální analýza (dále LA) načítá lexémy ze standartního vstupu pomocí funkce \texttt{getToken()}, ty následně přetváří na tokeny, které postupně naplňují list \texttt{TokenList}, který se po zpracování vstupu předává syntaktické analýze. LA se volá funkcí \texttt{lexAnalyser()} a je implementovaná v souborech \texttt{lex\_analyzer.c} a \texttt{lex\_analyzer.h}. Zpracování lexémů se řídí předem vytvořeným deterministickým konečným automatem (viz \ref{}). Konečný automat je reprezentován v LA  switchem, u kterého každý case zastupuje jeden jeho stav. Při natrefení na konečný stav se spouští funkce \texttt{tokenCtor()} pro vytvoření tokenu a poté \texttt{appendToken()} pro vložení do seznamu tokenů. Funkce vrací délku seznamu, číslo řádku - na kterém se token nalézal, informace o typu tokenu a popřípadě jeho data.
+    Lexikální analýza (dále LA) načítá lexémy ze standartního vstupu pomocí funkce \texttt{getToken()}, ty následně přetváří na tokeny, které postupně naplňují list \texttt{TokenList}. List se po zpracování vstupu předává syntaktické analýze. LA se volá funkcí \texttt{lexAnalyser()} a je implementovaná v souborech \texttt{lex\_analyzer.c} a \texttt{lex\_analyzer.h}. Zpracování lexémů se řídí předem vytvořeným deterministickým konečným automatem (viz \ref{}). Konečný automat je reprezentován v LA  switchem, u kterého každý case zastupuje jeden jeho stav. Pokud automat natrefí na nesouvisející vstupní hranu a nachází se v konečném stavu, spouští se funkce \texttt{tokenCtor()} pro vytvoření tokenu a poté \texttt{appendToken()} pro vložení do seznamu tokenů. Pokud se ale automat nenachází v konečném stavu, LA hlásí lexikální chybu a překlad se ruší. O tokenu se uchovává informace o jeho typu, číslo řádku - na kterém se token nalézal a relevantní data (název promněné, funkce, hodnota atd.).
     
     \section{Syntaktická analýza}
     
@@ -137,7 +137,7 @@
         \begin{itemize}
             \item Gabriel Biel (xbielg00)
                 \begin{itemize}
-                    \item architektura compileru, lexikální analýza, precedenční tabulka, precedenční analýza, testy pro precedenční analýzu, rozhraní pro tabulku symbolů, funkce v generátoru kódu
+                    \item architektura překladače, lexikální analýza, precedenční tabulka, precedenční analýza, testy pro precedenční analýzu, rozhraní pro tabulku symbolů, funkce v generátoru kódu
                 \end{itemize}
             \item Adam Gabrys (xgabry01)
                 \begin{itemize}
@@ -201,4 +201,3 @@
 	\renewcommand{\refname}{Zdroje}
 	\printbibliography
 \end{document}
-
