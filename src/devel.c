@@ -1,5 +1,5 @@
 #include "devel.h"
-#include "error-codes.h"
+#include "error_codes.h"
 #include "ast.h"
 
 #define AST_TYPE(TYPE) debug_log("\t|- type: |%s|\n", TYPE)

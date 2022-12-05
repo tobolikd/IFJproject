@@ -24,7 +24,7 @@
  *      stringvalue - string constant
  *      float_value - float constant
  *      function_call_data - structure with fnc call attribs
- *          |- functionID - id of called function - only for debug
+ *          |- function_id - id of called function - only for debug
  *          |- function - pointer to fnc in symtable
  *          |- params - list of parametres
  *              |- type - data type of parameter
@@ -122,14 +122,14 @@ typedef struct ast_fnc_param
 
 /* function call data
  *
- * functionID - function name - only for debug info
+ * function_id - function name - only for debug info
  *              pointer is NOT valid after destructing
  * function - pointer to symtable
  * params - list of parametres
  */
 typedef struct
 {
-    char *functionID;
+    char *function_id;
     ht_item_t *function;
     AST_fnc_param *params;
 } AST_function_call_data;
@@ -193,10 +193,10 @@ AST_function_declare_data *fnc_declare_data_const(ht_item_t *function, ht_table_
 
 /* fnc_call_data_const
  *  - allocate and initialize function call data structure
- *  fncSymtable - pointer to
+ *  fnc_symtable - pointer to
  *  function - pointer to symtable
  */
-AST_function_call_data *fnc_call_data_const(ht_table_t *fncSymtable, char *functionId);
+AST_function_call_data *fnc_call_data_const(ht_table_t *fnc_symtable, char *function_id);
 
 /* fnc_call_data_add_param
  *  - adds parameter to function call data acording to param type

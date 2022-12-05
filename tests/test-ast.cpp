@@ -71,7 +71,7 @@ TEST_F(testAst, fncCall) {
 
     AST_function_call_data *data = fnc_call_data_const(symtable, fncName);
 
-    EXPECT_EQ(data->functionID, fncName);
+    EXPECT_EQ(data->function_id, fncName);
 
     EXPECT_EQ(0, strcmp(fncName, data->function->identifier));
     EXPECT_TRUE(ht_search(symtable, fncName) == data->function);

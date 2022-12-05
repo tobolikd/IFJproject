@@ -3,7 +3,8 @@
 #include "preced_analyzer.h"
 #include "sem-analyzer.h"
 #include "ast.h"
-#include "error-codes.h"
+#include "error_codes.h"
+
 #include <stdlib.h>
 
 //PRECEDENCE TABLE

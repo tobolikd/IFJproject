@@ -23,7 +23,7 @@ enum ifjErrCode {
 };
 
 // global variable for errCode storage
-extern enum ifjErrCode errorCode;
+extern enum ifjErrCode error_code;
 
 #define COMPILER_INFO 1
 
@@ -50,17 +50,17 @@ extern enum ifjErrCode errorCode;
 #endif
 
 // check malloc success, on fail return
-#define CHECK_MALLOC(ptr) do { if (ptr == NULL) {errorCode = INTERNAL_ERR; return;} } while (0)
+#define CHECK_MALLOC(ptr) do { if (ptr == NULL) {error_code = INTERNAL_ERR; return;} } while (0)
 
 // check malloc success, on fail return NULL
-#define CHECK_MALLOC_PTR(ptr) do { if (ptr == NULL) {errorCode = INTERNAL_ERR; return NULL;} } while (0)
+#define CHECK_MALLOC_PTR(ptr) do { if (ptr == NULL) {error_code = INTERNAL_ERR; return NULL;} } while (0)
 
-#define MALLOC_ERR do{errorCode = INTERNAL_ERR; fprintf(stderr, "INTERNAL: malloc returned NULL"); } while(0)
+#define MALLOC_ERR do{error_code = INTERNAL_ERR; fprintf(stderr, "INTERNAL: malloc returned NULL"); } while(0)
 
 #define THROW_ERROR(CODE, ...)                                      \
-    if (errorCode == SUCCESS){                                      \
-        errorCode = CODE;                                           \
-        switch (errorCode){                                         \
+    if (error_code == SUCCESS){                                      \
+        error_code = CODE;                                           \
+        switch (error_code){                                         \
         case LEXICAL_ERR:                                           \
             debug_print("LEXICAL ERROR on line number: %d\n",__VA_ARGS__); \
             break;                                                  \
@@ -93,28 +93,28 @@ extern enum ifjErrCode errorCode;
     } }
 
 #define ERR_FNC_NOT_DECLARED(ID)                                    \
-do {errorCode = SEMANTIC_FUNCTION_DEFINITION_ERR;                   \
+do {error_code = SEMANTIC_FUNCTION_DEFINITION_ERR;                   \
     debug_print("ERROR: calling undefined function: %s\n", ID);     \
 } while (0)
 
 #define ERR_FNC_PARAM_TYPE(FNC)                                                     \
-do {errorCode = SEMANTIC_PARAMETER_ERR;                                   \
+do {error_code = SEMANTIC_PARAMETER_ERR;                                   \
     debug_print("ERROR in function call: %s\n\tincompatible function call parameter type\n", FNC);  \
 } while (0)
 
 #define ERR_FNC_PARAM_COUNT(FNC)                                                \
-do {errorCode = SEMANTIC_PARAMETER_ERR;                                         \
+do {error_code = SEMANTIC_PARAMETER_ERR;                                         \
     debug_print("ERROR in function call: %s\n\twrong parameter count\n", FNC);  \
 } while (0)
 
 
-#define ERR_INTERNAL(FUNCTION, ... ) do { errorCode = INTERNAL_ERR;        \
+#define ERR_INTERNAL(FUNCTION, ... ) do { error_code = INTERNAL_ERR;        \
             debug_print("ERROR(internal):\n\tin function: %s\n\t", #FUNCTION);    \
             debug_print(__VA_ARGS__);                                      \
             } while (0)
 
 #define ERR_AST_NOT_EMPTY(AST)                                    \
-do {errorCode = INTERNAL_ERR;                   \
+do {error_code = INTERNAL_ERR;                   \
     debug_print("ERROR(internal): in function codeGenerator - ast stack not empty");     \
     printAstStack(AST);\
 } while (0)

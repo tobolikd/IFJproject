@@ -5,7 +5,7 @@
 #include "stack.h"
 #include "code_gen_static.h"
 #include "symtable.h"
-#include "error-codes.h"
+#include "error_codes.h"
 
 typedef struct {
     // counts are used to generate unique labels and auxiliary variable names
@@ -16,9 +16,9 @@ typedef struct {
                                       // NULL - in main body
                                       // ptr - in function declaration
     stack_code_block_t block_stack;  // stack of code blocks for nested blocks
-} codeGenCtx;
+} code_gen_ctx_t;
 
-#define CODE_GEN_PARAMS stack_ast_t *ast, codeGenCtx *ctx
+#define CODE_GEN_PARAMS stack_ast_t *ast, code_gen_ctx_t *ctx
 
 /* code_generator
  *

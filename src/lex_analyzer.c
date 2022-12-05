@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "lex_analyzer.h"
-#include "error-codes.h"
+#include "error_codes.h"
 
 // init STATE_STRING
 const char *STATE_STRING[] =

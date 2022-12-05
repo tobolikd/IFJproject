@@ -1,6 +1,6 @@
 #include "lex_analyzer.h"
 #include "sem-analyzer.h"
-#include "error-codes.h"
+#include "error_codes.h"
 #include "symtable.h"
 //#include "stack.h"
 #include "devel.h"
@@ -60,7 +60,7 @@ var_type_t typeforFnDec(TokenList *list, int *index) {
             } else if (!strcmp(list->TokenArray[*index]->data, "string")) {
                 return null_string_t;
             } else {
-                errorCode = SYNTAX_ERR;
+                error_code = SYNTAX_ERR;
                 return error;
             }
         case t_type:
@@ -71,11 +71,11 @@ var_type_t typeforFnDec(TokenList *list, int *index) {
             } else if (!strcmp(list->TokenArray[*index]->data, "string")) {
                 return string_t;
             } else {
-                errorCode = SYNTAX_ERR;
+                error_code = SYNTAX_ERR;
                 return error;
             }
         default:
-            errorCode = SYNTAX_ERR;
+            error_code = SYNTAX_ERR;
             return error;
     }
 }
@@ -131,7 +131,7 @@ bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
     while (nestedLevel != 0) {
         switch (list->TokenArray[*index]->type) {
             case t_EOF:
-                errorCode = SYNTAX_ERR;
+                error_code = SYNTAX_ERR;
                 debug_log("not ended function declare\n");
                 return false;
             case t_lCurl:
@@ -305,9 +305,7 @@ ht_table_t *fncDeclarationTable(TokenList *list) {
         debug_log("Check return failed \n");
         return NULL;
     }
-    if (errorCode != SUCCESS) {
-        return NULL;
-    }
+    if (error_code != SUCCESS){ return NULL;}
     return table;
 }
 
@@ -337,7 +335,7 @@ bool cmpParamTypes(var_type_t symtable, AST_param_type ast) {
 
 bool checkFncCall(AST_function_call_data *data) {
     // not declared function
-    if (data->function == NULL) { ERR_FNC_NOT_DECLARED(data->functionID); return false; }
+    if (data->function == NULL) { ERR_FNC_NOT_DECLARED(data->function_id); return false; }
 
     if (0 == strcmp(data->function->identifier, "write"))
         return true; // built in function with unlimited params
@@ -347,7 +345,7 @@ bool checkFncCall(AST_function_call_data *data) {
     AST_fnc_param *tmpParam = data->params;
     while (tmpParam != NULL) {
         if (requiredParam == NULL) { // no more required params
-            ERR_FNC_PARAM_COUNT(data->functionID);
+            ERR_FNC_PARAM_COUNT(data->function_id);
 #if DEBUG == 1
             printAstFnc(data);
 #endif
@@ -355,7 +353,7 @@ bool checkFncCall(AST_function_call_data *data) {
         }
 
         if (requiredParam->type == void_t) {
-            ERR_INTERNAL(checkFncCall, "void parameter type in declared function\n\tfunction: %s\n\tparam: %s", data->functionID, requiredParam->varId);
+            ERR_INTERNAL(checkFncCall, "void parameter type in declared function\n\tfunction: %s\n\tparam: %s", data->function_id, requiredParam->varId);
 #if DEBUG == 1
             printAstFnc(data);
 #endif
@@ -364,7 +362,7 @@ bool checkFncCall(AST_function_call_data *data) {
 
         if (tmpParam->type != AST_P_VAR) { // check constant type
             if (!cmpParamTypes(requiredParam->type, tmpParam->type)) {
-                ERR_FNC_PARAM_TYPE(data->functionID);
+                ERR_FNC_PARAM_TYPE(data->function_id);
 #if DEBUG == 1
                 printAstFnc(data);
 #endif
@@ -376,7 +374,7 @@ bool checkFncCall(AST_function_call_data *data) {
         tmpParam = tmpParam->next;
     }
     if (requiredParam != NULL) { // more params needed
-        ERR_FNC_PARAM_COUNT(data->functionID);
+        ERR_FNC_PARAM_COUNT(data->function_id);
 #if DEBUG == 1
         printAstFnc(data);
 #endif

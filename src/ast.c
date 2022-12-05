@@ -6,7 +6,7 @@
  */
 
 #include "ast.h"
-#include "error-codes.h"
+#include "error_codes.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -160,12 +160,12 @@ AST_function_declare_data *fnc_declare_data_const(ht_item_t *function, ht_table_
     return new;
 }
 
-AST_function_call_data *fnc_call_data_const(ht_table_t *fncSymtable, char *functionId) {
+AST_function_call_data *fnc_call_data_const(ht_table_t *fnc_symtable, char *function_id) {
     AST_function_call_data *new = (AST_function_call_data *) malloc(sizeof(AST_function_call_data));
     CHECK_MALLOC_PTR(new);
 
-    new->functionID = functionId;
-    new->function = ht_search(fncSymtable, functionId);
+    new->function_id = function_id;
+    new->function = ht_search(fnc_symtable, function_id);
     new->params = NULL;
 
     return new;
@@ -213,7 +213,7 @@ void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, 
             break;
 
         default:
-            errorCode = INTERNAL_ERR;
+            error_code = INTERNAL_ERR;
             debug_print("INTERNAL ERR - in fnc_call_data_add_param():\n\tunknown type of fnc param (%d)\n", type);
             break;
     }

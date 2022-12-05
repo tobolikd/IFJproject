@@ -8,7 +8,6 @@
 #define IFJ_SYN_ANALYZER_H 1
 
 #include "lex_analyzer.h"
-#include "error-codes.h"
 #include "symtable.h"
 #include "stack.h"
 

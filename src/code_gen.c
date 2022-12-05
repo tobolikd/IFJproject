@@ -1,14 +1,14 @@
 #include "code_gen.h"
-#include "error-codes.h"
+#include "error_codes.h"
 #include "symtable.h"
 #include "code_gen_static.h"
 #include <stdlib.h>
 
-enum ifjErrCode errorCode;
+enum ifjErrCode error_code;
 
 /// AUXILIARY FUNCTIONS
 
-code_block *codeBlockConst(code_block_type type, codeGenCtx *ctx) {
+code_block *codeBlockConst(code_block_type type, code_gen_ctx_t *ctx) {
     code_block *new = (code_block *) malloc(sizeof(code_block));
     CHECK_MALLOC_PTR(new);
 
@@ -60,7 +60,7 @@ void code_generator(stack_ast_t *ast, ht_table_t *var_symtable) {
     genVarDefs(var_symtable, NULL);
 
     // allocate code context
-    codeGenCtx *ctx = (codeGenCtx *) malloc(sizeof(codeGenCtx));
+    code_gen_ctx_t *ctx = (code_gen_ctx_t *) malloc(sizeof(code_gen_ctx_t));
     CHECK_MALLOC(ctx);
 
     // init ctx
@@ -75,7 +75,7 @@ void code_generator(stack_ast_t *ast, ht_table_t *var_symtable) {
 
         COMMENT("NEW EXPRESSION IN CODE GEN");
 
-        if (errorCode != SUCCESS)
+        if (error_code != SUCCESS)
             break;
 
         // check if the item generated properly (is poped) to prevent looping
@@ -256,7 +256,7 @@ void code_generator(stack_ast_t *ast, ht_table_t *var_symtable) {
             stack_code_block_pop(&ctx->block_stack);
     }
 
-    if (errorCode == SUCCESS) {
+    if (error_code == SUCCESS) {
         INST_EXIT(CONST_INT(0));
     }
 

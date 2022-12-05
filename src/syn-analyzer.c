@@ -7,7 +7,7 @@
 #include "lex_analyzer.h"
 #include "syn-analyzer.h"
 #include "symtable.h"
-#include "error-codes.h"
+#include "error_codes.h"
 #include "ast.h"
 #include "stack.h"
 #include "preced_analyzer.h"
@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum ifjErrCode errorCode;
+enum ifjErrCode error_code;
 ht_table_t *fncTable;
 stack_declare_t stackDeclare;
 
