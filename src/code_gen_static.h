@@ -104,6 +104,13 @@ void genMathEqual();
  */
 void genSemanticTypeCheck();
 
+/* genBuiltInFcs
+ * Adam Gabrys (xgabry01)
+ *
+ * generates all built-functions
+ *
+ * readi, readf, reads, chr, ord, strlen, substr
+ */
 void genBuiltInFcs();
 
 #define AUX1 VAR_CODE("GF", "aux%1")

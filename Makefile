@@ -2,8 +2,8 @@ PROJECT=ifj-compiler
 SOURCE_DIR=./src/
 
 SOURCES += lex_analyzer.c
-SOURCES += syn-analyzer.c
-SOURCES += sem-analyzer.c
+SOURCES += syn_analyzer.c
+SOURCES += sem_analyzer.c
 SOURCES += preced_analyzer.c
 SOURCES += code_gen.c
 SOURCES += code_gen_static.c

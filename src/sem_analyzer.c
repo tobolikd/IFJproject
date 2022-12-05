@@ -1,10 +1,15 @@
+/* @file sem_analyzer.h
+ *
+ * @brief functions used in semantic analysis, declaring integrated functions, declaring all other functions in program, semantic check for fnc call
+ *
+ * @authors Adam Gabrys (xgabry01), David Tobolik (xtobol06)
+ */
 #include "lex_analyzer.h"
-#include "sem-analyzer.h"
+#include "sem_analyzer.h"
 #include "error_codes.h"
 #include "symtable.h"
-//#include "stack.h"
 #include "devel.h"
-#include "syn-analyzer.h"
+#include "syn_analyzer.h"
 
 #include <stdbool.h>
 #include <string.h>

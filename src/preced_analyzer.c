@@ -9,7 +9,7 @@
 #include "symtable.h"
 #include "preced_analyzer_data.h"
 #include "preced_analyzer.h"
-#include "sem-analyzer.h"
+#include "sem_analyzer.h"
 #include "ast.h"
 #include "error_codes.h"
 

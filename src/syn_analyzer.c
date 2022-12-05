@@ -5,7 +5,7 @@
  */
 
 #include "lex_analyzer.h"
-#include "syn-analyzer.h"
+#include "syn_analyzer.h"
 #include "symtable.h"
 #include "error_codes.h"
 #include "ast.h"
