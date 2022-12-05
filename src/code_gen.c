@@ -268,6 +268,13 @@ void gen_assign(stack_ast_t *ast) {
     free(idenitfier);
 }
 
+/* gen_expr
+ *
+ * Generates expression. Resolves expression using stack method.
+ * Semantically checks validity of used variables.
+ * 
+ * @author Gabriel Biel (xbielg00)
+ */
 void gen_expr(stack_ast_t *ast) {
     AST_item *item = AST_TOP();
     if (item->type == AST_END_EXPRESSION) //empty expression
@@ -334,7 +341,7 @@ void gen_expr(stack_ast_t *ast) {
 
         case AST_EQUAL:
         case AST_NOT_EQUAL:
-            INST_CALL(LABEL("type%cmp"));//2 oprands already on stack
+            INST_CALL(LABEL("math%equal"));//2 oprands already on stack
             if (item->type == AST_NOT_EQUAL)
                 INST_NOTS();//negate the outcome
 
@@ -382,6 +389,13 @@ void gen_expr(stack_ast_t *ast) {
     AST_POP();//pop AST_END_EXPR
 }
 
+/* gen_fnc_call
+ *
+ * Generates function call. Calls label of the function which is to be called.
+ * Semantically checks parameter types.
+ * 
+ * @author Gabriel Biel (xbielg00)
+ */
 void gen_fnc_call(stack_ast_t *ast) {
     // check for write
     if (!strcmp(AST_TOP()->data->function_call_data->function->identifier, "write")) {
@@ -562,7 +576,13 @@ void gen_string(char *str) {
     }
 }
 
-
+/* gen_return
+ *
+ * Generates proper action when return is called.
+ * Semantically checks return value - type while in function.
+ * 
+ * @author Gabriel Biel (xbielg00)
+ */
 void gen_return(CODE_GEN_PARAMS) {
     //main body return
     if (ctx->current_fnc_declaration == NULL){

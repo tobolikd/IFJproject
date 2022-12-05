@@ -1,3 +1,10 @@
+/* @file symtable.c
+ *
+ * @brief Interface for symtable. 
+ *
+ * @author Gabriel Biel(xbielg00)
+ */
+
 #include "symtable.h"
 #include "error_codes.h"
 #include <stdlib.h>
