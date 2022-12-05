@@ -42,7 +42,6 @@
     typedef struct stack_##NAME##_item {                        \
         TYPE data;                                              \
         struct stack_##NAME##_item *next;                       \
-        struct stack_##NAME##_item *previous;                   \
     } stack_##NAME##_item_t;                                    \
                                                                 \
     typedef struct {                                            \
