@@ -12,11 +12,11 @@
 
 /// AUXILIARY FUNCTIONS
 
-ht_table_t *initFncSymtable()
+ht_table_t *integratedFncSymtable()
 {
     ht_table_t *fncSymtable = ht_init();
-    /*all integrated fnctions declaration*/
 
+    /*all integrated fnctions declaration*/
     // "reads"
     ht_insert(fncSymtable, "reads", null_string_t, true);
 
@@ -45,6 +45,7 @@ ht_table_t *initFncSymtable()
     // "chr"
     ht_item_t  *chrItem = ht_insert(fncSymtable, "chr", string_t, true);
     ht_paramAppend(chrItem, "i", int_t);
+
     return (fncSymtable);
 }
 
@@ -52,7 +53,6 @@ ht_table_t *initFncSymtable()
 var_type_t typeforFnDec(TokenList *list, int *index) {
     switch (list->TokenArray[*index]->type) {
         case t_nullType:
-            // debug_log("in NULL TYPE\n");
             if (!strcmp(list->TokenArray[*index]->data, "int")) {
                 return null_int_t;
             } else if (!strcmp(list->TokenArray[*index]->data, "float")) {
@@ -64,7 +64,6 @@ var_type_t typeforFnDec(TokenList *list, int *index) {
                 return error;
             }
         case t_type:
-            // debug_log("in TYPE\n");
             if (!strcmp(list->TokenArray[*index]->data, "int")) {
                 return int_t;
             } else if (!strcmp(list->TokenArray[*index]->data, "float")) {
@@ -83,23 +82,38 @@ var_type_t typeforFnDec(TokenList *list, int *index) {
 
 var_type_t functionTypeForFunDec(TokenList *list, int *index)
 {
-    if (!strcmp(list->TokenArray[*index]->data, "void"))
-    {
-        // debug_log("in void\n");
-        if (list->TokenArray[*index]->type == t_type)
-        {
+    if (!strcmp(list->TokenArray[*index]->data, "void")) {
+        if (list->TokenArray[*index]->type == t_type) {
             return void_t;
         }
-        errorCode = SYNTAX_ERR;
+        THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
         return error;
     }
-    else if (list->TokenArray[*index]->type == t_type || list->TokenArray[*index]->type == t_nullType)
-    {
-        // debug_log("in FNC TYPE\n");
+    else if (list->TokenArray[*index]->type == t_type || list->TokenArray[*index]->type == t_nullType) {
         return typeforFnDec(list, index);
     }
-    errorCode = SYNTAX_ERR;
+    THROW_ERROR(SYNTAX_ERR, list->TokenArray[*index]->lineNum);
     return error;
+}
+
+bool paramRedeclaration(TokenList *list,int *index, ht_item_t *currFncDeclare){
+    bool redeclared = false;
+    ht_table_t *paramTable = ht_init();
+    param_info_t *currParam = currFncDeclare->fnc_data.params;
+
+    while (currParam != NULL){
+        ht_insert(paramTable, currParam->varId, void_t, false);
+        if(currParam->next != NULL) {
+            if(ht_search(paramTable, currParam->next->varId) != NULL){
+                THROW_ERROR(SEMANTIC_PARAMETER_ERR, list->TokenArray[*index]->lineNum)
+                redeclared = true;
+                break;
+            }
+        }
+        currParam = currParam->next;
+    }
+    ht_deleteAll(paramTable);
+    return redeclared;
 }
 
 bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
@@ -160,115 +174,140 @@ bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
 
 /// ! AUXILIARY FUNCTIONS
 
-ht_table_t *PutFncsDecToHT(TokenList *list, ht_table_t *fncSymtable) {
+ht_table_t *fncDeclarations(TokenList *list, ht_table_t *fncSymtable) {
+
     int index = 0;
     ht_item_t *currFncDeclare = NULL;
 
     //going through all tokens
-    while(list->TokenArray[index]->type != t_EOF){
-        //finding token with type t_function (declaration of fction)
-        if(list->TokenArray[index]->type == t_function){
-            index++;
+    while(CURR_TOKEN_TYPE != t_EOF){
+        //finding token with type t_function (declaration of function)
+        if(CURR_TOKEN_TYPE == t_function){
 
-            if(list->TokenArray[index]->type != t_functionId){errorCode = SYNTAX_ERR; return NULL;}
+            NEXT_TOKEN;
 
-            //creating item with functionID as param, type is just temporary set to void_t, will change it at the end of the while loop
-            currFncDeclare = ht_insert(fncSymtable, list->TokenArray[index]->data, void_t, true);
-
-            //redeclaration of fction happened
-            if(currFncDeclare == NULL){
-                errorCode = SEMANTIC_FUNCTION_DEFINITION_ERR;
-                debug_log("redeclaration of fction %i", errorCode);
+            if(CURR_TOKEN_TYPE != t_functionId) {
+                THROW_ERROR(SYNTAX_ERR, list->TokenArray[index]->lineNum)
                 return NULL;
             }
-            //debug_log(" item identifier %s\n", currFncDeclare->identifier);
+            //creating item with functionID as its identifier, type is just temporary set to void_t, will be changed at the end of the while loop
+            currFncDeclare = ht_insert(fncSymtable, CURR_FCTION_ID, void_t, true);
 
-            (index)++;
-            //checking if next token is lPar
-            if(list->TokenArray[index]->type == t_lPar) {
-                (index)++;
-                //if there are no params, skip adding params and jump to assign the return_type
-                if(list->TokenArray[index]->type != t_rPar){
-                    //adding params
-                    //it there is error typeCheck fction sets the errorcode
-                    typeCheck(list, &index);
+            if(currFncDeclare == NULL){ //redeclaration of function
+                THROW_ERROR(SEMANTIC_FUNCTION_DEFINITION_ERR,list->TokenArray[index]->lineNum)
+                debug_print("redeclaration of fction %i", errorCode);
+                return NULL;
+            }
 
-                    if(errorCode == SYNTAX_ERR){ return NULL;}
+            NEXT_TOKEN;
 
-                    var_type_t tmpParamType = typeforFnDec(list,&index);
+            //next token must be '('
+            if(CURR_TOKEN_TYPE != t_lPar) {
+                THROW_ERROR(SYNTAX_ERR, list->TokenArray[index]->lineNum)
+                return NULL;
+            }
 
-                    (index)++;
-                    if (list->TokenArray[index]->type != t_varId) { errorCode = SYNTAX_ERR;return NULL;}
+            NEXT_TOKEN;
 
-                    //appending first param to our function
-                    ht_paramAppend(currFncDeclare, list->TokenArray[index]->data, tmpParamType);
-                    //debug_log("param %s \n", tmp->fnc_data.params->varId);
-                    (index)++;
-                    //there are more params
-                    if(list->TokenArray[index]->type != t_rPar) {
-                        if (list->TokenArray[index]->type == t_comma) {
-                            do {
-                                (index)++;
+            //ADDING PARAMS
+            //if there are no params, skip adding params and jump to assigning the return_type
+            if(CURR_TOKEN_TYPE != t_rPar){
 
-                                if (!typeCheck(list, &index)) { return NULL; } //setting errcode in the function already
-
-                                tmpParamType = typeforFnDec(list,&index);
-
-                                (index)++;
-                                if (list->TokenArray[index]->type != t_varId) {errorCode = SYNTAX_ERR;return NULL;}
-
-                                ht_paramAppend(currFncDeclare, list->TokenArray[index]->data, tmpParamType);
-                                //debug_log("another param %s\n", currFncDeclare->fnc_data.params->next->varId);
-                                (index)++;
-                                //now the token can only be comma or ')'
-                                if (list->TokenArray[index]->type != t_rPar && list->TokenArray[index]->type != t_comma) {errorCode = SYNTAX_ERR; return NULL;}
-
-                                //if the next token isnt rPar, we continue in the loop and attach new params.
-                            } while (list->TokenArray[index]->type != t_rPar);
-                        }
-                        //next token after varID is not comma
-                        else {
-                            errorCode = SYNTAX_ERR;
-                            return NULL;
-                        }
-                    }
+                if(!typeCheck(list, &index)) {
+                return NULL; //typeCheck function sets the errorcode
                 }
-                (index)++;
-                if(list->TokenArray[index]->type == t_colon){
+                var_type_t paramType = typeforFnDec(list,&index);
 
-                    (index)++;
-                    functionTypeForFunDec(list, &index);
+                NEXT_TOKEN;
 
-                    if(errorCode == SYNTAX_ERR){return NULL;}
-
-                    //setting return type of our newly declared function
-                    currFncDeclare->fnc_data.returnType = functionTypeForFunDec(list, &index);
-                    debug_log("return type %i\n", currFncDeclare->fnc_data.returnType);
-                    (index)++;
-                }
-
-                if(checkReturn(list, &index, currFncDeclare) == false) {
-                    debug_log("checkReturn returned false\n");
+                if (CURR_TOKEN_TYPE != t_varId) {
+                    THROW_ERROR(SYNTAX_ERR,list->TokenArray[index]->lineNum);
                     return NULL;
                 }
-                debug_log("got through return check ended on line %d\n", list->TokenArray[index]->lineNum);
+                //appending first param to our function
+                ht_paramAppend(currFncDeclare, CURR_FCTION_ID, paramType);
+
+                NEXT_TOKEN;
+
+                if(CURR_TOKEN_TYPE != t_rPar) { //there are more params
+                    if (CURR_TOKEN_TYPE != t_comma) {
+                        THROW_ERROR(SYNTAX_ERR,list->TokenArray[index]->lineNum)
+                        return NULL;
+                    }
+                    //appending all other params with do-while cycle
+                    do {
+                            NEXT_TOKEN;
+
+                            if (!typeCheck(list, &index)) {
+                                return NULL; //setting errcode in the function already
+                            }
+                            paramType = typeforFnDec(list,&index);
+
+                            NEXT_TOKEN;
+
+                            if (CURR_TOKEN_TYPE != t_varId) {
+                                THROW_ERROR(SYNTAX_ERR,list->TokenArray[index]->lineNum);
+                                return NULL;
+                            }
+                            ht_paramAppend(currFncDeclare, CURR_FCTION_ID, paramType);
+
+                            NEXT_TOKEN;
+
+                            //now the token can only be comma or ')'
+                            if (CURR_TOKEN_TYPE != t_rPar && CURR_TOKEN_TYPE != t_comma) {
+                                THROW_ERROR(SYNTAX_ERR,list->TokenArray[index]->lineNum)
+                                return NULL;
+                            }
+                    } while (CURR_TOKEN_TYPE != t_rPar);   //if the next token isn't ')', we continue in the loop, check and attach new params.
+                }
             }
+            //params were processed /none/ /1 param/ /more params/
+
+            NEXT_TOKEN;
+
+            if(CURR_TOKEN_TYPE != t_colon) {
+                THROW_ERROR(SYNTAX_ERR,list->TokenArray[index]->lineNum)
+                return NULL;
+            }
+
+            NEXT_TOKEN;
+
+            functionTypeForFunDec(list, &index);//sets the errorcode
+            if(errorCode != SUCCESS) {
+                return NULL;
+            }
+            //setting return type of our newly declared function
+            currFncDeclare->fnc_data.returnType = functionTypeForFunDec(list, &index);
+            debug_log("return type %i\n", currFncDeclare->fnc_data.returnType);
+
+            if(paramRedeclaration(list, &index, currFncDeclare) == true){
+                debug_log("param redeclaration\n");
+                return NULL;
+            }
+
+            NEXT_TOKEN;
+
+            if(checkReturn(list, &index, currFncDeclare) == false) {
+                debug_log("checkReturn returned false\n");
+                return NULL;
+            }
+            debug_log("got through return check ended on line %d\n", list->TokenArray[index]->lineNum);
         }
-        //raising index and going back to loop, where we check if the token is last token
-        index++;
+        NEXT_TOKEN;  //raising index and going back to loop, where we check if the token is last token
     }
-    //we checked the whole TokenList last token was EOF, return the created symtable
+    //we checked the whole TokenList, return the created symtable
     return (fncSymtable);
 }
 
-ht_table_t *InitializedHTableFnctionDecs(TokenList *list){
-    ht_table_t *table = initFncSymtable();
-    if(PutFncsDecToHT(list, table)==NULL)
-    {
+ht_table_t *fncDeclarationTable(TokenList *list) {
+    ht_table_t *table = integratedFncSymtable();
+    if(fncDeclarations(list, table) == NULL) {
         debug_log("Check return failed \n");
         return NULL;
     }
-    if (errorCode != SUCCESS){ return NULL;}
+    if (errorCode != SUCCESS) {
+        return NULL;
+    }
     return table;
 }
 

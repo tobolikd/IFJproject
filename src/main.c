@@ -25,11 +25,12 @@ int main()
     fclose(fp);
 
     // get all function declarations
-    fncTable = InitializedHTableFnctionDecs(list);
+    fncTable = fncDeclarationTable(list);
 
     if (fncTable == NULL) {
         // error in function definitions
         listDtor(list);
+        ht_deleteAll(fncTable);
         return errorCode;
     }
 
