@@ -96,6 +96,27 @@ var_type_t functionTypeForFunDec(TokenList *list, int *index)
     return error;
 }
 
+bool paramRedeclaration(TokenList *list,int *index, ht_item_t *currFncDeclare){
+    bool redeclared = false;
+    ht_table_t *paramTable = ht_init();
+    param_info_t *currParam = currFncDeclare->fnc_data.params;
+
+    while (currParam != NULL){
+        ht_insert(paramTable, currParam->varId, void_t, false);
+        if(currParam->next != NULL) {
+            debug_log("%s\n", currParam->next->varId);
+            if(ht_search(paramTable, currParam->next->varId) != NULL){
+                THROW_ERROR(SEMANTIC_PARAMETER_ERR, list->TokenArray[*index]->lineNum)
+                redeclared = true;
+                break;
+            }
+        }
+        currParam = currParam->next;
+    }
+    ht_delete_all(paramTable);
+    return redeclared;
+}
+
 bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare) {
     int nestedLevel = 1;
 
@@ -171,7 +192,7 @@ ht_table_t *FncDeclarations(TokenList *list, ht_table_t *fncSymtable) {
                 return NULL;
             }
             //creating item with functionID as its identifier, type is just temporary set to void_t, will be changed at the end of the while loop
-            currFncDeclare = ht_insert(fncSymtable, list->TokenArray[index]->data, void_t, true);
+            currFncDeclare = ht_insert(fncSymtable, CURR_FCTION_ID, void_t, true);
 
             if(currFncDeclare == NULL){ //redeclaration of function
                 THROW_ERROR(SEMANTIC_FUNCTION_DEFINITION_ERR,list->TokenArray[index]->lineNum)
@@ -205,7 +226,7 @@ ht_table_t *FncDeclarations(TokenList *list, ht_table_t *fncSymtable) {
                     return NULL;
                 }
                 //appending first param to our function
-                ht_param_append(currFncDeclare, list->TokenArray[index]->data, paramType);
+                ht_param_append(currFncDeclare, CURR_FCTION_ID, paramType);
 
                 NEXT_TOKEN;
 
@@ -229,7 +250,7 @@ ht_table_t *FncDeclarations(TokenList *list, ht_table_t *fncSymtable) {
                                 THROW_ERROR(SYNTAX_ERR,list->TokenArray[index]->lineNum);
                                 return NULL;
                             }
-                            ht_param_append(currFncDeclare, list->TokenArray[index]->data, paramType);
+                            ht_param_append(currFncDeclare, CURR_FCTION_ID, paramType);
 
                             NEXT_TOKEN;
 
@@ -259,6 +280,11 @@ ht_table_t *FncDeclarations(TokenList *list, ht_table_t *fncSymtable) {
             //setting return type of our newly declared function
             currFncDeclare->fnc_data.returnType = functionTypeForFunDec(list, &index);
             debug_log("return type %i\n", currFncDeclare->fnc_data.returnType);
+
+            if(paramRedeclaration(list, &index, currFncDeclare) == true){
+                debug_log("param redeclaration\n");
+                return NULL;
+            }
 
             NEXT_TOKEN;
 

@@ -9,6 +9,7 @@ extern ht_table_t *fncTable;
 
 #define CURR_TOKEN_TYPE list->TokenArray[index]->type
 #define NEXT_TOKEN index++
+#define CURR_FCTION_ID list->TokenArray[index]->data
 
 /* @brief check semantics of the given expression
  *
@@ -45,5 +46,13 @@ ht_table_t *FncDeclarationTable(TokenList *list);
 ///@return true if return is okay
 ///@return false if there was an error
 bool checkReturn(TokenList *list, int *index, ht_item_t *currFncDeclare);
+
+///@brief checks if function doesnt have identical param IDs in its declaration
+///@param list list of Tokens
+///@param index for moving within the list
+///@param currFncDeclare currently checked fnc declaration
+///@returns false if there are no same params
+///@returns true if there are identical paramIDs
+bool paramRedeclaration(TokenList *list,int *index, ht_item_t *currFncDeclare);
 
 #endif // IFJ_SEM_ANALYZER_H
