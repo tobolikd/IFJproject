@@ -2,9 +2,9 @@
 #define IFJ_STACK_H 1
 
 #include "ast.h"
-#include "lex-analyzer.h"
+#include "lex_analyzer.h"
 #include "code-gen-data.h"
-#include "preced-analyzer-data.h"
+#include "preced_analyzer_data.h"
 
 #include <stdbool.h>
 

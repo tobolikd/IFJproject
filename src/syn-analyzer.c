@@ -4,13 +4,13 @@
  * @brief Syntatic Analyser for interpreter IFJcode22
  */
 
-#include "lex-analyzer.h"
+#include "lex_analyzer.h"
 #include "syn-analyzer.h"
 #include "symtable.h"
 #include "error-codes.h"
 #include "ast.h"
 #include "stack.h"
-#include "preced-analyzer.h"
+#include "preced_analyzer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -471,7 +471,7 @@ bool checkSyntax(SYN_ANALYZER_PARAMS)
 
 void SyntaxDtor(SyntaxItem *SyntaxItem)
 {
-    ht_delete_all(SyntaxItem->table);
+    ht_deleteAll(SyntaxItem->table);
     while (!stack_ast_empty(SyntaxItem->stackAST))
     {
         stack_ast_pop(SyntaxItem->stackAST);

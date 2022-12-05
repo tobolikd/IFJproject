@@ -2,7 +2,7 @@
 
 extern "C"
 {
-    #include "../src/lex-analyzer.h"
+    #include "../src/lex_analyzer.h"
 }
 
 #include <string>

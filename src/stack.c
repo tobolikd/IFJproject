@@ -8,7 +8,7 @@
 #include "stack.h"
 #include "error-codes.h"
 
-#include "lex-analyzer.h"
+#include "lex_analyzer.h"
 #include "ast.h"
 
 #include <stdlib.h>
@@ -92,4 +92,4 @@ STACK_DEFINITION(Token *, token, tokenDtor)
 STACK_DEFINITION(char *, string, free)
 STACK_DEFINITION(code_block *, code_block, free)
 STACK_DEFINITION(PrecedItem *, precedence, free)
-STACK_DEFINITION(ht_table_t *, declare, ht_delete_all)
+STACK_DEFINITION(ht_table_t *, declare, ht_deleteAll)
