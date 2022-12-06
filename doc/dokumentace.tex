@@ -54,13 +54,13 @@
     \newpage
 
     \section{Úvod}
-        Cílem našeho projektu bylo vytvoření překladače jazyka IFJ22, který je poupravenou podmnožinou jazyka PHP. Námi vytvořený překladač jsme implementovali v jazyce C a  má za úkol daný zdrojový kód načíst a zpracovat několika způsoby, kdy je zapotřebí využití lexikální, syntaktické, precedenční a sémantické analýzy s následným přeložením do mezikódu IFJcode22, který již zpracovává předem poskytnutý interpret, který tento mezikód provádí.
+    Cílem našeho projektu bylo vytvoření překladače jazyka IFJ22, který je poupravenou podmnožinou jazyka PHP. Námi vytvořený překladač jsme implementovali v jazyce C a  má za úkol daný zdrojový kód načíst a zpracovat několika způsoby, kdy je zapotřebí využití lexikální, syntaktické, precedenční a sémantické analýzy s následným přeložením do mezikódu IFJcode22, který již zpracovává předem poskytnutý interpret, který tento mezikód provádí.
+    
     \section{Popis fungování a struktura překladače}
-    Překladač se skládá z několika propojených spolu fungujících částí, kdy každá z nich zastává důležitou roli. Jde tedy o lexikální, syntaktickou, sémantickou a precendeční analýzu, po jejiž průchodu zastává důležitou část také generování mezikódu IFJcode22. Bylo nutné si překladač rozdělit do těchto částí, aby bylo jasné, které funkce překladače daná část zastává a lépe se nám dělila práce v týmu.
-        Cílem našeho projektu bylo vytvoření překladače jazyka IFJ22, který je poupravenou podmnožinou jazyka PHP. Námi vytvořený překladač jsme implementovali v jazyce C a  má za úkol daný zdrojový kód načíst a zpracovat několika způsoby, kdy je zapotřebí využití lexikální, syntaktické, precedenční a sémantické analýzy s následným přeložením do mezikódu IFJcode22, který již zpracovává předem poskytnutý interpret, který tento mezikód provádí.
-    \section{Lexikální analýza}
-    Lexikální analýza (dále LA) načítá lexémy ze standartního vstupu pomocí funkce \texttt{getToken()}, ty následně přetváří na tokeny, které postupně naplňují list \texttt{TokenList}. List se po zpracování vstupu předává syntaktické analýze. LA se volá funkcí \texttt{lexAnalyser()} a je implementovaná v souborech \texttt{lex\_analyzer.c} a \texttt{lex\_analyzer.h}. Zpracování lexémů se řídí předem vytvořeným deterministickým konečným automatem (viz \ref{}). Konečný automat je reprezentován v LA  switchem, u kterého každý case zastupuje jeden jeho stav. Pokud automat natrefí na nesouvisející vstupní hranu a nachází se v konečném stavu, spouští se funkce \texttt{tokenCtor()} pro vytvoření tokenu a poté \texttt{appendToken()} pro vložení do seznamu tokenů. Pokud se ale automat nenachází v konečném stavu, LA hlásí lexikální chybu a překlad se ruší. O tokenu se uchovává informace o jeho typu, číslo řádku\,--\,na kterém se token nalézal a relevantní data (název promněné, funkce, hodnota atd.).
+    Překladač se skládá z několika propojených spolu fungujících částí, kdy každá z nich zastává důležitou roli. Jde tedy o lexikální, syntaktickou, sémantickou a precedenční analýzu, po jejímž průchodu zastává důležitou část také generování mezikódu IFJcode22. Bylo nutné si překladač rozdělit do těchto částí, aby bylo jasné, které funkce překladače daná část zastává a lépe se nám dělila práce v týmu.
 
+     \section{Lexikální analýza}
+    Lexikální analýza (dále LA) načítá lexémy ze standardního vstupu pomocí funkce \texttt{getToken()}, ty následně přetváří na tokeny, které postupně naplňují list \texttt{TokenList}. List se po zpracování vstupu předává syntaktické analýze. LA se volá funkcí \texttt{lexAnalyser()} a je implementovaná v souborech \texttt{lex\_analyzer.c} a \texttt{lex\_analyzer.h}. Zpracování lexémů se řídí předem vytvořeným deterministickým konečným automatem (viz \ref{Konecny automat}). Konečný automat je reprezentován v LA  switchem, u kterého každý case zastupuje jeden jeho stav. Pokud automat natrefí na nesouvisející vstupní hranu a nachází se v konečném stavu, spouští se funkce \texttt{tokenCtor()} pro vytvoření tokenu a poté \texttt{appendToken()} pro vložení do seznamu tokenů. Pokud se ale automat nenachází v konečném stavu, LA hlásí lexikální chybu a překlad se ruší. O tokenu se uchovává informace o jeho typu, číslo řádku\,--\,na kterém se token nalézal a relevantní data (název proměnné, funkce, hodnota atd.).
     \section{Syntaktická analýza}
 
     \subsection{Rekurzivní sestup} \label{sestup}
@@ -185,7 +185,7 @@
     \begin{table}[h]
         \hspace*{-1cm}
         \centering
-        \includegraphics[width=0.80\paperwidth]{src/LL-tabulka.png}
+        \includegraphics[width=0.90\paperwidth]{src/LL-tabulka.png}
         \caption{LL tabulka.}
         \label{LL tabulka}
     \end{table}
