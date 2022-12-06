@@ -1,10 +1,17 @@
-#include "code-gen-data.h"
-#include "code-gen.h"
+/* @file code_gen_static.c
+ *
+ * @brief implementation of static generation functions and variable definitions
+ *
+ * @author David Tobolik (xtobol06)
+ */
+
+#include "code_gen_static.h"
+#include "code_gen.h"
 #include "symtable.h"
 
 #include <stdio.h>
 
-void genBuiltIns() {
+void genStatic() {
     printf(".IFJcode22\n");
 
     // generate global vars
@@ -19,13 +26,13 @@ void genBuiltIns() {
     INST_JUMP(LABEL("end%pregenerated%end"));
 
     // generate functions (built in and aux)
-
     genResolveCondition();
     genImplicitConversions();
     genSemanticTypeCheck();
-    genDataTypeComparisons();
+    genMathEqual();
     genBuiltInFcs();
 
+    // generate exit labels
     genExitLabels();
 
     // end pregenerated
@@ -50,12 +57,12 @@ void genResolveCondition() {
 
 	INST_EXIT(CONST_INT(99)); // variable not initialized
 
-	// true
+	// return true
 	INST_LABEL(LABEL("cond%true"));
 	INST_PUSHS(CONST_BOOL("true"));
     INST_RETURN();
 
-	// false
+	// return false
 	INST_LABEL(LABEL("cond%false"));
 	INST_PUSHS(CONST_BOOL("false"));
     INST_RETURN();
@@ -171,8 +178,8 @@ void genSemanticTypeCheck(){
     INST_RETURN();
 }
 
-void genDataTypeComparisons(){
-    INST_LABEL(LABEL("type%cmp"));
+void genMathEqual(){
+    INST_LABEL(LABEL("math%equal"));
 
 	INST_POPS(AUX1); // read value of operand
 	INST_POPS(AUX2); // read value of operand
@@ -227,9 +234,9 @@ void genDataTypeComparisons(){
     INST_RETURN();
 }
 
-void genVarDefs(ht_table_t *varSymtable, ht_item_t* function) {
+void genVarDefinitions(ht_table_t *varSymtable, ht_item_t* function) {
     if (varSymtable == NULL) {
-        ERR_INTERNAL(genVarDefs, "symtable is NULL\n");
+        ERR_INTERNAL(genVarDefinitions, "symtable is NULL\n");
         return;
     }
 
@@ -247,7 +254,7 @@ void genVarDefs(ht_table_t *varSymtable, ht_item_t* function) {
     for (int i = 0; i < HT_SIZE; i++) {
         tmpVar = varSymtable->items[i];
         while (tmpVar != NULL) {
-            // check if variable isnt predefined parameter
+            // check if variable is predefined parameter
             varIsParam = false;
             tmpParam = firstParam;
             while (tmpParam != NULL) {

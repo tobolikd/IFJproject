@@ -1,7 +1,14 @@
+/* @file preced_analyzer_data.h
+ *
+ * @brief Data structures for bottom-up parser module.
+ *
+ * @author Gabriel Biel(xbielg00)
+ */
+
 #ifndef IFJ_PRECED_ANALYZER_DATA_H
 #define IFJ_PRECED_ANALYZER_DATA_H 1
 
-#include "lex-analyzer.h"
+#include "lex_analyzer.h"
 
 #include <stdbool.h>
 
@@ -9,7 +16,6 @@
 #define RULE_SIZE 3
 
 typedef enum {
-    UNINITIALISED,
     OPERATOR_MULTIPLY,
     OPERATOR_DIVIDE,
     OPERATOR_PLUS,
@@ -25,6 +31,7 @@ typedef enum {
     RIGHT_BRACKET,
     DATA,
     DOLLAR,
+    UNINITIALISED,
     EXPRESSION
 }Element;
 

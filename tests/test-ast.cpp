@@ -15,7 +15,7 @@ extern "C"
 class testAst : public testBaseForAst {};
 
 TEST_F(testAst, initNoData) {
-    testedItem = ast_item_const(AST_ADD, NULL);
+    testedItem = astItemConst(AST_ADD, NULL);
 
     ASSERT_FALSE(testedItem == NULL) << "Constructor returned NULL" << endl;
     EXPECT_EQ(testedItem->type, AST_ADD) << "Returned item has incorrect type" << endl;
@@ -24,7 +24,7 @@ TEST_F(testAst, initNoData) {
 
 TEST_F(testAst, initInt) {
     int a = 58;
-    testedItem = ast_item_const(AST_INT, &a);
+    testedItem = astItemConst(AST_INT, &a);
 
     ASSERT_FALSE(testedItem == NULL) << "Constructor returned NULL" << endl;
     EXPECT_EQ(testedItem->type, AST_INT);
@@ -34,7 +34,7 @@ TEST_F(testAst, initInt) {
 
 TEST_F(testAst, initString) {
     char a[] = "sample string";
-    testedItem = ast_item_const(AST_STRING, a);
+    testedItem = astItemConst(AST_STRING, a);
 
     ASSERT_FALSE(testedItem == NULL) << "Constructor returned NULL" << endl;
     EXPECT_EQ(testedItem->type, AST_STRING);
@@ -44,7 +44,7 @@ TEST_F(testAst, initString) {
 
 TEST_F(testAst, initReturn) {
     bool a = true;
-    testedItem = ast_item_const(AST_RETURN_EXPR, &a);
+    testedItem = astItemConst(AST_RETURN_EXPR, &a);
 
     ASSERT_FALSE(testedItem == NULL) << "Constructor returned NULL" << endl;
     EXPECT_EQ(testedItem->type, AST_RETURN_EXPR);
@@ -54,7 +54,7 @@ TEST_F(testAst, initReturn) {
 TEST_F(testAst, initVar) {
     ht_item_t *a = (ht_item_t *) malloc(sizeof(ht_item_t));
     ASSERT_FALSE(a == NULL);
-    testedItem = ast_item_const(AST_VAR, a);
+    testedItem = astItemConst(AST_VAR, a);
 
     ASSERT_FALSE(testedItem == NULL) << "Constructor returned NULL" << endl;
     EXPECT_EQ(testedItem->type, AST_VAR);
@@ -69,9 +69,9 @@ TEST_F(testAst, fncCall) {
     char fncName[] = "sample_function";
     ht_insert(symtable, fncName, void_t, true);
 
-    AST_function_call_data *data = fnc_call_data_const(symtable, fncName);
+    AST_function_call_data *data = fncCallDataConst(symtable, fncName);
 
-    EXPECT_EQ(data->functionID, fncName);
+    EXPECT_EQ(data->functionId, fncName);
 
     EXPECT_EQ(0, strcmp(fncName, data->function->identifier));
     EXPECT_TRUE(ht_search(symtable, fncName) == data->function);
@@ -82,28 +82,28 @@ TEST_F(testAst, fncCall) {
     char param3[] = "sample string";
     ht_item_t param4;
 
-    fnc_call_data_add_param(data, AST_P_INT, &param1);
+    fncCallDataAddParam(data, AST_P_INT, &param1);
     AST_fnc_param *tmpParam = data->params;
     EXPECT_EQ(tmpParam->type, AST_P_INT);
     EXPECT_EQ(123, tmpParam->data->intValue);
 
-    fnc_call_data_add_param(data, AST_P_FLOAT, &param2);
+    fncCallDataAddParam(data, AST_P_FLOAT, &param2);
     tmpParam = tmpParam->next;
     EXPECT_EQ(tmpParam->type, AST_P_FLOAT);
     EXPECT_DOUBLE_EQ(1.2345, tmpParam->data->floatValue);
 
-    fnc_call_data_add_param(data, AST_P_STRING, &param3);
+    fncCallDataAddParam(data, AST_P_STRING, &param3);
     tmpParam = tmpParam->next;
     EXPECT_EQ(tmpParam->type, AST_P_STRING);
     EXPECT_FALSE(param3 == tmpParam->data->stringValue);
     EXPECT_EQ(0, strcmp(param3, tmpParam->data->stringValue));
 
-    fnc_call_data_add_param(data, AST_P_VAR, &param4);
+    fncCallDataAddParam(data, AST_P_VAR, &param4);
     tmpParam = tmpParam->next;
     EXPECT_EQ(tmpParam->type, AST_P_VAR);
     EXPECT_TRUE(&param4 == tmpParam->data->variable);
 
-    fnc_call_data_add_param(data, AST_P_NULL, NULL);
+    fncCallDataAddParam(data, AST_P_NULL, NULL);
     tmpParam = tmpParam->next;
     EXPECT_EQ(tmpParam->type, AST_P_NULL);
     EXPECT_TRUE(NULL == tmpParam->data);
@@ -111,10 +111,10 @@ TEST_F(testAst, fncCall) {
 
     EXPECT_TRUE(NULL == tmpParam->next);
 
-    testedItem = ast_item_const(AST_FUNCTION_CALL, data);
+    testedItem = astItemConst(AST_FUNCTION_CALL, data);
 
     EXPECT_EQ(AST_FUNCTION_CALL, testedItem->type);
     EXPECT_TRUE(data == testedItem->data->functionCallData);
 
-    ht_delete_all(symtable);
+    ht_deleteAll(symtable);
 }

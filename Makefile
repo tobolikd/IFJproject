@@ -1,12 +1,12 @@
 PROJECT=ifj-compiler
 SOURCE_DIR=./src/
 
-SOURCES += lex-analyzer.c
-SOURCES += syn-analyzer.c
-SOURCES += sem-analyzer.c
-SOURCES += preced-analyzer.c
-SOURCES += code-gen.c
-SOURCES += code-gen-static.c
+SOURCES += lex_analyzer.c
+SOURCES += syn_analyzer.c
+SOURCES += sem_analyzer.c
+SOURCES += preced_analyzer.c
+SOURCES += code_gen.c
+SOURCES += code_gen_static.c
 SOURCES += ast.c
 SOURCES += stack.c
 SOURCES += symtable.c
@@ -40,6 +40,9 @@ valgrind: compile_tests
 
 clean:
 	rm -f $(PROJECT)
+
+out: compile
+	cat myTestFiles/test.php | ./ifj-compiler
 
 purge: clean
 	rm -fr build

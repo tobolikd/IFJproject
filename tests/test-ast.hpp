@@ -22,7 +22,7 @@ class testBaseForAst : public ::testing::Test {
 
         void TearDown() override {
             if (testedItem != NULL)
-                ast_item_destr(testedItem);
+                astItemDestr(testedItem);
         }
 
 };

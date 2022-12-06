@@ -5,8 +5,8 @@ extern "C"
 {
     #include "../src/symtable.h"
     #include "../src/stack.h"
-    #include "../src/lex-analyzer.h"
-    #include "../src/preced-analyzer-data.h"
+    #include "../src/lex_analyzer.h"
+    #include "../src/preced_analyzer_data.h"
     #include "test-lex-analyzer.hpp" //prepTmpFile
 }
 
@@ -94,14 +94,14 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
             ht_insert(testTableVar,b,int_t,false);
             ASSERT_FALSE(ht_search(testTableVar,b) == NULL);
 
-            ht_param_append(ht_insert(fncTable,foo,int_t,true),param,float_t);
+            ht_paramAppend(ht_insert(fncTable,foo,int_t,true),param,float_t);
             ASSERT_FALSE(ht_search(fncTable,foo) == NULL);
             ASSERT_FALSE(ht_search(fncTable,foo)->fnc_data.params == NULL);
-           
+
             ht_insert(fncTable,poo,int_t,true);
             ASSERT_FALSE(ht_search(fncTable,poo) == NULL);
-            ht_param_append(ht_search(fncTable,poo),param,float_t);
-            ht_param_append(ht_search(fncTable,poo),param,float_t);
+            ht_paramAppend(ht_search(fncTable,poo),param,float_t);
+            ht_paramAppend(ht_search(fncTable,poo),param,float_t);
 
             ht_insert(fncTable,doe,int_t,true);
             ASSERT_FALSE(ht_search(fncTable,doe) == NULL);
@@ -124,8 +124,8 @@ class testBaseAST : public::testing::TestWithParam<tuple<bool,string>>
             while (!stack_ast_empty(&testStack)) //pop all
                 stack_ast_pop(&testStack);
 
-            ht_delete_all(fncTable);
-            ht_delete_all(testTableVar);
+            ht_deleteAll(fncTable);
+            ht_deleteAll(testTableVar);
             if (tmpFile != NULL)
                 fclose(tmpFile);
             listDtor(testList);
@@ -171,8 +171,8 @@ class CheckDoubleValue : public::testing::TestWithParam<tuple<double,string>>
             while (!stack_ast_empty(&testStack)) //pop all
                 stack_ast_pop(&testStack);
 
-            ht_delete_all(fncTable);
-            ht_delete_all(testTableVar);
+            ht_deleteAll(fncTable);
+            ht_deleteAll(testTableVar);
             if (tmpFile != NULL)
                 fclose(tmpFile);
             listDtor(testList);
