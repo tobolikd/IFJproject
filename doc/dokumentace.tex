@@ -64,7 +64,7 @@
     \section{Syntaktická analýza}
 
     \subsection{Rekurzivní sestup} \label{sestup}
-        Rekurzivní sestup se volá funkcí \texttt{synAnalyser()} a je implementovaný v souborech \texttt{syn\_analyzer.c} a \texttt{syn\_analyzer.h}. Řídí se podle navržené gramatiky (viz \ref{}), kde každé pravidlo představuje vlastní funkci. Funkce postupně prochází tokeny získané od lexikální analýzy, kontroluje jestli je vše gramaticky správně, naplňuje tabulku symbolů a tvoří abstraktní syntaktický strom (dále ASS). Při nalezení výrazu volá funkci \texttt{parseExpression}, která spouští precedenční analýzu. Při nalezení chyby se nastaví příslušný \texttt{errorCode} a chyba se v rekurzi propaguje dál, aby program ukončil kontrolu. Funkce vrací vytvořený ASS, naplněnou tabulku symbolů a informaci o tom, jestli rekurze proběhla syntakticky a sémanticky správně či nikoliv.
+        Rekurzivní sestup se volá funkcí \texttt{synAnalyser()} a je implementovaný v souborech \texttt{syn\_analyzer.c} a \texttt{syn\_analyzer.h}. Řídí se podle navržené gramatiky (viz \ref{LL gramatika}), kde každé pravidlo představuje vlastní funkci. Funkce postupně prochází tokeny získané od lexikální analýzy, kontroluje jestli je vše gramaticky správně, naplňuje tabulku symbolů a tvoří abstraktní syntaktický strom (dále ASS). Při nalezení výrazu volá funkci \texttt{parseExpression}, která spouští precedenční analýzu. Při nalezení chyby se nastaví příslušný \texttt{errorCode} a chyba se v rekurzi propaguje dál, aby program ukončil kontrolu. Funkce vrací vytvořený ASS, naplněnou tabulku symbolů a informaci o tom, jestli rekurze proběhla syntakticky a sémanticky správně či nikoliv.
 
     \subsection{Precedenční analýza}
 
@@ -140,7 +140,7 @@
 
     \section{Týmová spolupráce}
     \subsection{Komunikace v týmu}
-        Vzájemná domluva a komunikace probíhala online i offline. A to prostřednictvím Discord serveru\,--\,pro převážně obecnější problematiky, pro ty složitější a již více konkrétní nám sloužila funkce GitHub issues, kde jsme mohli jednoduše diskutovat o již konkrétní části kódu. K tomu jsme se každý čtvrtek setkávali na schůzích uskutečněných v budově škole, kde jsme řešili ty nejzásadnější problémy a rozhodnutí z hlediska směřování.
+        Vzájemná domluva a komunikace probíhala online i offline. A to prostřednictvím Discord serveru\,--\,pro převážně obecnější problematiky, pro ty složitější a již více konkrétní nám sloužila funkce GitHub Issues, kde jsme mohli jednoduše diskutovat o již konkrétní části kódu. K tomu jsme se každý čtvrtek setkávali na schůzích uskutečněných v budově škole, kde jsme řešili ty nejzásadnější problémy a rozhodnutí z hlediska směřování.
     \subsection{Verzovací systém}
         Při výběru verzovacího systému pro nás bylo jasnou volbou zvolit populární a osvědčený Git s nahráváním na server GitHub, kde probíhala i již zmíněná vzájemná komunikace.
     \subsection{Testování}
@@ -166,6 +166,21 @@
         \end{itemize}
 
     \section{Přílohy}
+
+    \begin{table}[h]
+        \includegraphics[width=0.65\paperwidth]{src/LL-gramatika.png}
+        \caption{LL gramatika.}
+        \label{LL gramatika}
+    \end{table}
+    
+    \begin{table}[h]
+        \hspace*{-1cm}
+        \centering
+        \includegraphics[width=0.90\paperwidth]{src/LL-tabulka.png}
+        \caption{LL tabulka.}
+        \label{LL tabulka}
+    \end{table}
+
     \begin{table}[h]
         \centering
         \begin{tabular}[p]{| l | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c |}
