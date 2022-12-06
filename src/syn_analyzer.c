@@ -138,7 +138,6 @@ bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
     return false;
 }
 
-// <fnc-decl> -> function functionId ( <param> ) : <fnc-type> { <st-list> }
 bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
 {
     if (TOKEN_TYPE == t_function)
@@ -209,7 +208,6 @@ bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
     return true; // -> eps
 }
 
-// <st-list> -> <stat> <st-list> || eps
 bool statList(SYN_ANALYZER_PARAMS)
 {
     if (statement(list, index, table, stackSyn) == false)
@@ -439,7 +437,6 @@ bool statement(SYN_ANALYZER_PARAMS)
     return true;
 }
 
-// <seq-stats> -> <stat> <fnc-decl> <seq-stats> || eps
 bool seqStats(SYN_ANALYZER_PARAMS)
 {
     bool programContinue; // if program return false, exit to propagate Error
@@ -459,7 +456,6 @@ bool seqStats(SYN_ANALYZER_PARAMS)
     return true;
 }
 
-// <prog> -> <prolog> <seq-stats> <epilog>
 bool checkSyntax(SYN_ANALYZER_PARAMS)
 {
     if (seqStats(list, index, table, stackSyn) == false)
@@ -469,7 +465,7 @@ bool checkSyntax(SYN_ANALYZER_PARAMS)
     return true;
 }
 
-void SyntaxDtor(SyntaxItem *SyntaxItem)
+void syntaxDtor(SyntaxItem *SyntaxItem)
 {
     ht_deleteAll(SyntaxItem->table);
     while (!stack_ast_empty(SyntaxItem->stackAST))
@@ -481,7 +477,7 @@ void SyntaxDtor(SyntaxItem *SyntaxItem)
     free(SyntaxItem);
 }
 
-SyntaxItem *SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct)
+SyntaxItem *syntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct)
 {
     SyntaxItem *syntaxItem = (SyntaxItem *)malloc(sizeof(SyntaxItem));
     CHECK_MALLOC_PTR(syntaxItem);
@@ -499,7 +495,7 @@ SyntaxItem *synAnalyser(TokenList *list)
     if (stackSyn == NULL)
     {
         MALLOC_ERR();
-        return SyntaxItemCtor(table, stackSyn, false);
+        return syntaxItemCtor(table, stackSyn, false);
     }
     stack_ast_init(stackSyn);
     stack_declare_init(&stackDeclare); // initialize stack for Function Frames
@@ -507,8 +503,8 @@ SyntaxItem *synAnalyser(TokenList *list)
     /* RECURSIVE DESCENT */
     if (checkSyntax(list, &index, table, stackSyn) == false)
     {
-        return SyntaxItemCtor(table, stackSyn, false);
+        return syntaxItemCtor(table, stackSyn, false);
     }
 
-    return SyntaxItemCtor(table, stackSyn, true);
+    return syntaxItemCtor(table, stackSyn, true);
 }
