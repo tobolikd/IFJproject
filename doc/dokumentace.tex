@@ -111,6 +111,8 @@
     \subsection{Statické funkce a definice proměnných}
     Před spuštěním veškerého generování kódu jsou vygenerovány statické části programu a definice proměnných. Statická část obsahuje definici globálních pomocných proměnných, které slouží místo registrů a definici vestavěných a pomocných funkcí. Tato část je přeskočena instrukcí \texttt{JUMP} až na začátek programu. Na začátku se vytvoří nový lokální rámec a nadefinují se všechny proměnné, které jsou použity v hlavním těle programu (i v podmínkách a cyklech, tudíž všude kromě deklarace funkcí).
 
+    \subsection{Generování konkrétních částí programu}
+
     \subsubsection{Podmínky\,--\,\texttt{if else, while}}
     Podmínka \texttt{if} se na začátku vyhodnotí a v případě nepravdivosti výrazu v podmínce se skočí na návěští \texttt{else} doplněné pořadovým číslem z kontextu. Před návěští \texttt{else} se vygeneruje skok za složený příkaz. U cyklu \texttt{while} se vygeneruje návěští začátku cyklu (opět doplněné o pořadové číslo z kontextu), při neplatnosti podmínky skočí až za konec cyklu. Návěští konce složených příkazů \texttt{else} a \texttt{while} jsou generovány na konci složeného příkazu (viz \ref{konec slozeneho}).
 
