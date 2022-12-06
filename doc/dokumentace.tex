@@ -23,6 +23,7 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{csquotes}
+\usepackage[htt]{hyphenat}
 
 \begin{document}
 
@@ -55,7 +56,7 @@
     \section{Popis fungování a struktura překladače}
 
     \section{Lexikální analýza}
-    Lexikální analýza (dále LA) načítá lexémy ze standartního vstupu pomocí funkce \texttt{getToken()}, ty následně přetváří na tokeny, které postupně naplňují list \texttt{TokenList}. List se po zpracování vstupu předává syntaktické analýze. LA se volá funkcí \texttt{lexAnalyser()} a je implementovaná v souborech \texttt{lex\_analyzer.c} a \texttt{lex\_analyzer.h}. Zpracování lexémů se řídí předem vytvořeným deterministickým konečným automatem (viz \ref{}). Konečný automat je reprezentován v LA  switchem, u kterého každý case zastupuje jeden jeho stav. Pokud automat natrefí na nesouvisející vstupní hranu a nachází se v konečném stavu, spouští se funkce \texttt{tokenCtor()} pro vytvoření tokenu a poté \texttt{appendToken()} pro vložení do seznamu tokenů. Pokud se ale automat nenachází v konečném stavu, LA hlásí lexikální chybu a překlad se ruší. O tokenu se uchovává informace o jeho typu, číslo řádku -- na kterém se token nalézal a relevantní data (název promněné, funkce, hodnota atd.).
+    Lexikální analýza (dále LA) načítá lexémy ze standartního vstupu pomocí funkce \texttt{getToken()}, ty následně přetváří na tokeny, které postupně naplňují list \texttt{TokenList}. List se po zpracování vstupu předává syntaktické analýze. LA se volá funkcí \texttt{lexAnalyser()} a je implementovaná v souborech \texttt{lex\_analyzer.c} a \texttt{lex\_analyzer.h}. Zpracování lexémů se řídí předem vytvořeným deterministickým konečným automatem (viz \ref{}). Konečný automat je reprezentován v LA  switchem, u kterého každý case zastupuje jeden jeho stav. Pokud automat natrefí na nesouvisející vstupní hranu a nachází se v konečném stavu, spouští se funkce \texttt{tokenCtor()} pro vytvoření tokenu a poté \texttt{appendToken()} pro vložení do seznamu tokenů. Pokud se ale automat nenachází v konečném stavu, LA hlásí lexikální chybu a překlad se ruší. O tokenu se uchovává informace o jeho typu, číslo řádku\,--\,na kterém se token nalézal a relevantní data (název promněné, funkce, hodnota atd.).
 
     \section{Syntaktická analýza}
 
@@ -71,16 +72,16 @@
 
     Abstraktní syntaktický strom (dále ASS) je implementovaný jako zásobník (viz \ref{zasobniky}), který obsahuje strukturu pro ASS. Ta je tvořena typem a volitelnými daty.
     \begin{itemize}
-        \item Aritmetické, řetězcový a relační operátory -- každý má svůj typ, nemají data, na zásobníku předcházejí 2 operandy.
-        \item Přiřazení -- nemá data, na zásobníku následuje proměnná, do které se přiřazuje a po ní výraz nebo volání funkce, které se má přiřadit.
-        \item Proměnná -- v datech obsahuje ukazatel do tabulky symbolů.
-        \item Konstanty -- každý typ konstanty má svůj typ v ASS (int, string, float, null) a obsahuje, kromě typu null, hodnotu této konstanty.
-        \item Deklarace funkce -- v datech je uložený ukazatel do tabulky symbolů na tuto funkci.
-        \item Volání funkce -- v datech obsahuje ukazatel na strukturu volání funkce, v ní je uložen ukazatel do tabulky symbolů a seznam parametrů. Parametry mají rovněž typ (proměnná nebo konstanta -- int, string, float, null) a svoje data (ukazatel do tabulky symbolů nebo hodnota konstanty).
-        \item Volání return -- typ bez návratové hodnoty nebo s návratovou hodnotou, v tom případě na zásobníku následuje výraz, který se má vrátit.
-        \item Podmínky -- if, else, while -- nemají data, na zásobníku následuje výraz, který je v podmínce.
-        \item Konec výrazu -- značí konec výrazu nebo volání funkce, slouží k rozpoznání konce postfixového zápisu.
-        \item Konec složeného výrazu -- značí konec složeného příkazu ve složených závorkách (if, else, deklarace funkce).
+        \item Aritmetické, řetězcový a relační operátory\,--\,každý má svůj typ, nemají data, na zásobníku předcházejí 2 operandy.
+        \item Přiřazení\,--\,nemá data, na zásobníku následuje proměnná, do které se přiřazuje a po ní výraz nebo volání funkce, které se má přiřadit.
+        \item Proměnná\,--\,v datech obsahuje ukazatel do tabulky symbolů.
+        \item Konstanty\,--\,každý typ konstanty má svůj typ v ASS (int, string, float, null) a obsahuje, kromě typu null, hodnotu této konstanty.
+        \item Deklarace funkce\,--\,v datech je uložený ukazatel do tabulky symbolů na tuto funkci.
+        \item Volání funkce\,--\,v datech obsahuje ukazatel na strukturu volání funkce, v ní je uložen ukazatel do tabulky symbolů a seznam parametrů. Parametry mají rovněž typ (proměnná nebo konstanta\,--\,int, string, float, null) a svoje data (ukazatel do tabulky symbolů nebo hodnota konstanty).
+        \item Volání return\,--\,typ bez návratové hodnoty nebo s návratovou hodnotou, v tom případě na zásobníku následuje výraz, který se má vrátit.
+        \item Podmínky\,--\,if, else, while\,--\,nemají data, na zásobníku následuje výraz, který je v podmínce.
+        \item Konec výrazu\,--\,značí konec výrazu nebo volání funkce, slouží k rozpoznání konce postfixového zápisu.
+        \item Konec složeného výrazu\,--\,značí konec složeného příkazu ve složených závorkách (if, else, deklarace funkce).
     \end{itemize}
     Řídící struktury jsou uloženy prefixově, výrazy postfixově, toho se s výhodou využívá v generování kódu (viz \ref{generovani}).
     \section{Zásobníky} \label{zasobniky}
@@ -104,7 +105,7 @@
     \subsection{Statické funkce a definice proměnných}
     Před spuštěním veškerého generování kódu jsou vygenerovány statické části programu a definice proměnných. Statická část obsahuje definici globálních pomocných proměnných, které slouží místo registrů a definici vestavěných a pomocných funkcí. Tato část je přeskočena instrukcí \texttt{JUMP} až na začátek programu. Na začátku se vytvoří nový lokální rámec a nadefinují se všechny proměnné, které jsou použity v hlavním těle programu (i v podmínkách a cyklech, tudíž všude kromě deklarace funkcí).
 
-    \subsubsection{Podmínky -- \texttt{if else, while}}
+    \subsubsection{Podmínky\,--\,\texttt{if else, while}}
     Podmínka \texttt{if} se na začátku vyhodnotí a v případě nepravdivosti výrazu v podmínce se skočí na návěští \texttt{else} doplněné pořadovým číslem z kontextu. Před návěští \texttt{else} se vygeneruje skok za složený příkaz. U cyklu \texttt{while} se vygeneruje návěští začátku cyklu (opět doplněné o pořadové číslo z kontextu), při neplatnosti podmínky skočí až za konec cyklu. Návěští konce složených příkazů \texttt{else} a \texttt{while} jsou generovány na konci složeného příkazu (viz \ref{konec slozeneho}).
 
     \subsubsection{Přiřazení}
@@ -125,10 +126,10 @@
     \subsubsection{Konec složeného příkazu} \label{konec slozeneho}
     Když je na vrcholu zásobníku ASS konec složeného výrazu, vyhodnotí se následující akce podle typu složeného výrazu v kontextu.
     \begin{itemize}
-        \item \texttt{if} -- vygeneruje skok na konec složeného příkazu \texttt{else}.
-        \item \texttt{else} -- generuje návěští značící konec příkazu \texttt{else}.
-        \item \texttt{while} -- generuje skok na začátek cyklu a návěští konce cyklu.
-        \item deklarace funkce -- vygeneruje kontrola návratu z funkce, v případě \texttt{void} funkce se vygeneruje navrácení z funkce. Aktualizuje se kontext programu.
+        \item \texttt{if}\,--\,vygeneruje skok na konec složeného příkazu \texttt{else}.
+        \item \texttt{else}\,--\,generuje návěští značící konec příkazu \texttt{else}.
+        \item \texttt{while}\,--\,generuje skok na začátek cyklu a návěští konce cyklu.
+        \item deklarace funkce\,--\,vygeneruje kontrola návratu z funkce, v případě \texttt{void} funkce se vygeneruje navrácení z funkce. Aktualizuje se kontext programu.
     \end{itemize}
 
     \subsection{Pomocné funkce pro vygenerovaný kód} \label{pomocne}
@@ -136,7 +137,7 @@
 
     \section{Týmová spolupráce}
     \subsection{Komunikace v týmu}
-        Vzájemná domluva a komunikace probíhala online i offline. A to prostřednictvím Discord serveru -- pro převážně obecnější problematiky, pro ty složitější a již více konkrétní nám sloužila funkce GitHub -- Issues, kde jsme mohli jednoduše diskutovat o již konkrétní části kódu. K tomu jsme se každý čtvrtek setkávali na schůzích uskutečněných v budově škole, kde jsme řešili ty nejzásadnější problémy a rozhodnutí z hlediska směřování.
+        Vzájemná domluva a komunikace probíhala online i offline. A to prostřednictvím Discord serveru\,--\,pro převážně obecnější problematiky, pro ty složitější a již více konkrétní nám sloužila funkce GitHub issues, kde jsme mohli jednoduše diskutovat o již konkrétní části kódu. K tomu jsme se každý čtvrtek setkávali na schůzích uskutečněných v budově škole, kde jsme řešili ty nejzásadnější problémy a rozhodnutí z hlediska směřování.
     \subsection{Verzovací systém}
         Při výběru verzovacího systému pro nás bylo jasnou volbou zvolit populární a osvědčený Git s nahráváním na server GitHub, kde probíhala i již zmíněná vzájemná komunikace.
     \subsection{Testování}
