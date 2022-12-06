@@ -45,7 +45,7 @@ int main()
     listDtor(list);
 
     // free syntax context
-    SyntaxDtor(SyntaxItem);
+    syntaxDtor(SyntaxItem);
 
     // free symtable stack
     while (!stack_declare_empty(&stackDeclare)) {
