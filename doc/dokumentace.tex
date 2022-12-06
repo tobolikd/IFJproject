@@ -1,4 +1,4 @@
-%Author: xtobol06
+%Author: xbielg00, xtobol06, xgabry01, xmikys03
 
 %class
 \documentclass[a4paper, 12pt]{article}
@@ -69,6 +69,9 @@
     \subsection{Precedenční analýza}
 
     \section{Tabulka symbolů}
+    Soubory \texttt{symtable.c}, \texttt{symtable.h}
+
+    Pro implementaci tabulky symbolů jsme si ze zadání vybrali variantu TRP, tedy hashovací tabulku, kdy jsme při jejím tvoření využili získané znalosti, jak z přednášek, tak z projektu do předmětu IAL.
 
     \section{Abstraktní syntaktický strom}
     Soubory \texttt{ast.c}, \texttt{ast.h}
@@ -153,7 +156,7 @@
                 \end{itemize}
             \item Adam Gabrys (xgabry01)
                 \begin{itemize}
-                    \item
+                    \item Konečný automat, sémantické kontroly pro deklarace funkcí, generování built-in funkcí, dokumentace
                 \end{itemize}
             \item Jakub Mikyšek (xmikys03)
                 \begin{itemize}
@@ -166,17 +169,23 @@
         \end{itemize}
 
     \section{Přílohy}
+    \begin{table}[h]
+    \hspace*{-1cm}
+        \includegraphics[width=0.85\paperwidth]{src/definitiveStateMachine_finall.png}
+        \caption{Konečný automat stavů.}
+        \label{Konecny automat}
+    \end{table}
 
     \begin{table}[h]
         \includegraphics[width=0.65\paperwidth]{src/LL-gramatika.png}
         \caption{LL gramatika.}
         \label{LL gramatika}
     \end{table}
-    
+
     \begin{table}[h]
         \hspace*{-1cm}
         \centering
-        \includegraphics[width=0.90\paperwidth]{src/LL-tabulka.png}
+        \includegraphics[width=0.80\paperwidth]{src/LL-tabulka.png}
         \caption{LL tabulka.}
         \label{LL tabulka}
     \end{table}
