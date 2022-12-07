@@ -1,5 +1,8 @@
-/* @file stack.c
- *
+/**
+ * IFJ22 compiler
+ * 
+ * @file stack.c
+ * 
  * @brief implementation of stacks
  *
  * @author David Tobolik (xtobol06)

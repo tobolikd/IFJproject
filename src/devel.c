@@ -1,5 +1,8 @@
-/* @file devel.c
+/**
+ * IFJ22 compiler
  *
+ * @file devel.c
+ * 
  * @brief implementation of formatted prints
  *
  * @author David Tobolik (xtobol06)

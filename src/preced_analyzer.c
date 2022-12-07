@@ -1,6 +1,9 @@
-/* @file preced_analyzer.c
- *
- * @brief Bottom-up parser module. Contains precedence table, precedence rules 
+/**
+ * IFJ22 compiler
+ * 
+ * @file preced_analyzer.c
+ * 
+ * @brief bottom-up parser module. Contains precedence table, precedence rules 
  *        and functions to parse expressions. 
  *
  * @author Gabriel Biel(xbielg00)

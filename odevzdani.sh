@@ -7,10 +7,10 @@ cp Makefile odevzdani/
 sed -i 's/TARGETS = $(addprefix $(SOURCE_DIR), $(SOURCES))/TARGETS = $(SOURCES)/' ./odevzdani/Makefile
 cp doc/dokumentace.pdf odevzdani
 
-echo "xbielg00:25" >> odevzdani/rozdeleni
-echo "xgabry01:25" >> odevzdani/rozdeleni
+echo "xbielg00:30" >> odevzdani/rozdeleni
+echo "xgabry01:15" >> odevzdani/rozdeleni
 echo "xmikys03:25" >> odevzdani/rozdeleni
-echo "xtobol06:25" >> odevzdani/rozdeleni
+echo "xtobol06:30" >> odevzdani/rozdeleni
 
 cd odevzdani
 zip xbielg00.zip *

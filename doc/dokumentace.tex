@@ -45,10 +45,6 @@
                 Adam Gabrys & xgabry01  \ \ \ 15\% \\
                 Jakub Mikyšek & xmikys03  \ \ \ 25\% \\
                 David Tobolík & xtobol06  \ \ \ 30\% \\
-                \textbf{Gabriel Biel} & \textbf{xbielg00 }\ \ \ 30\%\\
-                Adam Gabrys & xgabry01  \ \ \ 15\% \\
-                Jakub Mikyšek & xmikys03  \ \ \ 25\% \\
-                David Tobolík & xtobol06  \ \ \ 30\% \\
             \end{tabularx}
         \end{table}
 	\end{titlepage}
@@ -69,10 +65,12 @@
     \subsection{Rekurzivní sestup} \label{sestup}
         Rekurzivní sestup se volá funkcí \texttt{synAnalyser()} a je implementovaný v souborech \texttt{syn\_analyzer.c} a \texttt{syn\_analyzer.h}. Řídí se podle navržené gramatiky (viz \ref{LL gramatika}), kde každé pravidlo představuje vlastní funkci. Funkce postupně prochází tokeny získané od lexikální analýzy, kontroluje jestli je vše gramaticky správně, naplňuje tabulku symbolů a tvoří abstraktní syntaktický strom (dále ASS). Při nalezení výrazu volá funkci \texttt{parseExpression}, která spouští precedenční analýzu. Při nalezení chyby se nastaví příslušný \texttt{errorCode} a chyba se v rekurzi propaguje dál, aby program ukončil kontrolu. Funkce vrací vytvořený ASS, naplněnou tabulku symbolů a informaci o tom, jestli rekurze proběhla syntakticky a sémanticky správně či nikoliv.
 
+    \pagebreak
+    
     \subsection{Precedenční analýza}
     Soubory \texttt{preced\_analyzer.c}, \texttt{preced\_analyzer.h}, \texttt{preced\_analyzer-data.h}
 
-    Na zpracování výrazů jsme použili metodu shora-dolů - precedenční analýzu (dále jen PA). PA kontroluje sémantiku volání funkcí a zda byly použité proměnné definovány. Ke kontrole využívá tabulku symbolů. Dále se od sémantických kontrol zabývá PA také správnou syntaxí zadaného výrazu pomocí zásobníku PA a precedenční tabulky (viz \ref{tabulka precedence}). Výrazy se redukují pomocí pravidel, které máme definovány v souboru \texttt{preced\_analyzer.c}. Výstupem PA je post-fixově zpracovaný výraz na zásobníku ASS.
+    Na zpracování výrazů jsme použili metodu shora-dolů - precedenční analýzu (dále jen PA). PA kontroluje sémantiku volání funkcí a zda byly použité proměnné definovány. Ke kontrole využívá tabulku symbolů. Správnou syntaxi zadaného výrazu kontroluje pomocí zásobníku PA a precedenční tabulky (viz \ref{tabulka precedence}). Výrazy se na zásobníku PA redukují pomocí pravidel, které jsou definovány v souboru \texttt{preced\_analyzer.c}. Výstupem PA je post-fixově zpracovaný výraz na zásobníku ASS(\ref{ASS}).
 
     \section{Tabulka symbolů}
     Soubory \texttt{symtable.c}, \texttt{symtable.h}
@@ -81,7 +79,7 @@
     Pro správnou funkcionalitu tabulky jsme museli samozřejmě implementovat i další funkce, jako například odstranění položky z tabulky/odstranění všech položek (funkce \texttt{ht\_delete()}, \texttt{ht\_delete\_all()}) a ostatní, které jsou detailně popsány v souboru
     \texttt{symtable.h} a implementovány v souboru \texttt{symtable.c}.
 
-    \section{Abstraktní syntaktický strom}
+    \section{Abstraktní syntaktický strom} \label{ASS}
     Soubory \texttt{ast.c}, \texttt{ast.h}
 
     Abstraktní syntaktický strom (dále ASS) je implementovaný jako zásobník (viz \ref{zasobniky}), který obsahuje strukturu pro ASS. Ta je tvořena typem a volitelnými daty.
@@ -170,13 +168,9 @@
                 \begin{itemize}
                     \item Konečný automat, sémantické kontroly pro deklarace funkcí, generování built-in funkcí, dokumentace
                     \item \textbf{15\%}
-                    \item Konečný automat, sémantické kontroly pro deklarace funkcí, generování built-in funkcí, dokumentace
-                    \item \textbf{15\%}
                 \end{itemize}
             \item Jakub Mikyšek (xmikys03)
                 \begin{itemize}
-                    \item gramatika, LL tabulka, rekurzivní syntaktická analýza, sémantické kontroly pro proměnné, integrační testování pro parser, dokumentace
-                    \item \textbf{25\%}
                     \item gramatika, LL tabulka, rekurzivní syntaktická analýza, sémantické kontroly pro proměnné, integrační testování pro parser, dokumentace
                     \item \textbf{25\%}
                 \end{itemize}
@@ -184,12 +178,10 @@
                 \begin{itemize}
                     \item sémantické kontroly pro volání funkce, generování kódu, datové struktury pro ASS, zásobníky, pomocná makra a funkce, struktura projektu, cmake a struktura testů, testy (lexikální analýza, ASS, zásobníky), code review, makefile, dokumentace
                     \item \textbf{30\%}
-                    \item sémantické kontroly pro volání funkce, generování kódu, datové struktury pro ASS, zásobníky, pomocná makra a funkce, struktura projektu, cmake a struktura testů, testy (lexikální analýza, ASS, zásobníky), code review, makefile, dokumentace
-                    \item \textbf{30\%}
                 \end{itemize}
         \end{itemize}
     \subsection{Důvod nerovnoměrného rozdělení bodů}
-    Pro nerovnoměrné rozdělení bodů jsme se rozhodli jelikož někteří členové týmu odvedli proporčně značně větší část práce, a proto nám to takto přišlo fér a všichni členové týmu se na tomto rozdělení shodli.
+    Pro nerovnoměrné rozdělení bodů jsme se rozhodli jelikož někteří členové týmu odvedli značně větší část práce.  Všichni členové týmu se na tomto rozdělení shodli.
 
     \section{Závěr}
     Projekt nás svým objemem ze začátku opravdu překvapil a chvíli nám trvalo, než jsme se zorientovali v zadání. Naštěstí nám opravdu pomohlo scházet se každý týden a prodiskutovat jednotlivé problémy, či náš pokrok v práci. Velkou část sehrálo také to, že jsme se všichni znali a komunikovali vcelku bez prodlev a problémů a to jak na GitHubu, tak na Discord serveru, který jsme si pro projekt vytvořili(viz \ref{teamwork}). Práce nám s odstupem času šla stále lépe, jelikož jsme rozuměli dané problematice i specifikacím zadání stále více. Projekt nám přinesl nejen znalosti do předmětů IFJ a IAL, ale velmi nás posunul v práci s verzovacím systémem a v celkové práci v týmu na větších projektech, jako je tento.

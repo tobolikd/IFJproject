@@ -1,5 +1,8 @@
-/* @file code_gen_static.c
+/**
+ * IFJ22 compiler
  *
+ * @file code_gen_static.c 
+ * 
  * @brief implementation of static generation functions and variable definitions
  *
  * @author David Tobolik (xtobol06)

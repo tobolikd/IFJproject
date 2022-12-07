@@ -1,6 +1,9 @@
-/* @file preced_analyzer_data.h
- *
- * @brief Data structures for bottom-up parser module.
+/**
+ * IFJ22 compiler
+ * 
+ * @file preced_analyzer_data.h
+ * 
+ * @brief data structures for bottom-up parser module.
  *
  * @author Gabriel Biel(xbielg00)
  */

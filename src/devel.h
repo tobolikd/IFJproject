@@ -1,5 +1,8 @@
-/* @file devel.h
- *
+/**
+ * IFJ22 compiler
+ * 
+ * @file devel.h
+ * 
  * @brief developer library for formatted printing of ast and code block stack
  *
  * @author David Tobolik (xtobol06)

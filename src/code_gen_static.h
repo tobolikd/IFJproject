@@ -1,5 +1,8 @@
-/* @file code_gen_static.h
+/**
+ * IFJ22 compiler
  *
+ * @file code_gen_static.h 
+ * 
  * @brief data structures for code gen and functions generating static parts of program
  *
  * @author David Tobolik (xtobol06)

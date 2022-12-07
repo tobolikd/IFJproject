@@ -1,6 +1,9 @@
-/* @file symtable.c
+/** 
+ * IFJ22 compiler
  *
- * @brief Interface for symtable. 
+ * @file symtable.c
+ * 
+ * @brief interface for symtable 
  *
  * @author Gabriel Biel(xbielg00)
  */
@@ -12,7 +15,7 @@
 
 int HT_SIZE = MAX_HT_SIZE;
 
-/* SUPPORT FUNCTIONS */
+
 int ht_hash(char *key) 
 {
   int result = 1;

@@ -1,5 +1,8 @@
-/* @file lex_alyzer.c
+/**
+ * IFJ22 compiler
  *
+ * @file lex_alyzer.c
+ * 
  * @brief Scanner module. 
  * @brief Module to read and sort input file into tokens, which allows
  *        other modules to work efficiently.
@@ -185,7 +188,7 @@ char *parseString(char *data)
                 new = appendChar(new, data[i]);
                 break;
 
-            case 'x'://look for haxa num
+            case 'x'://look for hex num
                 i++;//look 1 ahead = now i is pointing to first digit
                 //strtol functioni returns value of number in string, stops only when the sequence of numbers is broken
                 //could possibly read more or less than 2 digits
@@ -201,8 +204,8 @@ char *parseString(char *data)
                 free(new);
                 return NULL; // error
 
-            case '0' ... '9'://look for okta numbers
-                if(isdigit(data[i+1]) && isdigit(data[i+2])) // 2 hexa digits must following
+            case '0' ... '9'://look for octal numbers
+                if(isdigit(data[i+1]) && isdigit(data[i+2])) // 2 hex digits must following
                 {
                     //from characters value subs value ord value of 0 and we get an integer value representing the number in char
                     if (((int)data[i]-'0')<=3 && ((int)data[i+1]-'0')<=7 && ((int)data[i+2]-'0')<=7)//check if its okta number
@@ -803,10 +806,12 @@ void listDtor(TokenList *list)
 
 void printToken(Token*token)
 {
-    if (token->data == NULL)
+    if (token->data == NULL){
         debug_log("%d %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type]);
-    else
+    }
+    else{
         debug_log("%d %s %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type], token->data);
+    }
 }
 
 

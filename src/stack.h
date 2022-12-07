@@ -1,3 +1,13 @@
+/** 
+ * IFJ22 compiler
+ *
+ * @file stack.c
+ * 
+ * @brief data structure of stacks
+ *
+ * @author David Tobolik (xtobol06)
+ */
+
 #ifndef IFJ_STACK_H
 #define IFJ_STACK_H 1
 

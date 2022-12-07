@@ -1,5 +1,8 @@
-/* @file sem_analyzer.h
+/** 
+ * IFJ22 compiler
  *
+ * @file sem_analyzer.h
+ * 
  * @brief functions used in semantic analysis, generated MACROS for sem analysis
  *
  * @authors Adam Gabrys (xgabry01), David Tobolik (xtobol06)
