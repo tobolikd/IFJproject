@@ -1,7 +1,11 @@
-/* @file code_gen.c
+/**
+ * @file code_gen.c 
  *
+ * IFJ22 compiler
+ * 
  * @brief implementation of code generation
  *
+ * @author Gabriel Biel (xbielg00),
  * @author David Tobolik (xtobol06)
  */
 
@@ -277,8 +281,9 @@ void genAssign(stack_ast_t *ast) {
  */
 void genExpr(stack_ast_t *ast) {
     AST_item *item = AST_TOP();
-    if (item->type == AST_END_EXPRESSION) //empty expression
+    if (item->type == AST_END_EXPRESSION){ //empty expression
         debug_log("genExpr - empty expression\n");
+    }
 
     while (item->type != AST_END_EXPRESSION){
         switch (item->type)

@@ -1,6 +1,9 @@
-/* @file preced_analyzer.h
+/**
+ * IFJ22 compiler
  *
- * @brief Library for bottom-up parser module. 
+ * @file preced_analyzer.h
+ * 
+ * @brief library for bottom-up parser module
  *
  * @author Gabriel Biel(xbielg00)
  */

@@ -1,3 +1,14 @@
+/**
+ * IFJ22 compiler
+ *
+ * @file devel.h
+ * 
+ * @brief error/debug management library
+ *
+ * @author Gabriel Biel (xbielg00),
+ * @author David Tobolik (xtobol06)
+ */
+
 #ifndef IFJ_ERROR_CODES_H
 #define IFJ_ERROR_CODES_H 1
 
@@ -40,7 +51,7 @@ extern enum ifjErrCode errorCode;
  * 0 - OFF
  * 1 - ON
  */
-#define DEBUG 1
+#define DEBUG 0
 
 #if DEBUG == 1
     // used for developmnent purposes

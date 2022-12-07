@@ -1,5 +1,8 @@
-/* @file lex_alyzer.h
+/**
+ * IFJ22 compiler
  *
+ * @file lex_alyzer.h
+ * 
  * @brief Data structures and functions for scanner module. 
  *
  * @author Gabriel Biel(xbielg00)

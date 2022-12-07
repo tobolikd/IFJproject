@@ -1,8 +1,14 @@
-/**
- * @file syn-analyzer.c
+/** 
+ * IFJ22 compiler
+ * 
+ * @file syn-analyzer.h
+ * 
+ * @brief syntatic analyser module for IFJ22 compiler
+ *
  * @author Jakub Mikysek (xmikys03)
- * @brief Syntatic Analyser for interpreter IFJcode22
  */
+
+
 
 #include "lex_analyzer.h"
 #include "syn_analyzer.h"
