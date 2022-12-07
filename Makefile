@@ -1,4 +1,5 @@
 PROJECT=ifj-compiler
+SOURCE_DIR=./src/
 
 SOURCES += lex_analyzer.c
 SOURCES += syn_analyzer.c
@@ -12,7 +13,7 @@ SOURCES += symtable.c
 SOURCES += devel.c
 SOURCES += main.c
 
-TARGETS = $(SOURCES)
+TARGETS = $(addprefix $(SOURCE_DIR), $(SOURCES))
 
 CC=gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -lm -fcommon
