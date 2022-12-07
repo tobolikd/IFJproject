@@ -7,9 +7,6 @@
 \usepackage[T1]{fontenc}           %font encoding
 \usepackage[utf8]{inputenc}         %script encoding
 
-\usepackage[bibencoding=UTF-8,style=iso-numeric]{biblatex}
-\addbibresource{sources.bib}
-
 %packages
 \usepackage[czech]{babel}           %language
 \usepackage[a4paper, text={17cm,24cm}, left=2cm, top=3 cm]{geometry}		%layout
@@ -186,28 +183,26 @@
     Projekt nás svým objemem zezačátku opravdu překvapil a chvíli nám trvalo, než jsme se zorientovali v zadání. Naštěstí nám opravdu pomohlo scházet se každý týden a prodiskutovat jednotlivé problémy, či náš pokrok v práci. Velkou část sehrálo také to, že jsme se všichni znali a komunikovali vcelku bez prodlev a problémů a to jak na GitHubu, tak na Discord serveru, který jsme si pro projekt vytvořili(viz \ref{teamwork}). Práce nám s odstupem času šla stále lépe, jelikož jsme rozuměli dané problematice i specifikacím zadání stále více. Projekt nám přinesl nejen znalosti do předmětů IFJ a IAL, ale velmi nás posunul v práci s verzovacím systémem a v celkové práci v týmu na větších projektech, jako je tento.
     \newpage
     \section{Přílohy}
-    \begin{figure}[h]
-    \hspace*{-1cm}
-        \includegraphics[width=0.85\paperwidth]{src/deterministicStateMachine_finall.png}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{src/deterministicStateMachine_finall.png}
         \caption{Deterministický konečný automat stavů.}
         \label{Konecny automat}
     \end{figure}
 
-    \begin{figure}[h]
-        \includegraphics[width=0.65\paperwidth]{src/LL-gramatika.png}
+    \begin{figure}[H]
+        \includegraphics[width=0.65\textwidth]{src/LL-gramatika.png}
         \caption{LL gramatika.}
         \label{LL gramatika}
     \end{figure}
 
-    \begin{figure}[h]
-        \hspace*{-1cm}
+    \begin{figure}[H]
         \centering
-        \includegraphics[width=0.90\paperwidth]{src/LL-tabulka.png}
+        \includegraphics[width=\textwidth]{src/LL-tabulka.png}
         \caption{LL tabulka.}
         \label{LL tabulka}
     \end{figure}
 
-    \begin{table}[h]
+    \begin{table}[H]
         \centering
         \begin{tabular}[p]{| l | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c |}
             \hline
@@ -248,9 +243,4 @@
         \caption{Precedenční tabulka.}
         \label{tabulka precedence}
     \end{table}
-
-    \newpage
-	%bibliography
-	\renewcommand{\refname}{Zdroje}
-	\printbibliography
 \end{document}
