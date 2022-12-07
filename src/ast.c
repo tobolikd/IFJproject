@@ -1,16 +1,16 @@
-/* @file ast.h
+/* @file ast.c
  *
- * @brief contains data structures and functions for AST
+ * @brief implementation of ast interface
  *
  * @author David Tobolik (xtobol06)
  */
 
 #include "ast.h"
-#include "error-codes.h"
+#include "error_codes.h"
 #include <stdlib.h>
 #include <string.h>
 
-void ast_item_destr(AST_item *item) {
+void astItemDestr(AST_item *item) {
     if (item == NULL)
         return;
 
@@ -21,7 +21,7 @@ void ast_item_destr(AST_item *item) {
 
     // free function call data
     if (item->type == AST_FUNCTION_CALL) {
-        fnc_call_data_destr(item->data->functionCallData);
+        fncCallDataDestr(item->data->functionCallData);
     }
 
     // free function declare data
@@ -40,7 +40,7 @@ void ast_item_destr(AST_item *item) {
 }
 
 // free all parametres and function id
-void fnc_call_data_destr(AST_function_call_data *data) {
+void fncCallDataDestr(AST_function_call_data *data) {
     if (data == NULL) {
         debug_print("WARNING(internal): AST item of type AST_FUNCTION_CALL has no funtion call data\n");
         return;
@@ -49,8 +49,10 @@ void fnc_call_data_destr(AST_function_call_data *data) {
     AST_fnc_param *deleted = data->params;
     AST_fnc_param *next;
 
+    // delete parametres of function
     while (deleted != NULL) {
         next = deleted->next;
+        // if string, free string
         if (deleted->type == AST_P_STRING)
             free(deleted->data->stringValue);
         free(deleted->data);
@@ -66,12 +68,13 @@ void fnc_call_data_destr(AST_function_call_data *data) {
     CHECK_MALLOC_PTR(new->data);            \
     } while (0)
 
-AST_item *ast_item_const(AST_type type, void *data) {
+AST_item *astItemConst(AST_type type, void *data) {
     AST_item *new = (AST_item *) malloc(sizeof(AST_item));
     CHECK_MALLOC_PTR(new);
 
     new->type = type;
 
+    // according to type assign data
     switch (type) {
 
         // arithmetic operations
@@ -107,7 +110,7 @@ AST_item *ast_item_const(AST_type type, void *data) {
             new->data->stringValue = (char *) malloc((strlen((char*) data) + 1) * sizeof(char));
             if (new->data->stringValue == NULL) {
                 free(new);
-                MALLOC_ERR;
+                MALLOC_ERR();
                 return NULL;
             }
             strcpy(new->data->stringValue, (char *) data);
@@ -143,14 +146,14 @@ AST_item *ast_item_const(AST_type type, void *data) {
             new->data = NULL;
             break;
         default:
-            debug_log("ERROR(internal): in function ast_item_const\n\tUnknown type!");
+            debug_log("ERROR(internal): in function astItemConst\n\tUnknown type!");
             new->data = NULL;
             break;
     }
     return new;
 }
 
-AST_function_declare_data *fnc_declare_data_const(ht_item_t *function, ht_table_t *varSymtable) {
+AST_function_declare_data *fncDeclareDataConst(ht_item_t *function, ht_table_t *varSymtable) {
     AST_function_declare_data *new = (AST_function_declare_data *) malloc(sizeof(AST_function_declare_data));
     CHECK_MALLOC_PTR(new);
 
@@ -160,18 +163,18 @@ AST_function_declare_data *fnc_declare_data_const(ht_item_t *function, ht_table_
     return new;
 }
 
-AST_function_call_data *fnc_call_data_const(ht_table_t *fncSymtable, char *functionId) {
+AST_function_call_data *fncCallDataConst(ht_table_t *fncSymtable, char *functionId) {
     AST_function_call_data *new = (AST_function_call_data *) malloc(sizeof(AST_function_call_data));
     CHECK_MALLOC_PTR(new);
 
-    new->functionID = functionId;
+    new->functionId = functionId;
     new->function = ht_search(fncSymtable, functionId);
     new->params = NULL;
 
     return new;
 }
 
-void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, void *param) {
+void fncCallDataAddParam(AST_function_call_data *data, AST_param_type type, void *param) {
     AST_fnc_param *new = malloc(sizeof(AST_fnc_param));
     CHECK_MALLOC(new);
 
@@ -181,7 +184,7 @@ void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, 
 
         if (new->data == NULL) {
             free(new);
-            MALLOC_ERR;
+            MALLOC_ERR();
             return;
         }
     }
@@ -189,6 +192,7 @@ void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, 
     new->next = NULL;
     new->type = type;
 
+    // copy param to parameter data
     switch (type) {
         case AST_P_INT:
             new->data->intValue = *((int*)param);
@@ -214,10 +218,11 @@ void fnc_call_data_add_param(AST_function_call_data *data, AST_param_type type, 
 
         default:
             errorCode = INTERNAL_ERR;
-            debug_print("INTERNAL ERR - in fnc_call_data_add_param():\n\tunknown type of fnc param (%d)\n", type);
+            debug_print("INTERNAL ERR - in fncCallDataAddParam():\n\tunknown type of fnc param (%d)\n", type);
             break;
     }
 
+    // add param to end of parameter list
     AST_fnc_param **tmp = &data->params;
     while (*tmp != NULL) {
         tmp = &(*tmp)->next;

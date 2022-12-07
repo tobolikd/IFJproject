@@ -2,9 +2,9 @@
 #define IFJ_STACK_H 1
 
 #include "ast.h"
-#include "lex-analyzer.h"
-#include "code-gen-data.h"
-#include "preced-analyzer-data.h"
+#include "lex_analyzer.h"
+#include "code_gen_static.h"
+#include "preced_analyzer_data.h"
 
 #include <stdbool.h>
 
@@ -42,7 +42,6 @@
     typedef struct stack_##NAME##_item {                        \
         TYPE data;                                              \
         struct stack_##NAME##_item *next;                       \
-        struct stack_##NAME##_item *previous;                   \
     } stack_##NAME##_item_t;                                    \
                                                                 \
     typedef struct {                                            \

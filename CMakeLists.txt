@@ -3,15 +3,15 @@ cmake_minimum_required(VERSION 3.14)
 project(IFJ-tests)
 
 set(PROJECT_FILES
-    src/lex-analyzer.c
-    src/syn-analyzer.c
-    src/sem-analyzer.c
-    src/preced-analyzer.c
+    src/lex_analyzer.c
+        src/syn_analyzer.c
+        src/sem_analyzer.c
+    src/preced_analyzer.c
     src/symtable.c
     src/ast.c
     src/stack.c
-    src/code-gen.c
-    src/code-gen-static.c
+    src/code_gen.c
+    src/code_gen_static.c
     src/devel.c
 )
 
@@ -20,7 +20,6 @@ set(UNIT_TESTS
     tests/test-lex-analyzer.cpp
     tests/test-syn-analyzer.cpp
     tests/test-preced-analyzer.cpp
-    tests/test-code-gen.cpp
 )
 
 

@@ -1,9 +1,16 @@
+/* @file symtable.h
+ *
+ * @brief Data structures and functions representing symtable's interface. 
+ *
+ * @author Gabriel Biel(xbielg00)
+ */
+
 #ifndef IFJ_SYM_TABLE_H
 #define IFJ_SYM_TABLE_H 1
 
 #include <stdbool.h>
 
-#define MAX_HT_SIZE 251 // highest prime number < 256
+#define MAX_HT_SIZE 4999 // highest prime number < 5000
 
 extern int HT_SIZE;
 
@@ -51,20 +58,20 @@ typedef struct ht_table_t {
 } ht_table_t;
 
 /// @brief Returns hash for entered key value.
-int get_hash(char *key);
+int ht_hash(char *key);
 
 /// @brief Appends new parameter to an existig item.
 /// @param appendTo Item to append the parameter to.
 /// @param name Id of parameter.
 /// @param type Data type of parameter.
-void ht_param_append(ht_item_t *appendTo, char *name, var_type_t type);
+void ht_paramAppend(ht_item_t *appendTo, char *name, var_type_t type);
 
 /// @brief Creates pointer to item.
 /// @param identifier Id of the item.
 /// @param type Return type of function / data type of variable.
 /// @param isFunction Switch between function / variable.
 /// @returns Pointer to newly created item.
-ht_item_t *ht_item_ctor(char* identifier, var_type_t type, bool isFunction);
+ht_item_t *ht_itemCtor(char* identifier, var_type_t type, bool isFunction);
 
 /// @brief Creates hash table with MAX_HT_SIZE size.
 /// @return Pointer to newly created hash table.
@@ -85,12 +92,12 @@ ht_item_t *ht_search(ht_table_t *table, char *key);
 ht_item_t * ht_insert(ht_table_t *table, char* identifier, var_type_t type, bool isFunction) ;
 
 /// @brief Deletes item and frees all its data.
-void ht_item_dtor(ht_item_t *item);
+void ht_itemDtor(ht_item_t *item);
 
 /// @brief Deletes item with coresponding key.
 void ht_delete(ht_table_t *table, char *key);
 
 /// @brief Deletes whole hash table.
-void ht_delete_all(ht_table_t *table);
+void ht_deleteAll(ht_table_t *table);
 
 #endif // IFJ_SYM_TABLE_H

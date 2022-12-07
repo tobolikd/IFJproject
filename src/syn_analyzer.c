@@ -4,13 +4,13 @@
  * @brief Syntatic Analyser for interpreter IFJcode22
  */
 
-#include "lex-analyzer.h"
-#include "syn-analyzer.h"
+#include "lex_analyzer.h"
+#include "syn_analyzer.h"
 #include "symtable.h"
-#include "error-codes.h"
+#include "error_codes.h"
 #include "ast.h"
 #include "stack.h"
-#include "preced-analyzer.h"
+#include "preced_analyzer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -138,7 +138,6 @@ bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
     return false;
 }
 
-// <fnc-decl> -> function functionId ( <param> ) : <fnc-type> { <st-list> }
 bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
 {
     if (TOKEN_TYPE == t_function)
@@ -153,7 +152,7 @@ bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
                 THROW_ERROR(INTERNAL_ERR, TOKEN_LINE_NUM);
                 return false;
             }
-            stack_ast_push(stackSyn, ast_item_const(AST_FUNCTION_DECLARE, fnc_declare_data_const(curFunction, fncDecTable)));
+            stack_ast_push_b(stackSyn, astItemConst(AST_FUNCTION_DECLARE, fncDeclareDataConst(curFunction, fncDecTable)));
             int counterParam = curFunction->fnc_data.paramCount;
             param_info_t *nextParam = curFunction->fnc_data.params;
             while (counterParam != 0) // insert params to symtable [Function Frame]
@@ -195,7 +194,7 @@ bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
                             if (TOKEN_TYPE == t_rCurl)
                             {
                                 stack_declare_push(&stackDeclare, fncDecTable);
-                                stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
+                                stack_ast_push_b(stackSyn, astItemConst(AST_END_BLOCK, NULL));
                                 return true;
                             }
                         }
@@ -209,7 +208,6 @@ bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
     return true; // -> eps
 }
 
-// <st-list> -> <stat> <st-list> || eps
 bool statList(SYN_ANALYZER_PARAMS)
 {
     if (statement(list, index, table, stackSyn) == false)
@@ -230,7 +228,7 @@ bool statList(SYN_ANALYZER_PARAMS)
 
 bool statementIf(SYN_ANALYZER_PARAMS)
 {
-    stack_ast_push(stackSyn, ast_item_const(AST_IF, NULL));
+    stack_ast_push_b(stackSyn, astItemConst(AST_IF, NULL));
     (*index)++;
     if (TOKEN_TYPE == t_lPar)
     {
@@ -256,11 +254,11 @@ bool statementIf(SYN_ANALYZER_PARAMS)
                     }
                     if (TOKEN_TYPE == t_rCurl)
                     {
-                        stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
+                        stack_ast_push_b(stackSyn, astItemConst(AST_END_BLOCK, NULL));
                         (*index)++;
                         if (TOKEN_TYPE == t_else)
                         {
-                            stack_ast_push(stackSyn, ast_item_const(AST_ELSE, NULL));
+                            stack_ast_push_b(stackSyn, astItemConst(AST_ELSE, NULL));
                             (*index)++;
                             if (TOKEN_TYPE == t_lCurl)
                             {
@@ -274,7 +272,7 @@ bool statementIf(SYN_ANALYZER_PARAMS)
                                 }
                                 if (TOKEN_TYPE == t_rCurl)
                                 {
-                                    stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
+                                    stack_ast_push_b(stackSyn, astItemConst(AST_END_BLOCK, NULL));
                                     return true;
                                 }
                             }
@@ -290,7 +288,7 @@ bool statementIf(SYN_ANALYZER_PARAMS)
 
 bool statementWhile(SYN_ANALYZER_PARAMS)
 {
-    stack_ast_push(stackSyn, ast_item_const(AST_WHILE, NULL));
+    stack_ast_push_b(stackSyn, astItemConst(AST_WHILE, NULL));
     (*index)++;
     if (TOKEN_TYPE == t_lPar)
     {
@@ -316,7 +314,7 @@ bool statementWhile(SYN_ANALYZER_PARAMS)
                     }
                     if (TOKEN_TYPE == t_rCurl)
                     {
-                        stack_ast_push(stackSyn, ast_item_const(AST_END_BLOCK, NULL));
+                        stack_ast_push_b(stackSyn, astItemConst(AST_END_BLOCK, NULL));
                         return true;
                     }
                 }
@@ -332,10 +330,10 @@ bool statementReturn(SYN_ANALYZER_PARAMS)
     (*index)++;
     if (TOKEN_TYPE == t_semicolon) // <stat> -> return;
     {
-        stack_ast_push(stackSyn, ast_item_const(AST_RETURN_VOID, NULL));
+        stack_ast_push_b(stackSyn, astItemConst(AST_RETURN_VOID, NULL));
         return true;
     }
-    stack_ast_push(stackSyn, ast_item_const(AST_RETURN_EXPR, NULL));
+    stack_ast_push_b(stackSyn, astItemConst(AST_RETURN_EXPR, NULL));
     if (parseExpression(list, index, table, stackSyn) == false)
     {
         return false;
@@ -380,8 +378,8 @@ bool statementVariable(SYN_ANALYZER_PARAMS)
         if (TOKEN_TYPE != t_semicolon) // <assign> -> <var> =; => ERROR
         {
             ht_item_t *varItem = ht_insert(table, list->TokenArray[(*index) - 2]->data, void_t, false); // insert variable to symtable
-            stack_ast_push(stackSyn, ast_item_const(AST_ASSIGN, NULL));
-            stack_ast_push(stackSyn, ast_item_const(AST_VAR, varItem));
+            stack_ast_push_b(stackSyn, astItemConst(AST_ASSIGN, NULL));
+            stack_ast_push_b(stackSyn, astItemConst(AST_VAR, varItem));
             if (parseExpression(list, index, table, stackSyn) == false)
             {
                 return false;
@@ -439,7 +437,6 @@ bool statement(SYN_ANALYZER_PARAMS)
     return true;
 }
 
-// <seq-stats> -> <stat> <fnc-decl> <seq-stats> || eps
 bool seqStats(SYN_ANALYZER_PARAMS)
 {
     bool programContinue; // if program return false, exit to propagate Error
@@ -459,7 +456,6 @@ bool seqStats(SYN_ANALYZER_PARAMS)
     return true;
 }
 
-// <prog> -> <prolog> <seq-stats> <epilog>
 bool checkSyntax(SYN_ANALYZER_PARAMS)
 {
     if (seqStats(list, index, table, stackSyn) == false)
@@ -469,9 +465,9 @@ bool checkSyntax(SYN_ANALYZER_PARAMS)
     return true;
 }
 
-void SyntaxDtor(SyntaxItem *SyntaxItem)
+void syntaxDtor(SyntaxItem *SyntaxItem)
 {
-    ht_delete_all(SyntaxItem->table);
+    ht_deleteAll(SyntaxItem->table);
     while (!stack_ast_empty(SyntaxItem->stackAST))
     {
         stack_ast_pop(SyntaxItem->stackAST);
@@ -481,7 +477,7 @@ void SyntaxDtor(SyntaxItem *SyntaxItem)
     free(SyntaxItem);
 }
 
-SyntaxItem *SyntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct)
+SyntaxItem *syntaxItemCtor(ht_table_t *table, stack_ast_t *stackAST, bool correct)
 {
     SyntaxItem *syntaxItem = (SyntaxItem *)malloc(sizeof(SyntaxItem));
     CHECK_MALLOC_PTR(syntaxItem);
@@ -498,8 +494,8 @@ SyntaxItem *synAnalyser(TokenList *list)
     stack_ast_t *stackSyn = (stack_ast_t *)malloc(sizeof(stack_ast_t));
     if (stackSyn == NULL)
     {
-        MALLOC_ERR;
-        return SyntaxItemCtor(table, stackSyn, false);
+        MALLOC_ERR();
+        return syntaxItemCtor(table, stackSyn, false);
     }
     stack_ast_init(stackSyn);
     stack_declare_init(&stackDeclare); // initialize stack for Function Frames
@@ -507,8 +503,8 @@ SyntaxItem *synAnalyser(TokenList *list)
     /* RECURSIVE DESCENT */
     if (checkSyntax(list, &index, table, stackSyn) == false)
     {
-        return SyntaxItemCtor(table, stackSyn, false);
+        return syntaxItemCtor(table, stackSyn, false);
     }
 
-    return SyntaxItemCtor(table, stackSyn, true);
+    return syntaxItemCtor(table, stackSyn, true);
 }

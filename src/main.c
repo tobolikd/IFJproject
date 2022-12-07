@@ -1,8 +1,8 @@
-#include "lex-analyzer.h"
-#include "syn-analyzer.h"
-#include "code-gen.h"
-#include "error-codes.h"
-#include "sem-analyzer.h"
+#include "lex_analyzer.h"
+#include "syn_analyzer.h"
+#include "code_gen.h"
+#include "error_codes.h"
+#include "sem_analyzer.h"
 #include "devel.h"
 
 ht_table_t *fncTable;         // Global variable - symtable for semantic controls with function declares
@@ -21,11 +21,11 @@ int main()
         fclose(fp);
         return errorCode;
     }
-    // no more reading wil be done
+    // no more reading will be done
     fclose(fp);
 
     // get all function declarations
-    fncTable = InitializedHTableFnctionDecs(list);
+    fncTable = fncDeclarationTable(list);
 
     if (fncTable == NULL) {
         // error in function definitions
@@ -45,7 +45,7 @@ int main()
     listDtor(list);
 
     // free syntax context
-    SyntaxDtor(SyntaxItem);
+    syntaxDtor(SyntaxItem);
 
     // free symtable stack
     while (!stack_declare_empty(&stackDeclare)) {
@@ -53,7 +53,7 @@ int main()
     }
 
     // free function symtable
-    ht_delete_all(fncTable);
+    ht_deleteAll(fncTable);
 
     return errorCode;
 }

@@ -6,9 +6,9 @@
  */
 
 #include "stack.h"
-#include "error-codes.h"
-
-#include "lex-analyzer.h"
+#include "error_codes.h"
+#include "code_gen_static.h"
+#include "lex_analyzer.h"
 #include "ast.h"
 
 #include <stdlib.h>
@@ -24,11 +24,8 @@
         CHECK_MALLOC(new);                                                      \
         new->data = item;                                                       \
         new->next = stack->top;                                                 \
-        new->previous = NULL;                                                   \
         if (stack->top == NULL)                                                 \
             stack->bottom = new;                                                \
-        else                                                                    \
-            stack->top->previous = new;                                         \
         stack->top = new;                                                       \
     }                                                                           \
                                                                                 \
@@ -38,9 +35,7 @@
             return;                                                             \
                                                                                 \
         stack->top = deleted->next;                                             \
-        if (stack->top != NULL)                                                 \
-            stack->top->previous = NULL;                                        \
-        else                                                                    \
+        if (stack->top == NULL)                                                 \
             stack->bottom = NULL;                                               \
         DESTRUCTOR(deleted->data);                                              \
         free(deleted);                                                          \
@@ -51,7 +46,6 @@
         CHECK_MALLOC(new);                                                      \
         new->data = item;                                                       \
         new->next = NULL;                                                       \
-        new->previous = stack->bottom;                                          \
         if (stack->top == NULL)                                                 \
             stack->top = new;                                                   \
         else                                                                    \
@@ -64,20 +58,6 @@
         return stack->top->data;                                                \
     }                                                                           \
                                                                                 \
-    void stack_##NAME##_pop_b(stack_##NAME##_t *stack) {                        \
-        stack_##NAME##_item_t *deleted = stack->bottom;                         \
-        if (deleted == NULL)                                                    \
-            return;                                                             \
-                                                                                \
-        stack->bottom = deleted->previous;                                      \
-        if (stack->bottom != NULL)                                              \
-            stack->bottom->next = NULL;                                         \
-        else                                                                    \
-            stack->top = NULL;                                                  \
-        DESTRUCTOR(deleted->data);                                              \
-        free(deleted);                                                          \
-    }                                                                           \
-                                                                                \
     TYPE stack_##NAME##_bot(stack_##NAME##_t *stack) {                          \
         if (stack->bottom == NULL) { return NULL; }                             \
         return stack->bottom->data;                                             \
@@ -87,9 +67,9 @@
         return stack->top == NULL;                                              \
     }
 
-STACK_DEFINITION(AST_item *, ast, ast_item_destr)
+STACK_DEFINITION(AST_item *, ast, astItemDestr)
 STACK_DEFINITION(Token *, token, tokenDtor)
 STACK_DEFINITION(char *, string, free)
 STACK_DEFINITION(code_block *, code_block, free)
 STACK_DEFINITION(PrecedItem *, precedence, free)
-STACK_DEFINITION(ht_table_t *, declare, ht_delete_all)
+STACK_DEFINITION(ht_table_t *, declare, ht_deleteAll)

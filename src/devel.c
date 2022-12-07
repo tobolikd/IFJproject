@@ -1,14 +1,20 @@
+/* @file devel.c
+ *
+ * @brief implementation of formatted prints
+ *
+ * @author David Tobolik (xtobol06)
+ */
+
 #include "devel.h"
-#include "error-codes.h"
+#include "error_codes.h"
 #include "ast.h"
-#include "code-gen-data.h"
 
 #define AST_TYPE(TYPE) debug_log("\t|- type: |%s|\n", TYPE)
 #define AST_DATA(DATA) debug_log("\t|- data: %s\n", DATA)
 
 /// AUXILIARY FUNCTIONS
 
-void printAstParam(AST_fnc_param *param) {
+void print_ast_param(AST_fnc_param *param) {
     switch (param->type) {
         case AST_P_INT:
             debug_log("\t\t\t|- Type: |int|\n");
@@ -36,20 +42,20 @@ void printAstParam(AST_fnc_param *param) {
     }
 }
 
-void printAstFnc(AST_function_call_data *data) {
+/// !AUXILIARY FUNCTIONS
+
+void print_ast_fnc(AST_function_call_data *data) {
     debug_log("\t\t|- Id: \"%s\"\n", data->function->identifier);
     AST_fnc_param *tmp = data->params;
     for (int i = 0; tmp != NULL; i++) {
-        printAstParam(tmp);
+        print_ast_param(tmp);
         tmp = tmp->next;
     }
 }
 
-/// !AUXILIARY FUNCTIONS
-
-void printAstItem(AST_item *item) {
+void print_ast_item(AST_item *item) {
 #if DEBUG == 0
-    debug_print("\nWARNING(internal): called printAstItem with DEBUG 0, run with DEBUG 1 for more info\n");
+    debug_print("\nWARNING(internal): called print_ast_item with DEBUG 0, run with DEBUG 1 for more info\n");
 #endif
 
     if (item == NULL) { debug_log("Item is NULL\n"); return; }
@@ -132,7 +138,7 @@ void printAstItem(AST_item *item) {
         // program control (jumps)
         case AST_FUNCTION_CALL:
             AST_TYPE("function call");
-            printAstFnc(item->data->functionCallData);
+            print_ast_fnc(item->data->functionCallData);
             break;  // data - AST_function_call_data *functionCallData
         case AST_RETURN_VOID:
             AST_TYPE("return (void)");
@@ -164,20 +170,20 @@ void printAstItem(AST_item *item) {
     }
 }
 
-void printAstStack(stack_ast_t *stack) {
+void print_ast_stack(stack_ast_t *stack) {
     stack_ast_item_t *tmp = stack->top;
     while (tmp != NULL) {
-        printAstItem(tmp->data);
+        print_ast_item(tmp->data);
         tmp = tmp->next;
     }
 }
 
-void printCodeBlockStack(stack_code_block_t *stack) {
+void print_code_block_stack(stack_code_block_t *stack) {
     debug_log("\n\nCODE BLOCK STACK:\n");
     stack_code_block_item_t *tmp = stack->top;
     while (tmp != NULL) {
         debug_log(" - type: %d\n", tmp->data->type);
-        debug_log("  \\labelNum: %d\n", tmp->data->labelNum);
+        debug_log("  \\label_num: %d\n", tmp->data->label_num);
         tmp = tmp->next;
     }
 }
