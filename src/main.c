@@ -1,3 +1,15 @@
+/**
+ * IFJ22 compiler
+ * 
+ * @file main.c
+ * 
+ * @brief Ensures linkage of modules. 
+ *
+ * @author Gabriel Biel(xbielg00),
+ * @author David Tobolik (xtobol06),
+ * @author Jakub Mikysek (xmikys03)
+ */
+
 #include "lex_analyzer.h"
 #include "syn_analyzer.h"
 #include "code_gen.h"

@@ -1,6 +1,9 @@
-/* @file symtable.h
- *
- * @brief Data structures and functions representing symtable's interface. 
+ /**
+ * IFJ22 compiler
+ * 
+ * @file symtable.h
+ * 
+ * @brief data structures and functions representing symtable's interface 
  *
  * @author Gabriel Biel(xbielg00)
  */

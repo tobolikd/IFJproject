@@ -1,6 +1,9 @@
-/* @file code_gen_static.h
- *
- * @brief data structures for code gen and functions generating static parts of program
+/**
+ * IFJ22 compiler
+ * 
+ * @file code_gen.h
+ * 
+ * @brief data structures for code gen and code generator's functions
  *
  * @author David Tobolik (xtobol06)
  */
@@ -91,10 +94,10 @@ void genString(char *str);
  *
  * stack top - return statement
  * output - in main body (ctx->currentFncDeclaration) == NULL
- *          - generate exit 0
+ *        - generate exit 0
  *        - in function declaration
- *          - empty statement - return
- *          - return with expression - generate push of result to stack
+ *        - empty statement - return
+ *        - return with expression - generate push of result to stack
  *
  * make sure that returned expression is the same type
  * as current function return value - dynamically

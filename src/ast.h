@@ -1,5 +1,8 @@
-/* @file ast.h
+/**
+ * IFJ22 compiler
  *
+ * @file ast.h 
+ * 
  * @brief contains data structures and function declarations for AST
  *
  * @author David Tobolik (xtobol06)

@@ -1,5 +1,8 @@
-/* @file lex_alyzer.c
+/**
+ * IFJ22 compiler
  *
+ * @file lex_alyzer.c
+ * 
  * @brief Scanner module. 
  * @brief Module to read and sort input file into tokens, which allows
  *        other modules to work efficiently.
@@ -803,10 +806,12 @@ void listDtor(TokenList *list)
 
 void printToken(Token*token)
 {
-    if (token->data == NULL)
+    if (token->data == NULL){
         debug_log("%d %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type]);
-    else
+    }
+    else{
         debug_log("%d %s %s\n", token->lineNum, TOKEN_TYPE_STRING[token->type], token->data);
+    }
 }
 
 

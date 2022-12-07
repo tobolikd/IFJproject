@@ -1,8 +1,12 @@
-/* @file sem_analyzer.h
- *
+/**
+ * IFJ22 compiler
+ *  
+ * @file sem_analyzer.h
+ *  
  * @brief functions used in semantic analysis, declaring integrated functions, declaring all other functions in program, semantic check for fnc call
  *
- * @authors Adam Gabrys (xgabry01), David Tobolik (xtobol06)
+ * @author Adam Gabrys (xgabry01),
+ * @author David Tobolik (xtobol06)
  */
 #include "lex_analyzer.h"
 #include "sem_analyzer.h"

@@ -1,4 +1,7 @@
-/* @file ast.c
+/**
+ * IFJ22 compiler
+ *
+ * @file ast.c 
  *
  * @brief implementation of ast interface
  *
