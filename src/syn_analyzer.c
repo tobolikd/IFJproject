@@ -3,7 +3,7 @@
  * 
  * @file syn-analyzer.h
  * 
- * @brief syntatic analyser module for IFJ22 comipler
+ * @brief syntatic analyser module for IFJ22 compiler
  *
  * @author Jakub Mikysek (xmikys03)
  */
