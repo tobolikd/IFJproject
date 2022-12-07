@@ -74,7 +74,9 @@
     \section{Tabulka symbolů}
     Soubory \texttt{symtable.c}, \texttt{symtable.h}
 
-    Pro implementaci tabulky symbolů jsme si ze zadání vybrali variantu TRP, tedy tabulku s rozptýlenými položkami, kdy jsme při jejím tvoření využili získané znalosti, jak z přednášek, tak z projektu do předmětu IAL.
+    Pro implementaci tabulky symbolů jsme si ze zadání vybrali variantu TRP, tedy tabulku s rozptýlenými položkami, kdy jsme při jejím tvoření využili získané znalosti, jak z přednášek, tak z projektu do předmětu IAL. Pro práci s položkami jsme využívali hlavně funkci \texttt{ht\_insert}, kdy při vkládání položky do tabulky jsme rozdělovali, zda vkládáme funkci, či proměnnou. Obecně jsme si ukládali ID - unikátní řetězec, který slouží jako klíč. Dále počet referencí na položku a odkaz na další položku v tabulce. Pokud byla daná položka funkce, ukládali jsme si navíc její návratový typ a informace o parametrech jí přiřazené, to pomocí funkce \texttt{ht\_paramAppend}.
+    Pro správnou funkcionalitu tabulky jsme museli samozřejmě implementovat i další funkce, jako například odstranění položky z tabulky/odstranění všech položek (funkce \texttt{ht\_delete}, \texttt{ht\_delete\_all}) a ostatní, které jsou detailně popsány v souboru
+    \texttt{symtable.h} a implementovány v souboru \texttt{symtable.c}.
 
     \section{Abstraktní syntaktický strom}
     Soubory \texttt{ast.c}, \texttt{ast.h}
@@ -177,7 +179,7 @@
     \begin{figure}[h]
     \hspace*{-1cm}
         \includegraphics[width=0.85\paperwidth]{src/deterministicStateMachine_finall.png}
-        \caption{Konečný automat stavů.}
+        \caption{Deterministický konečný automat stavů.}
         \label{Konecny automat}
     \end{figure}
 
