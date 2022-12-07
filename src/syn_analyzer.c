@@ -129,7 +129,7 @@ bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
     if (!strcmp(list->TokenArray[*index]->data, "void"))
     {
-        if (TOKEN_TYPE == t_type) // verify that void is correct Lexeme type
+        if (TOKEN_TYPE == t_type) // verify that void is correct Token type
         {
             return true;
         }
@@ -165,7 +165,7 @@ bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
             {
                 debug_log("Inserting parameter %s to symtable\n", nextParam->varId);
                 ht_insert(fncDecTable, nextParam->varId, nextParam->type, false);
-                counterParam--;
+                counterParam--; // decrement count of parameters
                 nextParam = nextParam->next; // move to next parameter
             }
             (*index)++;
@@ -192,7 +192,7 @@ bool functionDeclare(TokenList *list, int *index, stack_ast_t *stackSyn)
                             (*index)++;
                             if (TOKEN_TYPE != t_rCurl)
                             {
-                                if (statList(list, index, fncDecTable, stackSyn) == false)
+                                if (statList(list, index, fncDecTable, stackSyn) == false)  // content inside of definition
                                 {
                                     return false;
                                 }
@@ -221,7 +221,7 @@ bool statList(SYN_ANALYZER_PARAMS)
         return false;
     }
     (*index)++;
-    if (TOKEN_TYPE == t_rCurl) // end of statement with st-list or function declare - DON'T REMOVE!
+    if (TOKEN_TYPE == t_rCurl) // end of statement with st-list or function declare
     {
         return true;
     }
@@ -446,9 +446,9 @@ bool statement(SYN_ANALYZER_PARAMS)
 bool seqStats(SYN_ANALYZER_PARAMS)
 {
     bool programContinue; // if program return false, exit to propagate Error
-    programContinue = statement(list, index, table, stackSyn);
+    programContinue = statement(list, index, table, stackSyn);  // <stat>
     CHECK_END_PROGRAM();
-    programContinue = functionDeclare(list, index, stackSyn);
+    programContinue = functionDeclare(list, index, stackSyn);   // <fnc-decl>
     CHECK_END_PROGRAM();
     (*index)++;
     if ((*index) == list->length || TOKEN_TYPE == t_EOF)
@@ -506,9 +506,9 @@ SyntaxItem *synAnalyser(TokenList *list)
     stack_ast_init(stackSyn);
     stack_declare_init(&stackDeclare); // initialize stack for Function Frames
 
-    /* RECURSIVE DESCENT */
-    if (checkSyntax(list, &index, table, stackSyn) == false)
+    if (checkSyntax(list, &index, table, stackSyn) == false)    // start recursive descent
     {
+        // error appeared, return false
         return syntaxItemCtor(table, stackSyn, false);
     }
 
