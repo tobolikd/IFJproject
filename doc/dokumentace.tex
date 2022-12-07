@@ -67,11 +67,14 @@
         Rekurzivní sestup se volá funkcí \texttt{synAnalyser()} a je implementovaný v souborech \texttt{syn\_analyzer.c} a \texttt{syn\_analyzer.h}. Řídí se podle navržené gramatiky (viz \ref{LL gramatika}), kde každé pravidlo představuje vlastní funkci. Funkce postupně prochází tokeny získané od lexikální analýzy, kontroluje jestli je vše gramaticky správně, naplňuje tabulku symbolů a tvoří abstraktní syntaktický strom (dále ASS). Při nalezení výrazu volá funkci \texttt{parseExpression}, která spouští precedenční analýzu. Při nalezení chyby se nastaví příslušný \texttt{errorCode} a chyba se v rekurzi propaguje dál, aby program ukončil kontrolu. Funkce vrací vytvořený ASS, naplněnou tabulku symbolů a informaci o tom, jestli rekurze proběhla syntakticky a sémanticky správně či nikoliv.
 
     \subsection{Precedenční analýza}
+    Soubory \texttt{preced\_analyzer.c}, \texttt{preced\_analyzer.h}, \texttt{preced\_analyzer-data.h}
+
+    Na zpracování výrazů jsme použili metodu shora-dolů - precedenční analýzu (dále jen PA). PA kontroluje sémantiku volání funkcí a zda byly použité proměnné definovány. Ke kontrole využívá tabulku symbolů. Dále se od sémantických kontrol zabývá PA také správnou syntaxí zadaného výrazu pomocí zásobníku PA a precedenční tabulky. Výrazy se redukují pomocí pravidel, které máme definovány v souboru \texttt{preced\_analyzer.c}. Výstupem PA je post-fixově zpracovaný výraz na zásobníku ASS.
 
     \section{Tabulka symbolů}
     Soubory \texttt{symtable.c}, \texttt{symtable.h}
 
-    Pro implementaci tabulky symbolů jsme si ze zadání vybrali variantu TRP, tedy hashovací tabulku, kdy jsme při jejím tvoření využili získané znalosti, jak z přednášek, tak z projektu do předmětu IAL.
+    Pro implementaci tabulky symbolů jsme si ze zadání vybrali variantu TRP, tedy tabulku s rozptýlenými položkami, kdy jsme při jejím tvoření využili získané znalosti, jak z přednášek, tak z projektu do předmětu IAL.
 
     \section{Abstraktní syntaktický strom}
     Soubory \texttt{ast.c}, \texttt{ast.h}
@@ -173,7 +176,7 @@
     \section{Přílohy}
     \begin{figure}[h]
     \hspace*{-1cm}
-        \includegraphics[width=0.85\paperwidth]{src/definitiveStateMachine_finall.png}
+        \includegraphics[width=0.85\paperwidth]{src/deterministicStateMachine_finall.png}
         \caption{Konečný automat stavů.}
         \label{Konecny automat}
     \end{figure}
