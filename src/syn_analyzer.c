@@ -129,7 +129,7 @@ bool functionType(SYN_ANALYZER_TYPE_N_PARAM_PARAMS)
 {
     if (!strcmp(list->TokenArray[*index]->data, "void"))
     {
-        if (TOKEN_TYPE == t_type) // verify that void is correct Lexeme type
+        if (TOKEN_TYPE == t_type) // verify that void is correct Token type
         {
             return true;
         }
@@ -221,7 +221,7 @@ bool statList(SYN_ANALYZER_PARAMS)
         return false;
     }
     (*index)++;
-    if (TOKEN_TYPE == t_rCurl) // end of statement with st-list or function declare - DON'T REMOVE!
+    if (TOKEN_TYPE == t_rCurl) // end of statement with st-list or function declare
     {
         return true;
     }
