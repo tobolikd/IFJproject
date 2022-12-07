@@ -66,13 +66,13 @@
     \subsection{Precedenční analýza}
     Soubory \texttt{preced\_analyzer.c}, \texttt{preced\_analyzer.h}, \texttt{preced\_analyzer-data.h}
 
-    Na zpracování výrazů jsme použili metodu shora-dolů - precedenční analýzu (dále jen PA). PA kontroluje sémantiku volání funkcí a zda byly použité proměnné definovány. Ke kontrole využívá tabulku symbolů. Dále se od sémantických kontrol zabývá PA také správnou syntaxí zadaného výrazu pomocí zásobníku PA a precedenční tabulky. Výrazy se redukují pomocí pravidel, které máme definovány v souboru \texttt{preced\_analyzer.c}. Výstupem PA je post-fixově zpracovaný výraz na zásobníku ASS.
+    Na zpracování výrazů jsme použili metodu shora-dolů - precedenční analýzu (dále jen PA). PA kontroluje sémantiku volání funkcí a zda byly použité proměnné definovány. Ke kontrole využívá tabulku symbolů. Dále se od sémantických kontrol zabývá PA také správnou syntaxí zadaného výrazu pomocí zásobníku PA a precedenční tabulky (viz \ref{tabulka precedence}). Výrazy se redukují pomocí pravidel, které máme definovány v souboru \texttt{preced\_analyzer.c}. Výstupem PA je post-fixově zpracovaný výraz na zásobníku ASS.
 
     \section{Tabulka symbolů}
     Soubory \texttt{symtable.c}, \texttt{symtable.h}
 
     Pro implementaci tabulky symbolů jsme si ze zadání vybrali variantu TRP, tedy tabulku s rozptýlenými položkami, kdy jsme při jejím tvoření využili získané znalosti, jak z přednášek, tak z projektu do předmětu IAL. Pro práci s položkami jsme využívali hlavně funkci \texttt{ht\_insert()}, kdy při vkládání položky do tabulky jsme rozdělovali, zda vkládáme funkci, či proměnnou. Obecně jsme si ukládali ID - unikátní řetězec, který slouží jako klíč. Dále počet referencí na položku a odkaz na další položku v tabulce. Pokud byla daná položka funkce, ukládali jsme si navíc její návratový typ a informace o parametrech jí přiřazené, to pomocí funkce \texttt{ht\_paramAppend()}.
-    Pro správnou funkcionalitu tabulky jsme museli samozřejmě implementovat i další funkce, jako například odstranění položky z tabulky/odstranění všech položek (funkce \texttt{ht\_delete}, \texttt{ht\_delete\_all}) a ostatní, které jsou detailně popsány v souboru
+    Pro správnou funkcionalitu tabulky jsme museli samozřejmě implementovat i další funkce, jako například odstranění položky z tabulky/odstranění všech položek (funkce \texttt{ht\_delete()}, \texttt{ht\_delete\_all()}) a ostatní, které jsou detailně popsány v souboru
     \texttt{symtable.h} a implementovány v souboru \texttt{symtable.c}.
 
     \section{Abstraktní syntaktický strom}
@@ -152,7 +152,7 @@
     \subsection{Verzovací systém}
         Při výběru verzovacího systému pro nás bylo jasnou volbou zvolit populární a osvědčený Git s nahráváním na server GitHub, kde probíhala i již zmíněná vzájemná komunikace.
     \subsection{Testování}
-        Pro ověření správnosti jsme používali framework GoogleTest v jazyce C++, který nám sloužil k unit testování.
+        Pro ověření správnosti jsme používali framework GoogleTest v jazyce C++, který nám sloužil k unit testování. Co se týče integračního testování, zde jsme zvolili cestu manuálních testů.
     \subsection{Rozdělení práce a bodů}
         \begin{itemize}
             \item Gabriel Biel (xbielg00)
@@ -180,7 +180,7 @@
     Pro nerovnoměrné rozdělení bodů jsme se rozhodli jelikož někteří členové týmu odvedli proporčně značně větší část práce, a proto nám to takto přišlo fér a všichni členové týmu se na tomto rozdělení shodli.
 
     \section{Závěr}
-    Projekt nás svým objemem zezačátku opravdu překvapil a chvíli nám trvalo, než jsme se zorientovali v zadání. Naštěstí nám opravdu pomohlo scházet se každý týden a prodiskutovat jednotlivé problémy, či náš pokrok v práci. Velkou část sehrálo také to, že jsme se všichni znali a komunikovali vcelku bez prodlev a problémů a to jak na GitHubu, tak na Discord serveru, který jsme si pro projekt vytvořili(viz \ref{teamwork}). Práce nám s odstupem času šla stále lépe, jelikož jsme rozuměli dané problematice i specifikacím zadání stále více. Projekt nám přinesl nejen znalosti do předmětů IFJ a IAL, ale velmi nás posunul v práci s verzovacím systémem a v celkové práci v týmu na větších projektech, jako je tento.
+    Projekt nás svým objemem ze začátku opravdu překvapil a chvíli nám trvalo, než jsme se zorientovali v zadání. Naštěstí nám opravdu pomohlo scházet se každý týden a prodiskutovat jednotlivé problémy, či náš pokrok v práci. Velkou část sehrálo také to, že jsme se všichni znali a komunikovali vcelku bez prodlev a problémů a to jak na GitHubu, tak na Discord serveru, který jsme si pro projekt vytvořili(viz \ref{teamwork}). Práce nám s odstupem času šla stále lépe, jelikož jsme rozuměli dané problematice i specifikacím zadání stále více. Projekt nám přinesl nejen znalosti do předmětů IFJ a IAL, ale velmi nás posunul v práci s verzovacím systémem a v celkové práci v týmu na větších projektech, jako je tento.
     \newpage
     \section{Přílohy}
     \begin{figure}[H]
@@ -196,8 +196,9 @@
     \end{figure}
 
     \begin{figure}[H]
+        \hspace*{-1cm}
         \centering
-        \includegraphics[width=\textwidth]{src/LL-tabulka.png}
+        \includegraphics[width= 0.90 \paperwidth]{src/LL-tabulka.png}
         \caption{LL tabulka.}
         \label{LL tabulka}
     \end{figure}
